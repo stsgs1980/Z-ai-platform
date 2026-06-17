@@ -1,0 +1,102 @@
+# Cross-repo ID graph verification
+#
+# Triggers:
+#   - Push to main in Z-ai-platform (covers submodule pointer bumps)
+#   - Pull request to main (catches breakage before merge)
+#   - Nightly schedule (catches drift even if no pushes happen)
+#   - Manual dispatch (workflow_dispatch)
+#
+# This workflow lives in Z-ai-platform (the orchestrator) because only
+# the orchestrator has all three submodules checked out together.
+
+name: Verify ID Graph
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-id-graph.yml'
+      - 'standards/**'
+      - 'guard/**'
+      - 'skills/**'
+      - '.gitmodules'
+  pull_request:
+    branches: [main]
+  schedule:
+    # 03:00 UTC nightly = 06:00 Europe/Moscow
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify-id-graph.js (13/13 HARD PASS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Z-ai-platform
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          echo "--- submodule status ---"
+          git submodule status
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run verify-id-graph.js
+        id: verify
+        run: |
+          set +e
+          output=$(node standards/scripts/verify-id-graph.js 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "## verify-id-graph.js output"
+            echo '```'
+            echo "$output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+
+      - name: Upload verifier output (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: id-graph-verifier-output
+          path: |
+            standards/
+            guard/
+            skills/
+          retention-days: 7
+
+      - name: Comment on PR (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              '## ID graph verification FAILED',
+              '',
+              'The cross-repo ID graph verifier reported one or more HARD check failures.',
+              '',
+              'Run `node standards/scripts/verify-id-graph.js` locally to see details.',
+              'See also: [STD-META-001 v2.0 §10.2](standards/standards/STD-META-001-v2.0.md) for the G01-G15 check catalogue.',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
