@@ -14,12 +14,6 @@ name: Verify ID Graph
 on:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/verify-id-graph.yml'
-      - 'standards/**'
-      - 'guard/**'
-      - 'skills/**'
-      - '.gitmodules'
   pull_request:
     branches: [main]
   schedule:
