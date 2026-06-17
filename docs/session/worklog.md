@@ -181,3 +181,29 @@ Stage Summary:
 - All prior work documented and recoverable after session restart
 - Ready for next phase: import 20 standards from upload/ (pending O-001, O-002)
 - Next session can resume by cloning Z-ai-platform and reading docs/session/
+
+---
+
+Task ID: session-docs-push-2026-06-17
+Agent: main
+Task: Push session docs to GitHub; verify CI
+
+Work Log:
+- Committed docs/session/ (3 files, 1161 insertions) to Z-ai-platform
+- Commit: f2ee6e1 "Add docs/session/: worklog, SESSION_NOTES, DECISIONS_LOG"
+- Pushed to origin/main: 7c3461f → f2ee6e1
+- CI Run #6: event=push, head_sha=f2ee6e1, conclusion=success (45 sec after push)
+- Created symlink /home/z/my-project/worklog.md → docs/session/worklog.md
+  for cross-session discoverability
+
+Stage Summary:
+- Session documentation live on GitHub:
+  https://github.com/stsgs1980/Z-ai-platform/tree/main/docs/session
+- 3 files: worklog.md (8.7K), SESSION_NOTES.md (17K), DECISIONS_LOG.md (19K)
+- CI still green: 13/13 HARD PASS, 0 warnings
+- Next session can resume by:
+  1. git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
+  2. Read docs/session/DECISIONS_LOG.md for open questions (O-001..O-007)
+  3. Read docs/session/SESSION_NOTES.md for lessons learned
+  4. Read docs/session/worklog.md for task history
+  5. Run node standards/scripts/verify-id-graph.js to confirm state
