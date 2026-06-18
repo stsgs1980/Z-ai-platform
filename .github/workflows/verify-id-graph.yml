@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout Z-ai-platform
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -49,7 +49,7 @@ jobs:
           git submodule status
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
 
@@ -122,7 +122,7 @@ jobs:
           ls -la docs/_diagrams/
 
       - name: Upload graph artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: id-graph
           path: |
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload verifier output (on failure)
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: verifier-output
           path: |
