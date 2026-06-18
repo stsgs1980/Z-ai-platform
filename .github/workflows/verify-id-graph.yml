@@ -49,7 +49,10 @@ jobs:
   verify:
     name: verify-id-graph.js + verify-standards.js (all HARD PASS)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 15 minutes — generous enough for cache-miss runs (chrome download
+    # ~7m + slow apt mirror ~3m + actual work ~30s). On cache hit, the
+    # whole workflow finishes in ~1m.
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Z-ai-platform
@@ -110,8 +113,25 @@ jobs:
       # -------------------------------------------------------------------
       - name: Install graphviz
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq graphviz
+          # Try apt first (fast if mirror is healthy). Fall back to conda
+          # if apt is slow/broken — conda-forge serves graphviz from CDN,
+          # independent of Ubuntu mirror health.
+          #
+          # History: 2026-06-19 — apt-get update timed out at 10m on
+          # GitHub runner due to mirror degradation. Conda fallback added.
+
+          if sudo apt-get install -y -qq graphviz 2>/dev/null && command -v dot >/dev/null 2>&1; then
+            echo "[install] graphviz via apt (cache hit on package list)"
+          else
+            echo "[install] apt unavailable/slow, falling back to conda-forge"
+            # micromamba is preinstalled on ubuntu-latest runners
+            micromamba install -y -n base -c conda-forge graphviz 2>/dev/null \
+              || mamba install -y -n base -c conda-forge graphviz 2>/dev/null \
+              || conda install -y -n base -c conda-forge graphviz
+            # Make sure conda's bin is on PATH for subsequent steps
+            echo "$HOME/micromamba/envs/base/bin" >> "$GITHUB_PATH"
+            echo "$HOME/miniconda3/bin" >> "$GITHUB_PATH"
+          fi
           dot -V
 
       # -------------------------------------------------------------------
