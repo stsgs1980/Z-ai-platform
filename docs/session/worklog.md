@@ -356,3 +356,121 @@ Stage Summary:
 - "Про скилы" package source files preserved in upload/ (not deleted) because O-008 (MAS roadmap) and O-013 (ID reservation) still reference them
 - Open items for maintainer: confirm O-008 (adopt MAS roadmap), O-009 (add type: field to standards), O-010 (R1/R2/R5 -> STD-SKILL-001 v1.1), O-013 (reserve MAS IDs)
 - Next session can resume by: reading SESSION_NOTES §9-11 + DECISIONS_LOG O-008..O-014, running `node scripts/fix-unicode-compliance.js --path standards/` to verify the 727-violation baseline
+
+---
+
+Task ID: sandbox-archive-bootstrap-2026-06-18
+Agent: main
+Task: Move Z.ai Sandbox Documentation (7 files) into standards/docs/sandbox/; add thin §3.0 Bootstrap Procedure to ENV-002; harden verify-id-graph.js with new SOFT warnings W11-W15 so the guard catches project growth / inconsistencies that G01-G15 currently miss.
+
+Plan (committed BEFORE execution, per user instruction "профессионально = дублировать план в worklog"):
+1. Create `Z-ai-platform/standards/docs/sandbox/` directory.
+2. Move 7 files from `upload/` to `standards/docs/sandbox/` with standardized snake-case names:
+   - Z.ai-Sandbox-Guide.md → sandbox-guide.md
+   - Z.ai-Sandbox-Guide-Hooks.md → sandbox-hooks-cookbook.md
+   - Z.ai-Sandbox-Guide_commands_reference.md → sandbox-commands-cheatsheet.md
+   - Z.ai-Sandbox-Migration Guide.md → sandbox-migration.md
+   - Z.ai-Sandbox-Super-Z-Subagents-Education.md → sandbox-subagents-architecture.md
+   - RELATIONS.md → INDEX.md (renamed + updated internal links to new filenames)
+   - verify.sh → verify-sandbox.sh
+3. Add §3.0 "Bootstrap Procedure for New Project" to ENV-002-zai-integration.md:
+   - Thin (< 60 lines), 7-step bootstrap flow, references docs/sandbox/* on demand.
+   - Inserts BEFORE existing §3 "Project Directory" so bootstrap→directory ordering is preserved.
+   - Existing §3 / §3.1 numbering UNCHANGED (no broken cross-references).
+4. Harden verify-id-graph.js with new SOFT warnings (do NOT promote to HARD — would break CI):
+   - W11: Size anomaly. Standard .md > 1000 lines → warn; > 1500 lines → critical warn.
+     Rationale: DESIGN-001 is 1780 lines (anomaly); median is ~640 lines.
+   - W12: Missing §XA Known Issues section. Every standard MUST have a Known Issues section
+     (per doc convention established in ENV-002 v1.2 §10A).
+   - W13: Broken cross-doc file references. If a standard's body links to a .md file path
+     that does not exist in standards/ or docs/, warn.
+   - W14: Excessive OPEN Known Issues. If a single standard has > 5 OPEN issues in §XA,
+     warn (debt accumulation signal).
+   - W15: Naming drift. Files in standards/ that do not match `<DOMAIN>-<NNN>-<name>.md`
+     pattern (13 domains: META, ARCH, DOC, SKILL, ENV, GIT, DESIGN, FE, A11Y, ERR, SEC, TEST, AGENT).
+5. Run verify-id-graph.js: expect 13/13 HARD PASS (unchanged), expect new W11-W15 to surface
+   (specifically W11 on DESIGN-001, W12 on any new standard missing §XA).
+6. Commit Z-ai-standards, push, bump submodule pointer in Z-ai-platform, push parent.
+7. Append final Stage Summary to this worklog section.
+
+Stage Summary (planned):
+- docs/sandbox/ populated with 7 standardized-name reference files + INDEX.md.
+- ENV-002 v1.3 published with §3.0 Bootstrap Procedure.
+- verify-id-graph.js v1.1.0 published with W11-W15 soft warnings.
+- CI remains green (HARD checks untouched). New warnings surface as actionable debt.
+
+Work Log (execution):
+- Read worklog.md (359 lines, full prior context).
+- Read ENV-002-zai-integration.md v1.2 fully (260 lines, 9 sections + Known Issues).
+  Confirmed: NO bootstrap section existed. §6 "Session Continuity" was the closest,
+  but it covers RESUMING a session, not BOOTSTRAPPING a new project.
+- Located 7 sandbox-archive files in `/home/z/my-project/upload/` (analysis already
+  done in `docs/sandbox-docs-analysis.md` from prior session).
+- Created `Z-ai-platform/standards/docs/sandbox/` and copied 7 files with standardized names:
+  - Z.ai-Sandbox-Guide.md -> sandbox-guide.md
+  - Z.ai-Sandbox-Guide-Hooks.md -> sandbox-hooks-cookbook.md
+  - Z.ai-Sandbox-Guide_commands_reference.md -> sandbox-commands-cheatsheet.md
+  - Z.ai-Sandbox-Migration Guide.md -> sandbox-migration.md
+  - Z.ai-Sandbox-Super-Z-Subagents-Education.md -> sandbox-subagents-architecture.md
+  - verify.sh -> verify-sandbox.sh
+  - RELATIONS.md -> INDEX.md (rewritten with new filenames + authority order + maintenance rules)
+- Edited ENV-002-zai-integration.md via MultiEdit (5 atomic edits in one operation):
+  - Bumped version 1.2 -> 1.3 in header
+  - Updated Related: field (added ARCH-002-implementation-order.md, docs/sandbox/INDEX.md;
+    removed stale sandbox-rules.md (instructions/) reference)
+  - Inserted §3.0 "Bootstrap Procedure for a New Project" BEFORE existing §3
+    (3 subsections: 7-step flow, guarantees, failure handling)
+  - Added v1.3 row to Version History table
+  - Added ZAI-008 Known Issue (unpinned init-fullstack_*.sh version)
+  Existing §3 / §3.1 numbering UNCHANGED -> no broken cross-references.
+- Hardened verify-id-graph.js via MultiEdit (5 atomic edits in one operation):
+  - Bumped VERSION 1.0.0 -> 1.1.0
+  - Added W11-W15 description to header comment
+  - Added SOFT (W11-W15) entry to TWO-LEVEL STRICTNESS block
+  - Inserted new function phase10_healthWarnings(repos) after phase9_orphanWarnings
+    (with VALID_DOMAINS constant: 13 domains)
+  - Added phase10 call in main() after phase9
+  - Updated output section title "Soft Warnings (W01-W10)" -> "Soft Warnings (W01-W15)"
+- Ran `node standards/scripts/verify-id-graph.js` from platform root.
+
+Verification results:
+  - HARD: 13/13 PASS (G01-G15, unchanged — CI stays green)
+  - W11 (size anomaly): 2 warnings
+      * DESIGN-001-design-system.md: 1781 lines (CRITICAL — exceeds 1500-line cap)
+      * sandbox-hooks-cookbook.md: 1011 lines (soft cap)
+  - W12 (missing §XA Known Issues): 2 warnings
+      * ARCH-001-architecture-and-repo-layout.md
+      * SKILL-001-skill-format.md
+  - W13 (broken cross-doc references): 75 warnings
+      * Mostly from README.md referencing old filenames (IMPLEMENTATION_ORDER.md,
+        STANDARD_ID_SYSTEM.md, etc. — pre-restructure names)
+      * Some from individual standards referencing renamed/removed files
+  - W14 (excessive OPEN): 0 warnings
+  - W15 (naming drift): 0 warnings (flat layout is consistent)
+  - W03 (pre-existing dead-standard): 5 warnings (unchanged)
+  - Total: 84 SOFT warnings, 0 HARD failures
+
+Commit + push:
+- Standards submodule: 5d9be05 -> c0d1dbe ("feat(verify): W11-W15 + ENV-002 §3.0 + docs/sandbox/")
+- Pushed to GitHub stsgs1980/Z-ai-standards (main): SUCCESS
+- Parent (Z-ai-platform): bumping standards submodule pointer + this worklog entry
+  in one atomic commit.
+
+Stage Summary (actual):
+- docs/sandbox/ live with 7 standardized-name reference files + INDEX.md.
+- ENV-002 v1.3 published with §3.0 Bootstrap Procedure (thin, 7-step flow,
+  references docs/sandbox/ on demand).
+- verify-id-graph.js v1.1.0 published with W11-W15 soft warnings. HARD checks
+  untouched — CI remains green. New warnings surface actionable debt:
+  - DESIGN-001 1781 lines -> split required (W11 CRITICAL)
+  - ARCH-001, SKILL-001 missing §XA Known Issues -> add (W12)
+  - README.md + 20 standards reference old pre-restructure filenames -> fix
+    cross-doc links (W13, 75 occurrences) — this is exactly the "project is
+    growing and not everything matches" signal the user asked the guard to catch.
+- Next debt cleanup targets (in priority order):
+  1. W13 sweep: fix 75 broken cross-doc references (mostly README.md rename sweep)
+  2. W11 CRITICAL: split DESIGN-001 into normative + tokens appendix
+  3. W12: add §XA Known Issues to ARCH-001 and SKILL-001
+  4. ZAI-005, ZAI-006, ZAI-007, ZAI-008 (open issues in ENV-002)
+- Guard now catches project-growth inconsistencies. User complaint
+  "guard пиздюлей не дает" resolved: 84 actionable warnings emitted, was 5 before.
