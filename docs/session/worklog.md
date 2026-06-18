@@ -1707,3 +1707,482 @@ Stage Summary:
     2. .githooks/ missing              [CLOSED]
     3. templates/ sparse (only README) [STILL OPEN — next task]
     4. Dead scripts leaving stale ACTIVE refs [CLOSED — this task]
+
+---
+
+Task ID: research-1
+Agent: Explore (very thorough)
+Task: Produce comprehensive map of every directory on the filesystem that contains Z.ai skills (or skill-like artifacts); identify which are writable vs read-only, which persist across sessions, and what the skill-creator + SKILL-001 standard say about save/load/persistence.
+
+Work Log:
+
+# A. Inventory of all skill-like directories
+
+Investigated 12 starting points (5 explicit skill dirs + 7 other suspected locations). Findings per location:
+
+## A.1 /home/z/my-project/skills/  (RUNTIME VIEW — DISPOSABLE)
+- Absolute path: /home/z/my-project/skills
+- Owner / perms: z:z, drwxr-xr-x (WRITABLE by z)
+- Count: 79 top-level skill folders (65 from official zips + 14 sp-* from .superpowers-zai/install-zai.sh)
+- Mount: overlay rootfs (`c-6a339da8-...-rootfs on / type overlay rw,relatime,...,volatile,...`)
+  → **NOT persistent across sessions.** Recreated at session start by extract-official-skills.sh.
+- Sample folder is a real directory (NOT a symlink). Verified via `readlink -f` and inode check.
+- Includes: ASR, LLM, TTS, VLM, docx, charts, pdf, pptx, xlsx, skill-creator (Z.ai official), 14 sp-* (Superpowers), fullstack-dev, agent-browser, image-*, video-*, web-*, etc.
+- The official Z.ai `skill-creator` here has md5 40d31855... (matches /home/official_skills/skill-creator.zip exactly) — Apache-2.0 eval-pipeline variant, 485 lines, with agents/ eval-viewer/ scripts/.
+
+## A.2 /home/official_skills/  (SOURCE — READ-ONLY, PERSISTENT)
+- Absolute path: /home/official_skills
+- Owner / perms: root:root, drwxrwxrwx (mode looks writable but mount is RO — see below)
+- Count: 69 entries = 68 *.zip + 1 stages.yaml (whitelist of which zips to extract)
+- Mount: `ossfs on /home/official_skills type fuse.ossfs (ro,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)` over a tmpfs base
+  → **READ-ONLY. Persistent across sessions. Managed by Z.ai (Alibaba OSS).**
+- Format: each entry is a single zip (e.g. LLM.zip, docx.zip, skill-creator.zip). Not unpacked folders.
+- stages.yaml lists 7 stages (default, qingyan_writing, pipi, life_coach, professional_writer, info_scout, cyber_friend); their union is the whitelist.
+- extract-official-skills.sh unpacks only zips in this whitelist (3 filtered out: aminer-open-academic, frontend-design, skill-vetter).
+
+## A.3 /home/user_skills/  (USER SOURCE — RW, PERSISTENT)
+- Absolute path: /home/user_skills
+- Owner / perms: z:z, drwxrwxrwx (WRITABLE)
+- Count: 19 *.zip files (anti-monolith, anti-hallucination-guard, api-retry, code-reviewer, dev-watchdog, fallback, git-checkpoint, git-safe-ops, git-safety, health-check, performance-code-generator, performance-code-generator_sts, pptx, prompt-engineering, sanitize-validate, video-generator, web-craft, work-summary, z-ai-web-dev-sdk)
+- Mount: `PolarFS:pcs-ue6ju0nuiu0hz7tjc-0e3odv6t4dackr8s3 on /home/user_skills type fuse.pfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072)` over a tmpfs base
+  → **READ-WRITE. PERSISTENT across sessions (PolarFS = Alibaba persistent cloud-native storage).**
+- CRITICAL FINDING: extract-official-skills.sh does NOT touch this directory. Of the 19 zips, NONE appear unpacked in /home/z/my-project/skills/ (except pptx, which is shadowed by the official pptx.zip from official_skills). No system script in /etc, /usr/local/bin, or /home references user_skills. Conclusion: persistence of the zip is guaranteed, but auto-install into the runtime skills dir is NOT — user must manually unzip at session start, OR a higher-level orchestration outside this container does it on-demand.
+
+## A.4 /home/z/my-project/Z-ai-platform/skills/skills/  (USER GIT REPO — DISPOSABLE)
+- Absolute path: /home/z/my-project/Z-ai-platform/skills/skills
+- Owner / perms: z:z, drwxr-xr-x (WRITABLE)
+- Count: 36 entries = 35 skill folders + 1 INDEX.md
+- Mount: overlay rootfs (same disposable overlay as A.1) → **NOT persistent across sessions.**
+- HOWEVER: this directory is inside the Z-ai-platform git repo (submodule of GitHub.com/stsgs1980/Z-ai-platform), so its content is recoverable via `git clone --recurse-submodules`. The canonical persistent copy lives on GitHub, not on the local filesystem.
+- Contains: anti-monolith, api-retry, code-reviewer, commit-work, context-consolidation, database-schema-designer, dev-watchdog, fallback, folder-indexer, frontend-styling-expert_sts, gepetto, health-check, humanizer, memory-delete, memory-export, memory-query, memory-store, mermaid-diagrams, performance-code-generator_sts, phi-layout, phi-layout_sts, project-clone, prompt-engineering_sts, qa-test-planner, react-dev, reducing-entropy, requirements-clarity, session-experience, session-handoff, session-log, skill-creator (toolkit variant ZAI-META-002), skill-id-system, sync-toolkit_sts, workflow-discipline_sts, z-ai-web-dev-sdk, zai-ui-composer_sts.
+- This is the Z.ai Agent Toolkit repo (the user's own canonical source for their 24 ZAI-* ID'd skills).
+- md5 of skill-creator/SKILL.md here: 54897db1... (DIFFERENT from official — this is the ZAI-META-002 ID-assignment variant, 370 lines, no eval-viewer/agents/scripts).
+
+## A.5 /home/z/my-project/Z-ai-standards/standards/  (STANDARDS, NOT SKILLS)
+- Absolute path: /home/z/my-project/Z-ai-standards/standards
+- 20 *_STANDARD.md / *_POLICY.md files (MARKDOWN_STANDARD, UNICODE_POLICY, ZAI_INTEGRATION_STANDARD, etc.) + IMPLEMENTATION_ORDER.md + STANDARD_ID_SYSTEM.md.
+- Not skills. These are standards documents imported from /home/z/my-project/upload/standards-v2/. No SKILL.md files here.
+- Mount: overlay (disposable). Recoverable from git (Z-ai-standards repo on GitHub).
+
+## A.6 /home/z/my-project/Z-ai-platform/standards/standards/  (STANDARDS, NOT SKILLS)
+- 21 STD-*-*.md files including SKILL-001-skill-format.md (the standard that defines the skill format).
+- Disposable overlay; recoverable from git.
+
+## A.7 /home/z/my-project/.superpowers-zai/  (THIRD-PARTY SKILL PACK)
+- Drwxrwxr-x, 5 entries: README.md, hooks/, install-zai.sh, package.json, prepare-github-repo.sh, skills/
+- Git submodule (per session-start worklog entry). Source of the 14 sp-* skills.
+- install-zai.sh copies sp-* skills into /home/z/my-project/skills/ (the runtime view).
+- Persistent via git submodule; the runtime copy in /home/z/my-project/skills/sp-* is disposable.
+
+## A.8 /home/z/my-project/upload/  (USER UPLOADS — RW, PERSISTENT)
+- Mount: `ossfs on /home/z/my-project/upload type fuse.ossfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)` over tmpfs
+- Contains: skill-creator.zip (66K), standards.zip (128K), Z.ai Sandbox Documentation.zip, "Про скилы.zip" (Russian skill-analysis package), standards-v2/ subdir, etc.
+- This is where files appear when user uploads via Z.ai UI. RW + persistent.
+- Contains one skill-creator.zip — likely user's customized variant for download/sync purposes (NOT auto-installed).
+
+## A.9 /home/sync/  (SYNC STAGING — RW, PERSISTENT)
+- Mount: `ossfs on /home/sync type fuse.ossfs (rw,...)` over tmpfs
+- Contains: repo.tar (1.8MB gzip, a git bundle of the project repo), upload/ subdir (mirrors /home/z/my-project/upload contents).
+- Persistent. Likely the cross-session project state shuttle.
+
+## A.10 /tmp/my-project/  (PROJECT SNAPSHOT — RW, PERSISTENT)
+- Mount: `PolarFS:... on /tmp/my-project type fuse.pfs (rw,...)` over tmpfs
+- Owner: z:z, drwx------ (private)
+- Contains: .initial_snapshot.json (7591 bytes — JSON dict of {relative_path: mtime} for project files), .git.backup.1781622180/, Z-ai-platform/, Z-ai-skills/, Z-ai-standards/, Z-ai-guard/, docs/, scripts/, tool-results/, worklog.md (94K — full history), .env, .gitignore, .gitmodules, etc.
+- This is the persistent backing store for /home/z/my-project/ — at session start, files are restored from here per .initial_snapshot.json.
+- NOT a skill storage location per se, but it's how user-created skills placed in /home/z/my-project/skills/<custom>/ would survive (if listed in .initial_snapshot.json).
+- Note: /home/z/my-project/skills/ as a whole is NOT in the snapshot (extract-official-skills.sh manages it). Only user-authored files outside skills/ are tracked.
+
+## A.11 /home/z/.npm-global/lib/node_modules/  (NO SKILLS)
+- 7 packages: @mermaid-js, docx, pdf-lib, playwright, pptxgenjs, sharp. These are runtime libraries, not skills.
+
+## A.12 /usr/local/, /usr/share/, /etc/, ~/.config/  (NO Z.AI SKILLS)
+- /usr/local/bin contains: agent-browser, bun, bunx, docker-entrypoint.sh, tectonic, uv, uvx, z-ai, z-ai-generate. NO skill installer.
+- /usr/local/lib has only python3.13 — no node_modules.
+- /usr/share/ has no zai* or z.ai* directories.
+- No ~/.zairc, no ~/.zai.json, no ~/.config/, no /etc/z.ai/, no /etc/zai/.
+- env vars: NO SKILL*, ZAI*, CLAUDE*, SDK*, AGENT* environment variables set.
+
+## A.13 /home/extract-official-skills.sh  (THE EXTRACT SCRIPT)
+- -rwxr-xr-x root:root, 4016 bytes, dated 2026-06-04 11:09
+- Logic:
+  1. Reads /home/official_skills/stages.yaml, builds allowed_skills whitelist (union of all stages)
+  2. For each /home/official_skills/*.zip whose basename (minus .zip) is in whitelist:
+     - Copies zip to /tmp/skills_zip_XXXXXX/ staging (FC layer is slow on random small reads)
+     - `unzip -qq -o` to /home/z/my-project/skills/ (the -o = force overwrite without prompting)
+     - Excludes __MACOSX/*, *.DS_Store, ._*
+     - Uses 4 parallel workers (`xargs -P 4`)
+  3. chowns -R z:z, chmods -R 755 the extracted skills
+- ONLY handles /home/official_skills/. Does NOT touch /home/user_skills/.
+
+# B. Sample skill folder anatomy
+
+## B.1 /home/z/my-project/skills/LLM/  (official, simple, 4 files)
+```
+LLM/
+├── SKILL.md           21913 bytes  (frontmatter + instructions)
+├── LICENSE.txt         1080 bytes  (Apache 2.0)
+└── scripts/
+    └── chat.ts         758 bytes  (z-ai-web-dev-sdk wrapper)
+```
+
+## B.2 /home/z/my-project/skills/skill-creator/  (official, rich, 14 files)
+```
+skill-creator/
+├── SKILL.md           33082 bytes  (485 lines, eval-pipeline skill)
+├── LICENSE.txt        11357 bytes  (Apache 2.0)
+├── agents/                         (subagent prompts)
+│   ├── analyzer.md    10376 bytes
+│   ├── comparator.md   7287 bytes
+│   └── grader.md       9049 bytes
+├── assets/
+│   └── eval_review.html 7058 bytes
+├── eval-viewer/                    (HTML results viewer)
+│   ├── generate_review.py 16365 bytes
+│   └── viewer.html        44989 bytes
+├── references/
+│   └── schemas.md     12047 bytes
+└── scripts/                        (eval harness)
+    ├── __init__.py             0 bytes
+    ├── aggregate_benchmark.py 14386 bytes
+    ├── generate_report.py     12841 bytes
+    ├── improve_description.py 10493 bytes
+    ├── package_skill.py        4234 bytes
+    ├── quick_validate.py       3972 bytes
+    ├── run_eval.py            11419 bytes
+    ├── run_loop.py            13605 bytes
+    └── utils.py                1661 bytes
+```
+
+## B.3 /home/z/my-project/Z-ai-platform/skills/skills/skill-creator/  (toolkit, minimal, 2 files)
+```
+skill-creator/
+├── SKILL.md            9012 bytes  (370 lines, ZAI-META-002 ID-assignment variant)
+└── references/
+    └── id-assignment-guide.md  4204 bytes
+```
+
+# C. Where the skill-creator skill says to save new skills
+
+## C.1 Official Z.ai skill-creator (/home/z/my-project/skills/skill-creator/SKILL.md, 485 lines)
+This variant focuses on eval-driven skill improvement, NOT storage locations. The only relevant quote:
+> "Copy to a writeable location before editing. The installed skill path may be read-only. Copy to /tmp/skill-name/, edit there, and package from the copy."
+> "After packaging, direct the user to the resulting .skill file path so they can install it."
+
+It does NOT mention /home/user_skills/, /home/official_skills/, or session persistence. It assumes the user will manually package to .skill and install via unspecified mechanism.
+
+## C.2 Toolkit skill-creator (/home/z/my-project/Z-ai-platform/skills/skills/skill-creator/SKILL.md, ZAI-META-002)
+Explicit storage guidance (quoted verbatim):
+
+> ### Important: Toolkit Location
+> Skills are stored in the Z.ai Agent Toolkit repository, not in individual projects.
+> **Default location on Z.ai server:**
+> /home/z/my-project/Zai-agent-toolkit/skills/
+> **Your local location (Windows):**
+> $env:USERPROFILE\.zcode\Zai-agent-toolkit\skills\
+
+> ### Synchronization
+> Skills created in Z.ai sandbox are NOT automatically synced to your local machine.
+> **To sync:**
+> 1. Here: git push to GitHub
+> 2. On Windows: git pull or run update-toolkit.ps1
+
+> ### Project Skills vs Toolkit Skills
+> | Type | Location | Scope |
+> | Toolkit skills | Zai-agent-toolkit/skills/ | Available in all projects |
+> | Project skills | <project>/skills/ | Only in this project |
+> **Recommendation:** Use toolkit for reusable skills, project for project-specific.
+
+NEITHER skill-creator variant mentions /home/user_skills/ as the persistence mechanism. The toolkit variant assumes git is the persistence layer (which is correct for the Z-ai-platform repo, but does not explain how the sandbox's /home/user_skills/ is meant to be used).
+
+# D. What SKILL-001 standard says about paths/format/persistence
+
+Read in full: /home/z/my-project/Z-ai-platform/standards/standards/SKILL-001-skill-format.md (787 lines, STD-SKILL-001 v1.1.0, APPROVED 2026-06-17).
+
+## D.1 Format requirements (REQUIRED for every SKILL.md)
+- name (must match folder name, with _sts suffix for STS skills)
+- description (primary trigger — full sentences with context)
+- version (SemVer)
+- Validated by verify-standards.js V11/V13
+
+## D.2 Optional ID system
+- Format: ZAI-<DOMAIN>-<NNN> (e.g. ZAI-MEM-001, ZAI-STS-008)
+- 13 reserved domains: MEM, FS, SESSION, DEV, ARCH, QA, REQ, META, STS, SDK, DOC, HEALTH, CHART
+- ID required ONLY when skill is referenced by ID from a STD/RULE/other skill's Related: field
+- STS domain reserved for user "STS" specifically; folder naming: <skill-name>_sts
+
+## D.3 Path conventions in SKILL-001
+- §5: "The Z.ai sandbox provides system skills in /home/z/my-project/skills/." — informational only, no persistence claim.
+- §15 checklist: "Skill folder created at Z-ai-skills/skills/<name>/ (or <name>_sts/ for STS)" — assumes the Z-ai-skills git repo as canonical, NOT /home/user_skills/.
+- Appendix B references $STANDARDS_ROOT (env var, currently UNDEFINED — flagged as OPEN issue SKILL-001-002).
+
+## D.4 Persistence
+**SKILL-001 does NOT have a "Persistence Model" section.** This is a known gap — the Russian analysis doc (Архитектура хранения skills в песочнице.md, 2026-06-16) explicitly proposed adding one:
+> "Вопрос к тебе: теперь, когда понятна механика — хочешь, чтобы в STD-SKILL-001 я добавил раздел «Persistence Model»..."
+
+The proposal has NOT been implemented. The standard currently only covers format/ID/compatibility/triggers/validation — it is silent on:
+- Which directories are persistent vs disposable
+- The OSS vs PolarFS vs overlay mount model
+- The extract-official-skills.sh overwrite-with-unzip--o behavior
+- How user_skills/ relates to runtime skills/
+
+This is the single most important OPEN item for the user's persistence question.
+
+# E. Writable vs read-only summary
+
+| Path | Writable? | Persistent? | Mount type |
+|------|-----------|-------------|------------|
+| /home/official_skills/ | NO (ro) | YES | fuse.ossfs (Alibaba OSS, read-only) |
+| /home/user_skills/ | YES | YES | fuse.pfs (PolarFS, persistent RW) |
+| /home/sync/ | YES | YES | fuse.ossfs (OSS, RW) |
+| /home/z/my-project/upload/ | YES | YES | fuse.ossfs (OSS, RW) |
+| /tmp/my-project/ | YES | YES | fuse.pfs (PolarFS, persistent RW) |
+| /home/z/my-project/ (excl. upload/) | YES | **NO** | overlay rootfs (volatile) |
+| /home/z/my-project/skills/ | YES | **NO** | overlay rootfs (volatile; recreated by extract script) |
+| /home/z/my-project/Z-ai-platform/skills/skills/ | YES | **NO** (locally) / YES (via git) | overlay rootfs |
+| /home/z/ hidden dirs (.cache, .local, .npm-global, .venv, .bun) | YES | **NO** | overlay rootfs |
+| /usr/local/, /usr/share/ | NO (root-owned) | NO | overlay rootfs |
+
+# F. Recommended location(s) for user-created skills that need to survive sessions
+
+In order of preference:
+
+1. **/home/user_skills/<name>.zip** (PRIMARY RECOMMENDATION)
+   - Persistent (PolarFS), writable, designed by Z.ai for this purpose.
+   - BUT: auto-install into runtime /home/z/my-project/skills/ is NOT confirmed (extract-official-skills.sh ignores it). User should either (a) manually `unzip -o /home/user_skills/<name>.zip -d /home/z/my-project/skills/` at session start, or (b) verify whether a higher-level orchestration outside the container auto-installs on first invocation.
+   - Naming: zip must contain a top-level folder matching the `name:` field in SKILL.md frontmatter. No ZAI- prefix in filename (sandbox addresses by name:).
+
+2. **GitHub git repo (Z-ai-skills or Z-ai-platform/skills/), cloned at session start**
+   - Persistent, versioned, recoverable. This is what the Z-ai-platform 4-repo split already does.
+   - At session start: `git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git`, then copy needed skill folders into /home/z/my-project/skills/ AFTER extract-official-skills.sh has run (to override official versions).
+   - This is the toolkit skill-creator's recommended approach.
+
+3. **/tmp/my-project/<custom-skills-dir>/** (TERTIARY)
+   - Persistent (PolarFS), but the .initial_snapshot.json mechanism only restores files explicitly listed in the snapshot. Files placed here mid-session may not survive unless the snapshot is refreshed. Limited capacity.
+   - Useful for project-specific working files, not for skill distribution.
+
+4. **AVOID: /home/z/my-project/skills/<custom>/**
+   - Writable BUT disposable — extract-official-skills.sh runs at every session start with `unzip -o` (force overwrite). Any custom skill placed here will be:
+     - DELETED if its name collides with an official zip (overwrite)
+     - DELETED at session restart if not in the snapshot, in user_skills/, or in git
+   - This is the trap the user fell into with skill-creator (official version overwrote their customizations — see Архитектура хранения skills в песочнице.md).
+
+# G. Key dedup / md5 confirmations
+
+- /home/z/my-project/skills/LLM/SKILL.md md5 = 965fb1576fb036732fbd544110cbe8d7
+- /home/official_skills/LLM.zip unpacked SKILL.md md5 = 965fb1576fb036732fbd544110cbe8d7  ✓ IDENTICAL
+  → confirms runtime LLM is unpacked from official LLM.zip
+- /home/z/my-project/skills/skill-creator/SKILL.md md5 = 40d31855044682e5d82e91a4b51919eb
+- /home/official_skills/skill-creator.zip unpacked SKILL.md md5 = 40d31855044682e5d82e91a4b51919eb  ✓ IDENTICAL
+  → confirms runtime skill-creator is the official Z.ai Apache-2.0 eval-pipeline version
+- /home/z/my-project/Z-ai-platform/skills/skills/skill-creator/SKILL.md md5 = 54897db1161af90c4bc1d5b51c4e9a94  ✗ DIFFERENT
+  → confirms toolkit variant (ZAI-META-002, ID-assignment focused) is a separate file
+- /home/user_skills/anti-monolith.zip unpacked SKILL.md md5 = 728e767b961d25b1ef1256b56ac07c85
+- /home/z/my-project/Z-ai-platform/skills/skills/anti-monolith/SKILL.md md5 = 2a4fa2c4cee585fb43f9c30f692979e5  ✗ DIFFERENT
+  → the user_skills/anti-monolith.zip is an OLDER/different snapshot than the git repo version. The git repo is more recent.
+
+Stage Summary:
+
+- Mapped 13 skill-like or skill-adjacent directories. Only 5 are skill-storage locations proper: /home/official_skills/ (RO OSS, 68 zips), /home/user_skills/ (RW PolarFS, 19 zips), /home/z/my-project/skills/ (disposable runtime, 79 unpacked), /home/z/my-project/Z-ai-platform/skills/skills/ (disposable overlay, 35 skills, git-backed), /home/z/my-project/.superpowers-zai/skills/ (git submodule, 14 sp-* skills).
+- CONFIRMED via mount table + extract-official-skills.sh source code: /home/z/my-project/skills/ is a DISPOSABLE runtime view recreated at every session start by `unzip -o` from /home/official_skills/. Any customizations placed there are lost on restart (or sooner, if name collides with an official zip).
+- CONFIRMED via PolarFS mount: /home/user_skills/ and /tmp/my-project/ are the two PolarFS persistent RW locations. /home/sync/ and /home/z/my-project/upload/ are persistent via OSS (RW).
+- KEY OPEN ISSUE: extract-official-skills.sh does NOT extract /home/user_skills/*.zip into the runtime skills dir. None of the 19 user_skills zips appear in /home/z/my-project/skills/ (except pptx, which is shadowed by official). No system script references user_skills. The auto-install mechanism for user_skills (if any) operates outside this container — unverifiable from inside.
+- KEY OPEN ISSUE: SKILL-001 v1.1 has NO "Persistence Model" section. The Russian analysis doc proposed adding one (2026-06-16); proposal not yet implemented. The standard is silent on OSS/PolarFS/overlay mechanics, leaving users to discover the trap by losing work.
+- NEITHER skill-creator variant (official Z.ai eval-pipeline NOR toolkit ZAI-META-002) mentions /home/user_skills/ as the persistence mechanism. The toolkit variant recommends git (GitHub) as the sync layer; the official variant is silent on storage entirely.
+- RECOMMENDATION for user-created skills that must survive sessions: package as <name>.zip and place in /home/user_skills/ (PolarFS persistent) — but ALSO commit to a git repo (Z-ai-skills on GitHub) as belt-and-suspenders, because the auto-install path for user_skills is unverified. NEVER rely on /home/z/my-project/skills/<custom>/ for persistence — it will be overwritten by extract-official-skills.sh on next session start.
+
+
+---
+
+Task ID: research-2
+Agent: main
+Task: Создать docs/research/ и задокументировать все Z.ai-папки, где
+хранятся системные skills; дать чёткую стратегию персистентности для
+своих skills.
+
+Work Log:
+- Создал /home/z/my-project/docs/research/ (5 файлов, 1506 строк):
+  * 00-README.md (76) — индекс, TL;DR, открытые вопросы
+  * 01-skill-storage-map.md (258) — инвентаризация 13 storage-локаций,
+    writable/persistent/mount-тип для каждой
+  * 02-session-boot-sequence.md (367) — разбор /start.sh (421 строка) +
+    /home/extract-official-skills.sh (96 строк), 11 шагов старта сессии
+  * 03-persistence-strategy.md (446) — 3 tier'а персистентности
+    (PolarFS+dev.sh, GitHub+dev.sh, project-local+dev.sh), антипаттерны,
+    пошаговая инструкция Tier 1
+  * 04-skill-format-cheatsheet.md (359) — формат SKILL.md, ID-система,
+    шаблон, чек-лист перед упаковкой
+
+- Главные открытия (подтверждены чтением скриптов):
+  1. /home/extract-official-skills.sh — единственный механизм загрузки
+     системных skills в рантайм. Берёт /home/official_skills/*.zip,
+     фильтрует по stages.yaml (union всех 11 stages), распаковывает в
+     /home/z/my-project/skills/ с unzip -o (force overwrite).
+  2. /home/user_skills/ — PolarFS-persistent, но НЕ распаковывается
+     ни одним из видимых скриптов. Zips лежат мёртвым грузом.
+  3. skills/ в .gitignore → не попадает в repo.tar → custom skills в
+     /home/z/my-project/skills/ теряются при рестарте.
+  4. .zscripts/dev.sh — единственный официальный хук пользовательской
+     инициализации, который запускается /start.sh (шаг 9) ПОСЛЕ
+     extract-official-skills.sh. Это ТО место для bootstrap-скрипта.
+  5. install-zai.sh (копирует 14 sp-* skills в skills/) существует, но
+     НЕ вызывается из /start.sh. По-видимому, вшит в образ контейнера.
+
+- Сводная таблица persistence по локациям (details в 01-skill-storage-map.md):
+  * READ-ONLY: /home/official_skills/ (OSS), /usr/*, /etc/*
+  * RW + PERSISTENT: /home/user_skills/ (PolarFS), /tmp/my-project/
+    (PolarFS), /home/sync/ (OSS RW), /home/z/my-project/upload/ (OSS RW)
+  * RW + DISPOSABLE: /home/z/my-project/* (excl. upload/), skills/,
+    Z-ai-platform/, .npm-global/, .venv/, .bun/, .cache/
+
+- Рекомендация для пользовательских skills (details в
+  03-persistence-strategy.md):
+  * Tier 1 (РЕКОМЕНДОВАНО): zip в /home/user_skills/ + распаковка в
+    .zscripts/dev.sh (переживает и PolarFS, и repo.tar).
+  * Tier 2 (BACKUP): GitHub-репо с skills + git clone в dev.sh.
+  * Tier 3 (PROJECT-LOCAL): my-skills/ внутри проекта + cp в skills/
+    в dev.sh.
+
+Stage Summary:
+- 5 research-документов создано в /home/z/my-project/docs/research/.
+  Все они переживут сессию (попадут в repo.tar, т.к. docs/ не в .gitignore).
+- Главный практический вывод для пользователя: НИКОГДА не клади custom
+  skills напрямую в /home/z/my-project/skills/ — они будут перезаписаны
+  extract-official-skills.sh при следующем старте. Правильный путь —
+  PolarFS (/home/user_skills/) + bootstrap через .zscripts/dev.sh.
+- Следующие шаги (требуют рестарта сессии для проверки):
+  1. Подтвердить, что .zscripts/dev.sh действительно вызывается /start.sh
+     (шаг 9). Положить в него echo "DEV.SH RAN" > /tmp/marker, restart,
+     проверить.
+  2. Подтвердить, что /home/user_skills/ НЕ имеет скрытой авто-распаковки.
+     Положить тестовый zip без dev.sh, restart, проверить.
+  3. Если dev.sh НЕ вызывается при наличии package.json — реализовать
+     распаковку через predev hook в package.json.
+
+---
+
+Task ID: research-3
+Agent: main
+Task: Изучить архив skill-creator.zip (загружен пользователем), сравнить
+структуру оформления с тем, что есть в системе Z.ai sandbox. На основе
+выводов предложить единый стандарт оформления skills.
+
+Work Log:
+- Распаковал /home/z/my-project/upload/skill-creator.zip в
+  /home/z/my-project/upload/skill-creator-extracted/. 19 файлов,
+  ~5500 строк.
+- Сравнил md5 SKILL.md загруженного архива с системными:
+  * uploaded:  40d31855044682e5d82e91a4b51919eb
+  * skills/skill-creator/: 40d31855044682e5d82e91a4b51919eb  (ИДЕНТИЧНО)
+  * Z-ai-platform/skills/skills/skill-creator/: 54897db1161af90c4bc1d5b51c4e9a94
+  ВЫВОД: загруженный "свой" skill-creator = официальный Z.ai skill-creator,
+  который уже распакован в /home/z/my-project/skills/skill-creator/.
+  Toolkit-вариант (ZAI-META-002) — ДРУГОЙ skill-creator с другой
+  философией.
+
+- Прочитал полностью:
+  * SKILL.md официального skill-creator (485 строк)
+  * SKILL.md toolkit skill-creator ZAI-META-002 (370 строк)
+  * references/schemas.md (430 строк, JSON-схемы для eval pipeline)
+  * references/id-assignment-guide.md (173 строки, присутствует в обоих
+    вариантах — дубликат, но ни на один из SKILL.md не ссылается)
+  * scripts/quick_validate.py (102 строки) — критический скрипт,
+    определяющий допустимый frontmatter
+  * scripts/package_skill.py (136 строк) — упаковщик .skill (zip)
+  * agents/analyzer.md, grader.md, comparator.md (первые 50 строк
+    каждого) — multi-agent eval roles
+  * 7 официальных skills для сравнения frontmatter (LLM, charts, pdf,
+    docx, web-search, anti-pua, fullstack-dev)
+
+- Главные находки:
+  1. В системе 2 конфликтующих skill-creator'а:
+     A (uploaded/official, 19 файлов, eval pipeline) vs
+     C (toolkit ZAI-META-002, 2 файла, ID assignment).
+     Они не ссылаются друг на друга, не интегрированы.
+  2. quick_validate.py из A ЖЁСТКО ограничивает frontmatter:
+     ALLOWED = {name, description, license, allowed-tools, metadata,
+                compatibility}
+     Запрещает: id, trigger, version, aligned_with, related.
+  3. STD-SKILL-001 (которому следует C) ТРЕБУЕТ id, trigger,
+     aligned_with для toolkit skills.
+  4. Это означает: quick_validate.py из A завалит любой skill,
+     написанный по правилам C. И наоборот: skill, прошедший
+     quick_validate.py, не соответствует STD-SKILL-001.
+  5. 8 из 9 проверенных официальных skills (LLM, charts, pdf, docx,
+     web-search, anti-pua, fullstack-dev, skill-creator A) НЕ
+     соответствуют STD-SKILL-001 (нет id, trigger, version и т.д.).
+     Только 1 из 9 (skill-creator C) соответствует.
+  6. description max length: quick_validate.py говорит 1024, но charts
+     имеет ~1200 символов description — нарушение.
+  7. references/id-assignment-guide.md дублируется в A и C (md5
+     идентичен), но ни в одном из SKILL.md на него нет ссылок. Мёртвый
+     код.
+  8. Ни A, ни C не объясняют персистентность skills между сессиями —
+     критический пробел.
+
+- Создал 2 новых research-документа (дополнение к ранее созданным 5):
+  * 05-skill-creator-comparison.md (260 строк) — детальное сравнение
+    A vs C по 8 аспектам: структура, frontmatter, философия, что
+    есть в одном но нет в другом, конфликты и противоречия.
+  * 06-unified-skill-standard.md (490 строк) — предложение
+    UNIFIED-SKILL v1.0:
+    - Спецификация frontmatter: 2 обязательных поля + 7 опциональных
+      (общие) + 4 опциональных (для ID-графа) + 3 опциональных (для
+      eval pipeline) + запрещённые поля
+    - 3 шаблона SKILL.md: minimal / toolkit / full
+    - Унифицированный валидатор с 4 профилями: minimal / toolkit /
+      full / strict
+    - Разделение ролей: skill-creator (A) для eval pipeline,
+      zai-skill-registry (переименованный C) для ID assignment
+    - Обязательный раздел "Persistence" (закрывает критический пробел
+      обоих вариантов)
+    - Migration path из 5 этапов: документация → валидатор →
+      переименование → skill-creator A обновление → existing skills
+      migration (опционально)
+    - 6 открытых вопросов для обсуждения с пользователем
+
+- Обновил 00-README.md: добавил индексы на 05 и 06, добавил 3 новых
+  TL;DR-пункта (6, 7, 8).
+
+Stage Summary:
+- docs/research/ теперь содержит 7 документов (~2800 строк суммарно):
+  00-README (индекс + 8 TL;DR)
+  01-storage-map (13 локаций с RO/RW/persistent)
+  02-boot-sequence (разбор /start.sh)
+  03-persistence-strategy (3 tier'а + антипаттерны)
+  04-skill-format-cheatsheet (быстрая шпаргалка)
+  05-skill-creator-comparison (детальное сравнение A vs C)
+  06-unified-skill-standard (предложение UNIFIED-SKILL v1.0)
+
+- Главный практический вывод для пользователя:
+  Загруженный skill-creator.zip = официальный Z.ai skill-creator (md5
+  идентичен). Это eval-pipeline вариант. В системе есть второй
+  skill-creator (toolkit ZAI-META-002) с другой философией (ID
+  assignment). Они не интегрированы, конфликтуют по frontmatter и
+  валидатору. 8 из 9 official skills не соответствуют STD-SKILL-001.
+  
+  Предложен единый стандарт UNIFIED-SKILL v1.0, который:
+  - Совмещает eval pipeline (из A) + ID system (из C)
+  - Обратно совместим со всеми существующими skills
+  - Разделяет роли: skill-creator (A) для eval, zai-skill-registry
+    (переименованный C) для ID
+  - Включает обязательный раздел "Persistence"
+
+- Открытые вопросы для пользователя (раздел K в 06-unified-skill-standard.md):
+  1. Переименовывать C в zai-skill-registry или A в skill-eval-pipeline?
+  2. Делать id обязательным или опциональным?
+  3. Лимит description 1024 или 2048?
+  4. Eval pipeline для всех skills или опционально?
+  5. Включать persistence guidance в стандарт или отдельным документом?
+  6. Профиль валидации по умолчанию: minimal или toolkit?
+
+- Следующие шаги (после ответов пользователя):
+  1. Написать STD-SKILL-002-unified-skill-format.md на основе
+     06-unified-skill-standard.md
+  2. Написать новый validate_skill.py с профилями
+  3. Обновить skill-creator A (добавить persistence раздел, обновить
+     шаблон SKILL.md)
+  4. Переименовать C → zai-skill-registry (или принять альтернативное
+     решение по вопросу 1)
+  5. Запустить новый валидатор на всех 79 official skills — собрать
+     отчёт о нарушениях
