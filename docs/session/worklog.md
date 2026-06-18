@@ -2186,3 +2186,199 @@ Stage Summary:
      решение по вопросу 1)
   5. Запустить новый валидатор на всех 79 official skills — собрать
      отчёт о нарушениях
+
+---
+Task ID: doc-002-v2.4.1-check-md-sh-2026-06-19
+Agent: main (orchestrator)
+
+Task:
+  User asked: "еще и Добавить шелл-скрипт ./scripts/check-md.sh для проверки?"
+  Add a shell script `scripts/check-md.sh` that verifies Markdown files
+  against STD-DOC-002 (Markdown Formatting Standard). Wire the new script
+  into the standard document itself (§0 TL;DR, §10.7, §13 checklist, §14
+  version history, §14A known issues).
+
+Work Log:
+  - Located the standard at standards/DOC-002-markdown-standard.md.
+    Found it is already at v2.4.0 (the prior session's polish work —
+    MD-001/MD-003 resolution, TL;DR §0, §12.4 before/after example,
+    §3 (ref) clarification — was committed locally as da355ff but not
+    yet pushed to origin).
+  - Read existing scripts (remove-stack-signature-footers.sh,
+    install-hooks.sh, .githooks/pre-commit, verify-standards.js header)
+    to align on style: `#!/usr/bin/env bash`, `set -euo pipefail`,
+    `[ok]`/`[FAIL]`/`[skip]` text tags (no Unicode — mandated by the
+    standard being authored), REPO_ROOT pattern via BASH_SOURCE.
+  - Created scripts/check-md.sh (10.7 KB, 268 lines). Three-layer
+    architecture:
+      Layer 1: bash-only static checks (always run, no deps)
+        - bare code fence (``` without language) — §5.4
+        - `*`/`+` unordered list markers — §5.2
+        - closing `#` on ATX headings — §5.1
+        - multiple H1 in one document — §5.1
+        - table pseudographics outside code blocks — §3
+      Layer 2: ESLint via `npx --no-install eslint` (skipped if missing)
+      Layer 3: `lint-md.js` from repo root or scripts/ (skipped if missing)
+  - First smoke-test produced 11 false positives because the fence-state
+    machine did not handle 4-backtick fences wrapping 3-backtick examples
+    (used in §5.4 and §12.4 of the standard). Fixed by tracking the
+    opening fence length and only closing on a fence of equal or greater
+    length, per CommonMark spec. Re-test on DOC-002: 0 false positives.
+  - Full-corpus run (`bash scripts/check-md.sh standards/`): 21/21 PASS.
+  - Full-repo run (`bash scripts/check-md.sh` with no args): 29 PASS,
+    5 FAIL, 2 SKIP. The 5 failures are real pre-existing bare-fence
+    violations in README.md:14 and docs/verify-id-graph-spec-v1.0.md
+    (lines 32, 60, 337, 452). Documented as MD-004 [OPEN] in §14A.
+  - Fixed `usage()` function — original sed-based parser printed empty
+    output because the `# ====` pattern appears twice in the header.
+    Rewrote with awk that prints lines 3..(line before `set -euo pipefail`).
+  - Updated DOC-002-markdown-standard.md:
+      * Header: version 2.4.0 -> 2.4.1, added `Entry point:` line
+      * §0 TL;DR: replaced direct `npx eslint` + `node lint-md.js`
+        invocation with `bash scripts/check-md.sh` as the recommended
+        form; kept the underlying-tool form as an alternative.
+      * §10.7 Application Stages: added "Manual check" row pointing
+        to the wrapper, plus a paragraph explaining the 3-layer
+        architecture and graceful degradation.
+      * §13 Pre-merge checklist: added a `check-md.sh` bullet.
+      * §14 Version History: added v2.4.1 entry.
+      * §14A Known Issues: added MD-004 [OPEN] documenting the 5
+        pre-existing bare-fence violations discovered by the script.
+      * Footer: `MARKDOWN_STANDARD v2.4` -> `v2.4.1`.
+  - Final self-compliance check: `bash scripts/check-md.sh standards/
+    DOC-002-markdown-standard.md` exits 0. The standard complies with
+    itself.
+
+Stage Summary:
+  - New file: standards/scripts/check-md.sh (10.7 KB, executable,
+    bash-only, no Node.js / npm install required for layer 1).
+  - Updated file: standards/standards/DOC-002-markdown-standard.md
+    (v2.4.0 -> v2.4.1).
+  - The script is the canonical entry point referenced from §0 TL;DR
+    and §13 pre-merge checklist. It complements (does not replace)
+    the existing verify-standards.js (which checks content-level
+    invariants on the standards corpus itself) and verify-id-graph.js
+    (which checks cross-repo ID-graph invariants).
+  - MD-004 [OPEN] is a separate cleanup task: 5 bare-fence violations
+    in README.md and docs/verify-id-graph-spec-v1.0.md. Mechanical
+    fix (add `text` / `bash` / appropriate language tag to each
+    fence). Proposed for a separate PR.
+  - Next: commit + push to Z-ai-standards origin/main, then bump
+    the submodule pointer in the parent Z-ai-platform repo.
+
+---
+Task ID: a11y-001-v1.3-review-md004-fix-2026-06-19
+Agent: main (orchestrator)
+
+Task:
+  Two-part task triggered by user:
+  (1) "еще и Добавить шелл-скрипт ./scripts/check-md.sh для проверки?" — DONE
+      in prior task (doc-002-v2.4.1-check-md-sh-2026-06-19). Pushed to
+      origin/main as commit 0395a61.
+  (2) "и заодно проверить и сравни где у нас еще есть пересечения" — plus
+      user attached a detailed 8.5/10 review of A11Y-001 v1.2 with 5
+      concrete fixes needed for v1.3.
+
+Work Log:
+  - Pushed pending commits (DOC-002 v2.4.0 + v2.4.1) to Z-ai-standards
+    origin/main (da355ff..0395a61). Token provided by user in fresh
+    upload at /home/z/my-project/upload/github.txt (github_pat_ format,
+    93 chars).
+  - Ran `bash scripts/check-md.sh` on full standards repo. Found 6
+    pre-existing bare-fence violations (MD-004) in non-standards files:
+      README.md:14
+      docs/verify-id-graph-spec-v1.0.md:32, 60, 337, 452
+      MIGRATIONS.md:96
+    All 6 fixed by adding `text` language tag (mechanical fix, no
+    semantic change). Full repo run now 32/32 PASS.
+  - Conducted overlap audit across A11Y-001, DESIGN-001, FE-001,
+    TEST-001, DOC-003. Identified 3 real overlap points + 2 non-issues:
+      [REAL] FE-001 §11.5 → A11Y-001 §7 (empty table) — RESOLVED by
+              updating FE-001 §11.5 to reference the new automated
+              report.
+      [REAL] A11Y-001 §5.1 (prefers-reduced-motion) ↔ DESIGN-001 §11
+              animation tokens — OPEN (A11Y-009).
+      [REAL] A11Y-001 §8.2 (jest-axe + Lighthouse) ↔ TEST-001 test
+              categories — OPEN (A11Y-009).
+      [NON-ISSUE] A11Y-001 §1.5 SVG aria-hidden ↔ DOC-003 line 287-298
+              — DOC-003 only uses aria-hidden as SVG load-error
+              fallback, not as general a11y rule. Complementary, not
+              duplicative.
+      [NON-ISSUE] A11Y-001 §1.1 Text Contrast ↔ DESIGN-001 §4.2
+              Light/Dark Variants — DESIGN-001 requires variants but
+              not contrast. Complementary.
+  - Applied all 5 fixes from the user's review of A11Y-001 v1.2,
+    producing v1.3:
+      1. Added §1.6 Text Spacing (1.4.12 AA) with 4 override
+         dimensions, 4 hard rules (no overflow:hidden on text
+         containers, no fixed height, no max-height+overflow:hidden,
+         multi-column testing requirement), Tailwind wrong/right
+         patterns, testing pointer to Text Spacing Bookmarklet.
+         (A11Y-005 [RESOLVED])
+      2. Clarified §1.2 Non-Text Contrast for state components: 3:1
+         applies to boundary/fill vs. surrounding background, NOT to
+         internal symbol vs. component fill. Added ASCII diagram.
+         Added exception for status icons without adjacent text.
+         (A11Y-007 [RESOLVED])
+      3. Rewrote §2.5 Skip Navigation: replaced `#sidebar` with
+         `#main-content` (always) + `#primary-nav` (optional, targets
+         `<nav aria-label="Main">`). Added landmark target table.
+         Added "DO NOT use generic region names" list (#sidebar,
+         #content, #nav). Added rule: omit second skip link if no
+         <nav aria-label="Main">. (A11Y-008 [RESOLVED])
+      4. Added §4.1 Library note: ARIA table applies to custom-built
+         components only. Added library mapping table (shadcn/ui,
+         Radix UI, React Aria, Headless UI) showing how ARIA is
+         provided by each. Documented failure mode (duplicate ARIA
+         from pasting custom-component example onto library primitive).
+         Documented customization carve-out (aria-label, aria-describedby
+         still allowed). (A11Y-006 [RESOLVED])
+      5. Replaced §7 empty contrast table with automated-report
+         reference (`npx stsgs a11y audit`). Added quality gate (PR
+         that changes color tokens MUST attach updated contrast report
+         as CI artifact; token pair below threshold blocks PR).
+         Preserved historical note for audit. (A11Y-003 [RESOLVED])
+      6. Activated §8.2: removed "(Future)" qualifier. Added jest-axe
+         setup + usage pattern (TypeScript example with
+         toHaveNoViolations matcher). Added Lighthouse command +
+         quality gate (score >= 90 blocks production deploys). Added
+         CI workflow example (.github/workflows/a11y.yml). (A11Y-004
+         [RESOLVED])
+      7. Header: added `Status: ACTIVE` line per review feedback
+         (status belongs in header, not version history entries).
+         Added `Entry point:` line referencing check-md.sh for
+         Markdown hygiene.
+  - Added 5 new §9A Known Issues entries:
+      A11Y-005 [RESOLVED in v1.3] — Text Spacing gap
+      A11Y-006 [RESOLVED in v1.3] — ARIA library clarification
+      A11Y-007 [RESOLVED in v1.3] — §1.2 boundary vs. internal symbol
+      A11Y-008 [RESOLVED in v1.3] — §2.5 #sidebar ambiguity
+      A11Y-009 [OPEN] — Two remaining overlap cross-references needed
+              in DESIGN-001 v3.1.1 and TEST-001 v(next)
+  - Updated §9 Cross-References to reflect the v1.3 changes:
+      * STD-FE-001 row: noted FE-001 §11.5 updated in sync
+      * STD-TEST-001 row: added note about jest-axe + Lighthouse gates
+      * STD-DESIGN-001 row: added §11 animation tokens ↔ §5.1
+        prefers-reduced-motion cross-reference
+  - Added v1.3 entry to §10 Version History documenting all 6 RESOLVED
+    issues + 1 OPEN issue + the FE-001 sync update.
+  - Updated FE-001 §11.5 (WCAG Contrast Compliance) to reference the
+    new automated contrast report instead of the deprecated empty
+    §7 table. Added a historical note explaining the sync update.
+
+Stage Summary:
+  - A11Y-001 v1.2 -> v1.3 (file: standards/A11Y-001-wcag-2-1-aa.md).
+    All 5 review fixes applied. External review rating was 8.5/10;
+    the v1.3 changes address every concrete recommendation. 4 OPEN
+    issues from v1.2 (A11Y-001, 002, 003, 004) are all now RESOLVED
+    (001/002 were already resolved in v1.2; 003/004 resolved in v1.3).
+    New OPEN issue A11Y-009 documents 2 follow-up cross-references
+    for sibling standards.
+  - FE-001 §11.5 updated in sync (no version bump — documentation-only
+    cross-reference update, no normative rule change).
+  - 6 MD-004 bare-fence violations fixed across 3 files (README.md,
+    docs/verify-id-graph-spec-v1.0.md, MIGRATIONS.md).
+  - Full repo self-compliance: `bash scripts/check-md.sh` exits 0
+    on all 32 .md files in Z-ai-standards.
+  - Next: commit + push v1.3 + FE-001 update + MD-004 fixes, then
+    bump parent Z-ai-platform submodule pointer.
