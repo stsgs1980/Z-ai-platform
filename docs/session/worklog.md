@@ -576,3 +576,154 @@ Stage Summary (actual):
 - Cascade State principle now formalized (user instruction "Cascade State -
   сделать" completed). SSOT, submodule-vs-subtree, D4 already in place from
   prior sessions — confirmed via cascade diagram cross-references.
+
+---
+
+Task ID: w03-w12-sweep-2026-06-18
+Agent: main
+Task: Close W12 (SKILL-001 missing §XA) and W03 (5 dead standards not referenced
+by any RULE/ZAI) by adding Related: edges from RULE/ZAI artifacts to the 5 dead
+standards. User instruction: "делать обе задачи — §XA в SKILL-001 (1 файл,
+механически) + Related: edges для 5 dead standards (кросс-репозиторная правка,
+требует анализа содержания каждого стандарта)".
+
+Plan (committed BEFORE execution):
+- Phase A — §10A Known Issues in SKILL-001:
+  * Read SKILL-001 fully (700 lines) ✓ done
+  * Convention: `## 10A. Known Issues and Proposed Solutions` between §10 and §11
+    (matches ARCH-001 §10A, ENV-002 §10A)
+  * W12 regex: `^\s*##\s+\d*[A-Z]\.?\s*Known\s+Issues` (case-insensitive)
+  * Initial content: 3 OPEN issues observed during read:
+    - SKILL-001-001 [OPEN]: §3.5 says Related: goes in blockquote only, but all
+      17 RULE files and 24 ZAI skills actually use YAML frontmatter `related:`
+      field. Standard inconsistent with repo practice.
+    - SKILL-001-002 [OPEN]: $STANDARDS_ROOT used in Appendix B example but not
+      formally defined in SKILL-001 / ENV-001 / ENV-002.
+    - SKILL-001-003 [OPEN]: Appendix B template shows ZAI-META-001 v1.1 but
+      actual skills/skills/skill-id-system/SKILL.md is at v1.0.
+
+- Phase B — Related: edges for 5 dead standards (mapping decisions):
+  | Dead STD | What it regulates | Executor (RULE/ZAI) | Why |
+  |---|---|---|---|
+  | STD-AGENT-002 | Multi-agent orchestration patterns | RULE-MONOLITH-007 (Work structure) | Work structure loop applies; when work is multi-agent, orchestration kicks in |
+  | STD-ERR-002 | Retry, circuit breaker, fallback | ZAI-DEV-002 (commit-work) | Git commit/push can fail transiently; commit-work should use retry per ERR-002 §2 |
+  | STD-GIT-002 | Sandbox git safety (deadlock, network) | RULE-MONOLITH-008 (Sandbox verification) | Sandbox verification explicitly checks git state for deadlock risk |
+  | STD-SEC-002 | Production security (auth, passwords) | RULE-MONOLITH-014 (Pre-commit checklist) | Pre-commit is the natural enforcement gate for production security checks |
+  | STD-TEST-001 | Testing pyramid, coverage, AAA | ZAI-QA-001 (qa-test-planner) | QA test planning IS the executor of the testing standard |
+  
+  All 5 edges are RULE→STD or ZAI→STD, both allowed by layer matrix (G04).
+  Current Related: counts: RULE-MONOLITH-007 (2), RULE-MONOLITH-008 (2),
+  RULE-MONOLITH-014 (3), ZAI-DEV-002 (1), ZAI-QA-001 (1).
+
+- Phase C — Verify + commit + push:
+  * Run verify-id-graph.js — expect: 13/13 HARD PASS, W03: 5→0, W12: 1→0
+  * Commit standards submodule (SKILL-001 §10A)
+  * Commit guard submodule (3 RULE edits)
+  * Commit skills submodule (2 SKILL.md edits)
+  * Push all 3 submodules
+  * Bump parent submodule pointers, commit, push parent
+
+Work Log:
+- Read SKILL-001-skill-format.md fully (700 lines, 15 sections + 3 appendices)
+- Confirmed: §XA convention is `## 10A. Known Issues and Proposed Solutions`
+  (matches ARCH-001 §10A at line 685, ENV-002 §10A at line 235)
+- Ran verify-id-graph.js v1.1.2: baseline = 13/13 HARD PASS, 8 SOFT warnings
+  (W03: 5, W11: 2, W12: 1)
+- Wrote /tmp/w03-yaml.js to scan all 60 declarations (19 STD + 17 RULE + 24 ZAI)
+  with proper YAML frontmatter parsing — confirmed exact 5 dead standards:
+  STD-AGENT-002, STD-ERR-002, STD-GIT-002, STD-SEC-002, STD-TEST-001
+- Confirmed NONE of the 5 dead standards are mentioned in any RULE or ZAI body
+  text — all current mentions are in OTHER STD files (ARCH-002, META-001, etc.)
+- Listed all 17 RULE files with YAML frontmatter (id, title, related) — found
+  current Related: edges total 17 across RULE files (mostly RULE→RULE or
+  RULE→TOOL/PROC/ENV/DOC/ARCH)
+- Listed all 24 ZAI skills with frontmatter — current Related: edges are mostly
+  ZAI→STD-SKILL-001 (skill format standard) + intra-domain ZAI→ZAI edges
+- Read bodies of all 5 target files (RULE-MONOLITH-007/008/014, commit-work,
+  qa-test-planner) to confirm semantic relevance of planned edges
+
+Execution results:
+- Phase A (§10A in SKILL-001):
+  * Added §10A Known Issues and Proposed Solutions section (90 lines) between
+    §10 (Validation) and §11 (ID Assignment Procedure). Position matches
+    convention in ARCH-001 §10A (line 685) and ENV-002 §10A (line 235).
+  * 3 OPEN issues documented: SKILL-001-001 (YAML vs blockquote inconsistency
+    for Related: field), SKILL-001-002 ($STANDARDS_ROOT undefined),
+    SKILL-001-003 (Appendix B template version drift).
+  * Bumped version 1.0.0 -> 1.1.0, Last Updated 2026-06-17 -> 2026-06-18.
+  * Initial verify after edit triggered regression: W13 fired on
+    "skills/skill-id-system/SKILL.md" (single skills/, not in whitelist).
+    Fixed inline by using canonical cross-repo path
+    "Z-ai-skills/skills/skill-id-system/SKILL.md" (already whitelisted).
+  * Final verify: W12 closed (1 -> 0). W13 stayed at 0. No regression.
+
+- Phase B (Related: edges for 5 dead standards):
+  * guard/rules/RULE-MONOLITH-007.md: added "  - STD-AGENT-002" to related:
+    YAML list. Edge: Work structure -> Orchestration. Justification: when
+    work is multi-agent, orchestration patterns from STD-AGENT-002 govern
+    subagent coordination; rule's step 3 "Execute the step" may invoke
+    orchestration.
+  * guard/rules/RULE-MONOLITH-008.md: added "  - STD-GIT-002" to related:
+    YAML list. Edge: Sandbox verification -> Sandbox git safety.
+    Justification: sandbox verification explicitly checks git state for
+    deadlock risk; STD-GIT-002 §2.1 defines the deadlock problem.
+  * guard/rules/RULE-MONOLITH-014.md: added "  - STD-SEC-002" to related:
+    YAML list. Edge: Pre-commit checklist -> Security Extended.
+    Justification: pre-commit is the natural enforcement gate for
+    production security checks (secrets scanning, dependency audit).
+  * skills/skills/commit-work/SKILL.md: added "  - STD-ERR-002" to related:
+    YAML list. Edge: commit-work -> Error Recovery. Justification: git
+    commit/push can fail transiently; commit-work should use retry-with-
+    backoff per STD-ERR-002 §2.
+  * skills/skills/qa-test-planner/SKILL.md: added "  - STD-TEST-001" to
+    related: YAML list. Edge: qa-test-planner -> Testing. Justification:
+    qa-test-planner IS the executor of the testing standard; test plans,
+    cases, and regression suites must conform to STD-TEST-001 (pyramid,
+    coverage, AAA pattern).
+  * All 5 edges are RULE->STD or ZAI->STD, both allowed by layer matrix
+    (G04 PASS unchanged).
+  * Final verify: W03 closed (5 -> 0). No regression.
+
+Verification results (final, after Phase A + B):
+  - HARD: 13/13 PASS (G01-G15, unchanged — CI stays green)
+  - W03 (dead-standard): 0 warnings (was 5 — 100% closure)
+  - W11 (size anomaly): 2 warnings (unchanged — DESIGN-001 CRITICAL 1781
+    lines + sandbox-hooks-cookbook 1011 lines; out of scope for this task)
+  - W12 (missing §XA Known Issues): 0 warnings (was 1 — 100% closure)
+  - W13 (broken cross-doc refs): 0 warnings (unchanged)
+  - W14, W15, W01-W10: 0 warnings
+  - Total: 2 SOFT warnings (was 8 — 75% reduction in this session,
+    97.6% reduction from starting 84)
+
+Commit + push:
+- Standards submodule: e5aa875 -> 06ee161
+  ("feat(skill-001): add §10A Known Issues + bump to v1.1.0 (closes W12)")
+  Pushed to GitHub stsgs1980/Z-ai-standards (main): SUCCESS
+- Guard submodule: 97d2911 -> ac2bcd5
+  ("feat(rules): add Related: edges to 3 RULEs for dead-standard sweep (W03)")
+  Pushed to GitHub stsgs1980/Z-ai-guard (main via HEAD:main): SUCCESS
+- Skills submodule: f3ab7df -> 2cd76b3
+  ("feat(skills): add Related: edges to 2 ZAI skills for dead-standard sweep (W03)")
+  Pushed to GitHub stsgs1980/Z-ai-skills (main via HEAD:main): SUCCESS
+- Parent (Z-ai-platform): bumping 3 submodule pointers + this worklog entry
+  in one atomic commit.
+
+Stage Summary:
+- SKILL-001 v1.1.0 published with §10A Known Issues section. W12 closed
+  for SKILL-001 (ARCH-001 was already closed in prior task). W12 is now
+  at 0 repo-wide.
+- All 5 W03 dead-standard warnings closed via cross-repo Related: edges.
+  The 5 dead standards now have explicit executors:
+    STD-AGENT-002 <- RULE-MONOLITH-007 (Work structure)
+    STD-ERR-002   <- ZAI-DEV-002 (commit-work)
+    STD-GIT-002   <- RULE-MONOLITH-008 (Sandbox verification)
+    STD-SEC-002   <- RULE-MONOLITH-014 (Pre-commit checklist)
+    STD-TEST-001  <- ZAI-QA-001 (qa-test-planner)
+- Total SOFT warnings: 84 (start of W11-W15 era) -> 8 (prior task end) ->
+  2 (this task end). 97.6% cumulative reduction. Remaining 2 are W11
+  size-anomaly warnings that require content splits (DESIGN-001 CRITICAL
+  + sandbox-hooks-cookbook soft cap) — out of scope for this task.
+- HARD checks: 13/13 PASS throughout (no regression).
+- 3 OPEN Known Issues documented in SKILL-001 §10A for future iteration:
+  YAML/blockquote format inconsistency, $STANDARDS_ROOT definition gap,
+  Appendix B version drift. None blocks CI; all are technical-debt signals.
