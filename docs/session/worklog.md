@@ -207,3 +207,152 @@ Stage Summary:
   3. Read docs/session/SESSION_NOTES.md for lessons learned
   4. Read docs/session/worklog.md for task history
   5. Run node standards/scripts/verify-id-graph.js to confirm state
+
+---
+
+Task ID: superpowers-zai-analysis-2026-06-18
+Agent: main
+Task: Install and analyze Superpowers-Z.ai package; assess applicability to Z.ai environment
+
+Work Log:
+- Inspected install-zai.sh before running — confirmed clean (no network calls, no sudo,
+  no system file edits, just markdown copy)
+- Added Superpowers-Z.ai as git submodule: .superpowers-zai/
+- Ran bash .superpowers-zai/install-zai.sh — installed 14 sp-* skills into skills/
+- Verified install status: all 14 skills [OK] up to date
+- Read all 14 SKILL.md files + README.md + references/zcode-tools.md
+- Compared Superpowers style (ALL-CAPS, <HARD-GATE>, Iron Law, dense anti-pattern tables)
+  against ZCode native style (from skill-creator: imperative form, <500 lines, no MUSTs,
+  examples beat rules, "remove what isn't pulling their weight")
+- Identified 5 conflicts with existing Z.ai gate-process:
+  1. sp-brainstorming "one question at a time" vs our AskUserQuestion batch-of-6-8
+  2. sp-writing-plans vs our Outline tool (duplication)
+  3. sp-using-superpowers aggressive triggering vs existing system prompt gate
+  4. sp-using-git-worktrees file pollution in /home/z/my-project/
+  5. sp-subagent-driven-development token cost on non-coding tasks
+- Tiered all 14 skills by applicability:
+  - Tier 1 (active use): systematic-debugging, verification-before-completion,
+    test-driven-development (code only), writing-skills
+  - Tier 2 (targeted use): brainstorming (adapted), writing-plans (code projects),
+    subagent-driven-development, dispatching-parallel-agents, receiving-code-review
+  - Tier 3 (ignore/rare): using-superpowers (no auto-inject hook), executing-plans
+    (redundant), finishing-a-development-branch (not our env), using-git-worktrees
+    (caveats in Z.ai sandbox)
+- Resolved philosophical question: "true Superpowers or intercepted-by-ZCode?"
+  Answer: intercepted (adapted to ZCode native style) is correct, because:
+  - Target model is GLM not Claude (engineered, not taste)
+  - ZCode has existing gate-process (AskUserQuestion, Outline, Skill, Complete)
+  - Official skill-creator explicitly opposes Obra-style enforcement
+  - No parallel evaluation subagents infrastructure available
+- Documented findings in /home/z/my-project/docs/superpowers-zai-analysis.md
+  (9 sections: what's installed, content overview, tier assessment, conflicts,
+  philosophical comparison, structural formula for own skills, plan for first
+  4 own skills, 7 open questions, one-line summary)
+
+Stage Summary:
+- Superpowers-Z.ai installed as submodule + 14 sp-* skills in skills/
+- Full analysis written to docs/superpowers-zai-analysis.md (worknote for further Q&A)
+- Conclusion: keep Superpowers as methodology reference, write own skills in ZCode
+  native style (skill-creator aesthetic), not Obra/Superpowers style
+- Plan: pilot with zai-debugging (4-phase from sp-systematic-debugging, rewritten
+  in ZCode style), then zai-verify-before-claim, zai-skill-authoring,
+  zai-document-generation
+- 7 open questions for user review before proceeding (in §8 of analysis doc)
+
+---
+
+Task ID: sandbox-docs-analysis-2026-06-18
+Agent: main
+Task: Analyze Z.ai Sandbox Documentation zip — assess applicability to our work
+
+Work Log:
+- Unpacked Z.ai Sandbox Documentation.zip to /tmp/sandbox-docs/ (7 files, identical
+  to existing upload/Z.ai-Sandbox-*.md — diff confirmed identical)
+- Read all 7 files in full:
+  - Z.ai-Sandbox-Guide.md (937 lines, 17 sections — Next.js + bun + Prisma + Preview Panel)
+  - Z.ai-Sandbox-Guide-Hooks.md (1011 lines — React hooks cookbook + z-ai-web-dev-sdk API routes)
+  - Z.ai-Sandbox-Guide_commands_reference.md (679 lines preview, 1321 Linux commands catalog)
+  - Z.ai-Sandbox-Migration Guide.md (223 lines — Next.js/Vercel migration with safety checks)
+  - Z.ai-Sandbox-Super-Z-Subagents-Education.md (240 lines — Super Z + subagents architecture)
+  - RELATIONS.md (47 lines — PlantUML diagram of doc relationships + contradictions table)
+  - verify.sh (202 lines — 11 groups of checks for sandbox state)
+- Checked current sandbox state: NO .zscripts/, NO src/app/, NO next.config.ts
+  → current session is docs/methodology, NOT fullstack web-dev
+- Identified 3 internal contradictions (per RELATIONS.md):
+  1. npm vs bun (Guide says bun, Migration Guide says npm)
+  2. API routes (Guide forbids, Hooks cookbook creates /api/ai/*)
+  3. allowedDevOrigins (Guide requires, init-fullstack template lacks)
+- Identified 1 stale doc: Subagents-Education (March 2025) contradicts skill-creator
+  on progressive disclosure vs single-file skills
+- Wrote analysis to docs/sandbox-docs-analysis.md (10 sections, ~6KB):
+  - File-by-file assessment (needed / not needed / where to store)
+  - Per-scenario applicability matrix
+  - Specific recommendation: docs/sandbox/ + 3 short wrapper-skills
+  - 5 open questions for user
+
+Stage Summary:
+- Conclusion: package needed as reference documentation for fullstack web-dev in Z.ai
+  sandbox (especially Guide, Hooks, Migration, Subagents-Education, verify.sh)
+- BUT should NOT be installed as skills in current form — too large (47K for
+  commands_reference alone), partially stale, contradicts skill-creator style
+- Recommendation: unpack to docs/sandbox/, write 3 short wrapper-skills
+  (zai-fullstack-init, zai-sandbox-migration, zai-subagents-architecture) that
+  reference the docs on demand
+- For current docs session: only Subagents-Education.md + RELATIONS.md give
+  immediate value (architectural understanding); rest is for future fullstack work
+- 5 open questions for user (in §9 of analysis doc) before proceeding
+
+---
+
+Task ID: extract-pro-skilli-and-sandbox-triage-2026-06-18
+Agent: main
+Task: Extract all valuable content from "Про скилы" package into existing md
+infrastructure (no new docs in /docs/), and make a final keep/drop decision
+on Z.ai Sandbox Documentation
+
+Work Log:
+- Read all 9 files in "upload/Про скилы unpacked/" to identify extractable value
+- Read existing SESSION_NOTES.md (sections 1-8 + Change History) and
+  DECISIONS_LOG.md (D-001..D-010, O-001..O-007) to understand injection points
+- Created `Z-ai-platform/scripts/fix-unicode-compliance.js` (300+ lines):
+  - Extracted canonical emoji regex from "Skill assembler.txt" §6.1
+    (U+1F000-1FFFF, U+2600-27BF, U+FE00-FEFF, U+1F900-1F9FF, U+2702-27B0)
+  - Extracted final sanitization regex (ASCII + Cyrillic only)
+  - Added context-aware targeted fixers: em-dash -> "--", en-dash -> "-",
+    smart quotes -> straight, box-drawing -> ASCII tree equivalents
+  - CLI: --apply, --path, report-only mode
+  - Tested on standards/: 727 violations in 9 files (25 emoji, 135 em-dash,
+    27 en-dash, 0 smart-quotes, 540 box-drawing) -- numbers match prior scan
+- Appended 3 new sections to SESSION_NOTES.md:
+  - §9 "Sandbox persistence model (mount points)" -- extracted from
+    "Архитектура хранения skills в песочнице.md". Documents the 4 mount points
+    (OSS / PolarFS / overlay / tmpfs), the startup sequence, the disposability
+    of /home/z/my-project/skills/, the name-collision risk, and the install
+    procedure for Z-ai-skills. Closes O-006 and O-007.
+  - §10 "Z.ai Sandbox Documentation -- keep / drop decision" -- final triage
+    matrix for the 7 sandbox docs. Decision: KEEP 6, DROP 1
+    (commands_reference.md, 47K, redundant with agent's Linux knowledge).
+    Records the 3 internal contradictions (npm vs bun, API routes,
+    allowedDevOrigins) and the session-type applicability matrix.
+  - §11 "Ready-to-use Unicode regex filters" -- documents the two canonical
+    regexes from upstream MARKDOWN_STANDARD.md with usage warnings, points
+    to scripts/fix-unicode-compliance.js for the implementation
+- Appended 7 new entries to DECISIONS_LOG.md:
+  - O-008: MAS "Skill & Standard Factory" roadmap (5 agents, 3 phases, we are at Phase 1)
+  - O-009: Standard typology TECHNICAL/MANAGEMENT/COMPLIANCE/GUIDANCE (proposed for STD-META-001 v2.1)
+  - O-010: R1-R18 recommendations triage -- 3 critical (R1/R2/R5), 4 high, 3 medium, 3 standards-specific, 5 rejected as N/A
+  - O-011: 88-skill inventory vs our 35-skill catalog -- gap is healthy (delta = Z.ai official + 3P)
+  - O-012: ui-clarity_sts 6-phase UI redesign methodology -- defer adoption, ID collision (ZAI-STS-007 taken by workflow-discipline_sts), use ZAI-STS-008 when needed
+  - O-013: Reserve MAS agent IDs ZAI-ORCH-001, ZAI-META-003/004/005, ZAI-CORE-001. Avoid ZAI-STD-001 to keep STD-* prefix exclusive to standards.
+  - O-014: Z.ai Sandbox Documentation final triage -- DECIDED (keep 6/7, drop commands_reference, do not package as skills, write 3 wrapper-skills later)
+- Marked O-006 and O-007 as RESOLVED in the Index (they are now answered in SESSION_NOTES §9)
+- Updated Change History in both SESSION_NOTES.md and DECISIONS_LOG.md
+- Verified the fix-unicode-compliance.js script works in report-only mode
+
+Stage Summary:
+- Extraction complete: 9 source files -> 1 script + 3 new SESSION_NOTES sections + 7 new DECISIONS_LOG entries
+- No new docs files created in /docs/ (per user instruction "без явной задачи никаких DOCS не создавать")
+- Z.ai Sandbox Documentation triage DECIDED: keep 6 of 7 files in upload/, drop commands_reference.md from active use, do not package as skills
+- "Про скилы" package source files preserved in upload/ (not deleted) because O-008 (MAS roadmap) and O-013 (ID reservation) still reference them
+- Open items for maintainer: confirm O-008 (adopt MAS roadmap), O-009 (add type: field to standards), O-010 (R1/R2/R5 -> STD-SKILL-001 v1.1), O-013 (reserve MAS IDs)
+- Next session can resume by: reading SESSION_NOTES §9-11 + DECISIONS_LOG O-008..O-014, running `node scripts/fix-unicode-compliance.js --path standards/` to verify the 727-violation baseline

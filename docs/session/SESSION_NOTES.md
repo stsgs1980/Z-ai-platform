@@ -7,7 +7,7 @@
 > reusable knowledge for future sessions.
 >
 > Location: `Z-ai-platform/docs/session/SESSION_NOTES.md`
-> Last Updated: 2026-06-17
+> Last Updated: 2026-06-18
 
 ---
 
@@ -21,6 +21,9 @@
 6. [Available standards inventory (upload/)](#6-available-standards-inventory-upload)
 7. [Local workspace persistence](#7-local-workspace-persistence)
 8. [Lessons that became decisions](#8-lessons-that-became-decisions)
+9. [Sandbox persistence model (mount points)](#9-sandbox-persistence-model-mount-points)
+10. [Z.ai Sandbox Documentation — keep / drop decision](#10-zai-sandbox-documentation--keep--drop-decision)
+11. [Ready-to-use Unicode regex filters](#11-ready-to-use-unicode-regex-filters)
 
 ---
 
@@ -447,8 +450,189 @@ decisions. See `DECISIONS_LOG.md` for the formal version.
 
 ---
 
+## 9. Sandbox persistence model (mount points)
+
+**Source:** package "Про скилы" (`Архитектура хранения skills в песочнице.md`).
+Extracted 2026-06-18. Closes O-006 (workspace persistence) and
+O-007 (consumer onboarding).
+
+### 9.1. Mount map (what survives a session restart)
+
+| Path | Filesystem | Persistent? | Contents |
+|---|---|---|---|
+| `/home/official_skills/*.zip` | fuse.ossfs (read-only) | YES (Z.ai managed) | 69 official Z.ai skill zips |
+| `/home/user_skills/*.zip` | PolarFS (read-write) | YES (yours) | ~17 user-uploaded skill zips |
+| `/home/z/my-project/upload/` | tmpfs + ossfs rw | YES (OSS-backed) | Files uploaded via the chat UI |
+| `/home/z/my-project/skills/` | local overlay FS | **NO** (rebuilt each start) | Disposable runtime view of extracted skills |
+| `/tmp/my-project/` | PolarFS (read-write) | YES | `.initial_snapshot.json` with file timestamps |
+| `~/.git-credentials` | local FS | YES (unless actively cleared) | Git PAT storage |
+| GitHub repos | external | YES | 4-repo split (Z-ai-platform + submodules) |
+
+### 9.2. Session startup sequence
+
+1. Sandbox mounts `/home/official_skills/` (read-only OSS).
+2. Sandbox mounts `/home/user_skills/` (PolarFS, read-write).
+3. Sandbox mounts `/tmp/my-project/` (PolarFS, with `.initial_snapshot.json`).
+4. `extract-official-skills.sh` runs: `unzip -qq -o <zip> -d /home/z/my-project/skills/`
+   with `-o` (force overwrite). The `default:` stage in `stages.yaml` lists
+   ~10 always-extracted skills (skill-creator, docx, pdf, pptx, ...).
+5. Presumably the same script extracts user_skills/*.zip into the same target.
+6. `.initial_snapshot.json` is read; project files listed there are restored
+   by timestamp.
+
+### 9.3. Critical implications for our 4-repo architecture
+
+1. **`/home/z/my-project/skills/` is disposable.** Anything placed there
+   directly is wiped on the next session start. This is not a bug, it is
+   the sandbox guaranteeing official skills are always current.
+
+2. **To survive between sessions, a user-authored skill must be either:**
+   - Packaged as `.zip` and placed in `/home/user_skills/` (sandbox auto-extracts), OR
+   - Stored in a git repo (e.g. `Z-ai-skills`) and cloned on demand, OR
+   - Placed in `/tmp/my-project/` (PolarFS, but size-limited).
+
+3. **Name collision is a real risk.** Z.ai's official `skill-creator.zip`
+   and a user-authored `skill-creator.zip` would both extract to the same
+   path `/home/z/my-project/skills/skill-creator/`. The last writer wins.
+   Currently Z.ai wins because the container extracts its own zips last.
+   **Mitigation:** user-authored skills should use distinct names
+   (e.g. `toolkit-skill-creator`, not `skill-creator`).
+
+4. **ZAI-* IDs are source-layer only.** The runtime sandbox addresses
+   skills by their `name:` field (from YAML frontmatter), not by ID.
+   `verify-id-graph.js` validates the source repo, not the runtime.
+   `MIGRATIONS.md` in `Z-ai-skills` should map `ZAI-XXX-NNN <-> runtime name:`
+   as the bridge between the two layers.
+
+5. **Recommended install procedure for `Z-ai-skills`:**
+   - At session start, after official extraction runs, clone `Z-ai-skills`
+     and copy needed skills into `/home/z/my-project/skills/`.
+   - Do NOT attempt to write into `/home/official_skills/` (no permissions).
+   - Do NOT rely on `/home/z/my-project/skills/<name>/` preserving edits
+     across sessions.
+
+### 9.4. Action items captured as open questions
+
+- O-006 (workspace persistence strategy) -> resolved by §9.1 + §9.3 above.
+- O-007 (consumer onboarding) -> resolved by §9.3 item 5 (install procedure).
+- O-008 (MAS roadmap) -> see DECISIONS_LOG.md, we are at Phase 1 (monolith).
+- New: O-013 (reserve MAS agent IDs) -> see DECISIONS_LOG.md.
+
+---
+
+## 10. Z.ai Sandbox Documentation -- keep / drop decision
+
+**Source:** `Z.ai Sandbox Documentation.zip` (7 files in `upload/`).
+Analyzed in `docs/sandbox-docs-analysis.md` (2026-06-18). This section
+records the final triage decision so future sessions do not re-analyze.
+
+### 10.1. Decision matrix
+
+| File | Size | Decision | Rationale |
+|---|---|---|---|
+| `Z.ai-Sandbox-Guide.md` | 24K | **KEEP** in `upload/` | Only known systematic doc of sandbox internals (idle timeout, allowedDevOrigins, port 81 proxy). Needed for fullstack sessions. |
+| `Z.ai-Sandbox-Guide-Hooks.md` | 25K | **KEEP** in `upload/` | React hooks cookbook + z-ai-web-dev-sdk API routes. Copy-paste ready. Needed for AI-integrated fullstack sessions. |
+| `Z.ai-Sandbox-Migration Guide.md` | 9.8K | **KEEP**, needs update | Migration procedure between sandbox sessions. STALE: uses `npm install --legacy-peer-deps` instead of `bun install`. Must be patched before next use. |
+| `Z.ai-Sandbox-Super-Z-Subagents-Education.md` | 10K | **KEEP** | Architectural primer for Super Z + subagents. Required reading for understanding our own environment. STALE on one point: contradicts skill-creator on progressive disclosure (Subagents-Education is from March 2025, predates skill-creator). |
+| `Z.ai-Sandbox-Guide_commands_reference.md` | 47K | **DROP** from active use | 1321 Linux commands catalog. The agent already knows these. 47K is too large for skill context. Keep on disk as `upload/`-only reference if disk space allows; do not turn into a skill. |
+| `RELATIONS.md` | 2.5K | **KEEP** | PlantUML diagram of doc relationships + contradictions table. Acts as navigator. |
+| `verify.sh` | 8.5K | **KEEP**, needs refresh | 11-group sanity check script. STALE: check 1 (dev.sh manager) and check 6 (build command) assume npm, current stack uses bun. Should be patched before relying on it. |
+
+### 10.2. Overall decision
+
+**KEEP 6 of 7 files** in `upload/` as reference material. **DROP** only
+`commands_reference.md` from active use (it may remain on disk as an
+offline man-page substitute, but should not be turned into a skill or
+loaded into context).
+
+**Do NOT package any of these as skills in their current form.** They
+are too large (10K-47K each), pre-date the skill-creator progressive
+disclosure pattern, and partially contradict current Z.ai infrastructure
+(npm vs bun; Subagents-Education vs skill-creator). If skill wrappers
+are needed later, write three short ones (< 500 lines each, per
+skill-creator style) that reference the docs on demand:
+`zai-fullstack-init`, `zai-sandbox-migration`, `zai-subagents-architecture`.
+
+### 10.3. Internal contradictions to remember
+
+1. **npm vs bun:** Guide.md -> bun; Migration Guide -> npm.
+   Resolution: use bun (current stack). Migration Guide needs update.
+2. **API routes:** Guide.md -> "DO NOT create other routes"; Hooks.md ->
+   creates `/api/ai/chat`. Resolution: API routes for AI integrations
+   via `z-ai-web-dev-sdk` are normal and work; Guide is overly strict.
+3. **allowedDevOrigins:** Guide.md -> required; init-fullstack template
+   -> missing. Resolution: add manually after every `init-fullstack`
+   run (this is a documented Z.ai infra bug).
+
+### 10.4. Session-type applicability (when to consult which file)
+
+| Session type | Files to consult |
+|---|---|
+| Fullstack web-dev (Next.js + AI) | All 6 kept files |
+| Docs / PPT / PDF / charts | Subagents-Education.md + RELATIONS.md only |
+| Migration between sandboxes | Migration Guide.md + verify.sh |
+| Code-only without AI (Vercel deploy) | Guide.md + Migration Guide + verify.sh |
+| Learning Super Z architecture | Subagents-Education.md |
+
+---
+
+## 11. Ready-to-use Unicode regex filters
+
+**Source:** "Skill assembler.txt" (package "Про скилы"), section 6.1.
+These are the canonical upstream regexes from MARKDOWN_STANDARD.md.
+Extracted 2026-06-18 to close O-004 (fix Unicode in 118 MD files).
+
+### 11.1. Emoji pre-analysis cleanup
+
+```javascript
+// Removes emoji and Unicode pictographic symbols.
+// Ranges: U+1F000-1FFFF, U+2600-27BF, U+FE00-FEFF, U+1F900-1F9FF, U+2702-27B0
+const EMOJI_REGEX = /[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{2702}-\u{27B0}]/gu;
+text.replace(EMOJI_REGEX, '');
+```
+
+### 11.2. Final sanitization (DESTRUCTIVE)
+
+```javascript
+// Allows only printable ASCII (0x20-0x7E) + Cyrillic (U+0400-04FF).
+// WARNING: strips em-dash, en-dash, smart quotes, box-drawing, etc.
+// Do NOT apply blindly; use targeted fixers instead.
+const FINAL_SANITIZE_REGEX = /[^\x20-\x7E\u0400-\u04FF]/g;
+text.replace(FINAL_SANITIZE_REGEX, '');
+```
+
+### 11.3. Implemented as a script
+
+These regexes are wired into `Z-ai-platform/scripts/fix-unicode-compliance.js`
+with context-aware targeted fixers (em-dash -> `--`, en-dash -> `-`,
+smart quotes -> straight, box-drawing -> ASCII tree equivalents).
+
+Run report-only:
+```bash
+node scripts/fix-unicode-compliance.js --path standards/
+```
+
+Apply fixes:
+```bash
+node scripts/fix-unicode-compliance.js --apply --path standards/
+```
+
+### 11.4. Current scan baseline (2026-06-18)
+
+Running the script on `standards/` (9 MD files) reports 727 violations:
+- emoji: 25 (all in `STD-META-001-v2.0.md`)
+- em-dash: 135
+- en-dash: 27 (12 in `STD-META-001-v2.0.md` -- the meta-standard violates its own policy)
+- smart-quotes: 0
+- box-drawing: 540 (mostly ASCII tree diagrams in `STD-SKILL-001-v1.0.md`, 343 occurrences)
+
+Full 4-repo scan is pending O-003/O-004 decision in DECISIONS_LOG.md.
+
+---
+
 ## Change History
 
 | Date | Change |
 |---|---|
 | 2026-06-17 | Initial creation. Captured all lessons from the 2026-06-17 session: GitHub Actions gotchas (3), PAT gotchas (2), submodule gotchas (4), verifier gotchas (4), Unicode findings (3), standards inventory (20 files), workspace persistence (3 subsections). |
+| 2026-06-18 | Added §9 (sandbox persistence model from "Про скилы" package), §10 (final keep/drop decision for Z.ai Sandbox Documentation), §11 (ready-to-use Unicode regex filters with implementation pointer). Closes O-006, O-007; introduces O-008..O-014 in DECISIONS_LOG.md. |

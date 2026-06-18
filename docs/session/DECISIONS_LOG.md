@@ -6,7 +6,7 @@
 > affected artifacts can be promoted out of stub state.
 >
 > Location: `Z-ai-platform/docs/session/DECISIONS_LOG.md`
-> Last Updated: 2026-06-17
+> Last Updated: 2026-06-18
 
 ---
 
@@ -27,8 +27,15 @@
 - [O-003] Unicode compliance check in verifier — soft or hard — OPEN
 - [O-004] Fix Unicode violations in existing 118 MD files — when and how — OPEN
 - [O-005] Box-drawing ASCII tree diagrams in README — waiver or convert — OPEN
-- [O-006] Local workspace persistence strategy — OPEN
-- [O-007] Consumer-project onboarding flow — OPEN
+- [O-006] Local workspace persistence strategy — RESOLVED (see SESSION_NOTES §9)
+- [O-007] Consumer-project onboarding flow — RESOLVED (see SESSION_NOTES §9.3)
+- [O-008] MAS "Skill & Standard Factory" as long-term roadmap — OPEN
+- [O-009] Standard typology (TECHNICAL/MANAGEMENT/COMPLIANCE/GUIDANCE) — OPEN
+- [O-010] Recommendations R1-R18 from WIKI structure doc — OPEN
+- [O-011] Reconcile our 35-skill catalog with 88-skill inventory — OPEN
+- [O-012] Add ui-clarity_sts (6-phase UI redesign methodology) to catalog — OPEN
+- [O-013] Reserve MAS agent IDs (ZAI-ORCH-001, ZAI-META-003/004, ZAI-CORE-001) — OPEN
+- [O-014] Z.ai Sandbox Documentation final triage — DECIDED
 
 ---
 
@@ -517,8 +524,287 @@ platform is advertised as ready for external consumers.
 
 ---
 
+### O-008: MAS "Skill & Standard Factory" as long-term roadmap
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (long-term roadmap, not blocking)
+
+**Source:** `Архитектура полноценной агентной системы MAS для создания_валидации_поддержки жизненного цикла скиллов и стандартов.MD` (package "Про скилы").
+
+The source proposes a 5-agent Multi-Agent System for skill/standard lifecycle:
+
+| Agent | Role | Proposed ID | Safety level |
+|---|---|---|---|
+| Orchestrator | Routes requests, holds context, gatekeeper | `ZAI-ORCH-001` | L2 (User-approved) |
+| Skill Forge | Authors skills (knows 9 skill types) | `ZAI-META-003` | L1 (Sandboxed) |
+| Standardizer | Authors standards (TECH/MGMT/COMP/GUIDANCE) | `ZAI-STD-001` | L1 (Sandboxed) |
+| Guardian | QA + security auditor, read-only | `ZAI-META-004` | L0 (Read-only) |
+| Registry Manager | Single writer for `skill-registry.json` | `ZAI-CORE-001` | L2 (User-approved) |
+
+**Phased roadmap proposed by the source:**
+
+| Phase | Duration | Scope | Our status |
+|---|---|---|---|
+| Phase 1: Monolith | 1-2 days | One big SKILL.md with branching logic ("if skill then template A, if standard then template B, always self-check at end") | **WE ARE HERE** (skill-creator + verify-id-graph.js + verify-standards.js form a monolithic pipeline) |
+| Phase 2: Separation of duties | ~1 week | Extract Guardian as standalone script called via tool-calling | Partially done (`verify-standards.js` is L0 read-only), but not yet invoked through tool-calling |
+| Phase 3: Full MAS | ~1 month | All 5 agents, external coordination (LangGraph/AutoGen), needed at >100 skills + >20 standards | NOT STARTED (we have 35 skills + 6 standards) |
+
+**Decision points (not yet made):**
+
+1. Do we adopt this roadmap formally as the long-term evolution path?
+2. Should the source artifact (MAS MD + PlantUML sequence diagram) be preserved in `Z-ai-platform/docs/` as a reference, or only summarized in SESSION_NOTES?
+3. Phase 2 extraction: should `verify-id-graph.js` + `verify-standards.js` be moved to a dedicated `guardian/` subagent directory with explicit tool-calling interface?
+
+**Recommendation:** Adopt as roadmap. Mark Phase 1 complete (current state). Defer Phase 2/3 until skill count exceeds 50 (currently 35).
+
+**Source artifact preservation:** The PlantUML sequence diagram (`Архитектура полноценной агентной системы MAS plant uml.txt`) is the only known formalization of the 4-phase, 22-step skill-creation lifecycle. It should NOT be lost. Decision: keep the source files in `upload/Про скилы unpacked/` until O-013 (ID reservation) is resolved, then archive the extracted knowledge into the appropriate `Z-ai-skills/skills/<agent>/SKILL.md` files.
+
+---
+
+### O-009: Standard typology (TECHNICAL / MANAGEMENT / COMPLIANCE / GUIDANCE)
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (informational, may inform O-002)
+
+**Source:** `ЕДИНАЯ МНОГОУРОВНЕВАЯ СТРУКТУРА WIKI ...md` §5 (package "Про скилы").
+
+The source proposes a 4-type taxonomy for standards:
+
+| Type | What it covers | Required components |
+|---|---|---|
+| TECHNICAL | How to do (implementation) | Metric threshold, Code example, Linter/CI rule, Exception process |
+| MANAGEMENT | Who is responsible + what to do on failure | RACI matrix, Escalation path, SLA/SLO, Consequence ladder |
+| COMPLIANCE | Conformance to external requirements | External mapping, Evidence artifact, Control objective, Audit procedure |
+| GUIDANCE | Process, recommendation, best practice | (informal, no mandatory components) |
+
+**Current state of our 6 standards:**
+
+| ID | Title | Current type (implicit) | Should be |
+|---|---|---|---|
+| STD-META-001 | Standard ID System | TECHNICAL | TECHNICAL |
+| STD-ARCH-001 | Architecture & Repo Layout | TECHNICAL | TECHNICAL |
+| STD-SKILL-001 | Skill Catalog | TECHNICAL | TECHNICAL |
+| STD-ENV-001 | Reproducibility | TECHNICAL | TECHNICAL |
+| STD-ENV-002 | ZAI Integration | TECHNICAL | TECHNICAL |
+| STD-DOC-002 | Markdown Standard | TECHNICAL | TECHNICAL |
+
+All 6 of ours are TECHNICAL. The 20 upload/standards-v2/ files (O-002) are also predominantly TECHNICAL, with potential MANAGEMENT candidates in `GITHUB_STANDARD.md` (RACI for repo maintainers) and `SUBAGENT_STANDARD.md` (escalation paths).
+
+**Decision points:**
+
+1. Should we add a `type:` field to the standard YAML frontmatter? (currently absent)
+2. Should STD-META-001 §4 (the registry) gain a `type` column?
+3. Should we import the typology into STD-META-001 §2 (scope) as informative subsection?
+
+**Recommendation:** Add `type:` field to standard frontmatter in the next STD-META-001 revision (v2.1). Default to TECHNICAL. Add the 4-type table as §2.1 informative subsection. No hard enforcement initially — this is a tagging aid for O-002 import prioritization.
+
+---
+
+### O-010: Recommendations R1-R18 from WIKI structure doc
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (cataloged, individual recommendations need triage)
+
+**Source:** `ЕДИНАЯ МНОГОУРОВНЕВАЯ СТРУКТУРА WIKI ...md` §"РЕКОМЕНДАЦИИ" (package "Про скилы").
+
+18 recommendations proposed. Triage against our current state:
+
+#### Critical priority
+
+| # | Recommendation | Our status | Action |
+|---|---|---|---|
+| R1 | Add `verifiable_assertions` to all skills | NOT DONE. Not in STD-SKILL-001 v1.0 frontmatter schema | Add as optional field in STD-SKILL-001 v1.1 |
+| R2 | Add PII scanner to session-experience | NOT DONE. session-experience v4.0 has no PII filter | Add `scripts/pii-scanner.py` to session-experience assets |
+| R5 | Add `stop_condition` to all skills | NOT DONE. Not in STD-SKILL-001 v1.0 frontmatter schema | Add as optional field, required for Active skills |
+
+#### High priority
+
+| # | Recommendation | Our status | Action |
+|---|---|---|---|
+| R6 | Baseline comparison via agent-skills-eval | NOT DONE. No eval harness in our 4-repo split | Defer until Phase 2 (O-008) |
+| R8 | Add Metrics block (Before/After/Target) | PARTIAL. Some skills have it ad-hoc | Standardize in STD-SKILL-001 v1.1 |
+| R9 | Machine-readable registry (`registry.json`) | NOT DONE. INDEX.md is the only registry | Add `Z-ai-skills/registry.json` generated from INDEX.md |
+| R10 | Add skill validation script | DONE. `verify-standards.js` covers this for standards; `verify-id-graph.js` covers cross-repo IDs | Extend `verify-standards.js` to also lint skills |
+
+#### Medium priority
+
+| # | Recommendation | Our status | Action |
+|---|---|---|---|
+| R11 | Add Changelog to skills | PARTIAL. Some skills have it (humanizer v2.1.1) | Standardize in STD-SKILL-001 v1.1 |
+| R12 | Add `deprecated` + `replaced_by` fields | DONE. `MIGRATIONS.md` covers lifecycle; STD-META-001 v2.0 §7 defines status | Already covered |
+| R13 | Add pre-commit hook | DONE. `install-hooks.sh` exists in `Z-ai-platform/` | Already covered |
+
+#### Specific to standards
+
+| # | Recommendation | Our status | Action |
+|---|---|---|---|
+| R16 | Rewrite STD-FE-001 away from "sections have no state" | N/A. STD-FE-001 not yet imported (O-002) | Consider during import |
+| R17 | Demather UNICODE_POLICY for AI chat/logs | REJECTED. UNICODE_POLICY is intentionally strict | Do not implement |
+| R18 | Add MIGRATION_GUIDE.md with codemods and grace period | PARTIAL. `MIGRATIONS.md` covers grace period but no codemods | Add codemod examples to MIGRATIONS.md |
+
+#### Not applicable / rejected
+
+| # | Recommendation | Reason |
+|---|---|---|
+| R3 | Deduplication via embeddings in session-experience | Over-engineering for current scale (35 skills, <100 sessions) |
+| R4 | Switch MUST auto-activate to SHOULD + confirm-first in anti-monolith | anti-monolith already auto-activates with announcement; current behavior is correct |
+| R7 | Reduce phi-layout to top-6 patterns | phi-layout is a third-party skill, not ours to refactor |
+| R14 | Browser fallback for subgrid in phi-layout | Same as R7 |
+| R15 | Reduce cognitive formulas to top-10 in prompt-engineering | Same as R7 |
+
+**Decision needed from:** maintainer (stsgs1980). The R1/R2/R5 critical items should be folded into STD-SKILL-001 v1.1 revision.
+
+---
+
+### O-011: Reconcile our 35-skill catalog with 88-skill inventory
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (informational, gap analysis)
+
+**Source:** `skills-inventory.md` (package "Про скилы"), dated 2026-05-23.
+
+The source catalogs 88 skills across 21 categories from `/home/z/my-project/skills/` (the disposable runtime view, see SESSION_NOTES §9). Our `Z-ai-skills/skills/INDEX.md` lists 35 skills (24 with ZAI-* IDs, 11 without).
+
+**Gap explanation (not a defect):**
+
+| Set | Count | What it represents |
+|---|---|---|
+| Source inventory (88) | 88 | All skills visible at runtime (Z.ai official + user-uploaded + third-party) |
+| Our catalog (35) | 35 | Only skills we own and version-control in `Z-ai-skills` git repo |
+| Delta (53) | 53 | Z.ai official skills + third-party skills we use but don't own |
+
+The delta is expected and healthy. Our 35 includes user-authored skills (ZAI-STS-*, ZAI-META-*, ZAI-DEV-*, etc.) that the source inventory classifies as `[STS]` or `!`. The source's `[S]` (system) and `[3P]` (third-party) entries are not in our catalog by design.
+
+**Useful patterns from the source to adopt:**
+
+1. The 5-axis skill typology (interaction, role, I/O structure, autonomy level, activation) — see O-009 for analogous standard typology. Could enrich STD-SKILL-001.
+2. The `[S]/[STS]/[3P]/[!]/[?]` ownership tag system — useful for our INDEX.md.
+3. The category-based grouping (21 categories) — our INDEX.md uses domain-prefix grouping (ARCH, DEV, FS, MEM, META, QA, SESSION, STS) which is flatter but mechanically verifiable.
+
+**Decision points:**
+
+1. Should we add an `ownership:` field (S/STS/3P) to skill frontmatter?
+2. Should we adopt any of the 5-axis typology dimensions as optional metadata?
+3. Should we mirror the source's 21-category structure as a secondary view in INDEX.md?
+
+**Recommendation:** Defer until skill count exceeds 50. Current 35 is manageable in the flat domain-prefix view.
+
+---
+
+### O-012: Add ui-clarity_sts (6-phase UI redesign methodology) to catalog
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (skill adoption decision)
+
+**Source:** `ui-clarity_sts.txt` (package "Про скилы").
+
+The source describes a skill `ui-clarity_sts` (proposed ID `ZAI-STS-007`) with a 6-phase methodology for transforming "broken UI" into a coherent design system:
+
+| Phase | Action | Output |
+|---|---|---|
+| 1. Audit | Catalog all inconsistencies (typography, color, spacing, themes) | Comparison table |
+| 2. Propose | Design token system (typography + color + spacing) | Token spec |
+| 3. Wireframe | Generate HTML before/after presentation | `wireframe-design-system.html` |
+| 4. Implement | Apply tokens to all components | Clean code without hardcode |
+| 5. Verify | Test both themes, linter, compile | All passing |
+| 6. Document | Write worklog migration guide | Worklog entry |
+
+Key principles: semantic tokens instead of hardcode, intent-based naming, wireframe-first (show user before touching code), replacement table for typical patterns.
+
+**Current state in our catalog:** `ZAI-STS-007` is already assigned to `workflow-discipline_sts` (see `INDEX.md` line 49). The proposed ID in the source collides with our existing assignment.
+
+**Decision points:**
+
+1. Should we adopt the 6-phase methodology as a new skill?
+2. If yes, what ID? Options:
+   - (a) `ZAI-STS-008` (next free STS slot) -- preferred
+   - (b) `ZAI-UI-001` (new UI domain) -- cleaner semantically but adds a domain
+   - (c) Skip the ID, keep as a reference document in `Z-ai-skills/docs/`
+3. Should the wireframe template (110KB HTML) be committed to git, or referenced externally?
+
+**Recommendation:** Defer adoption. The methodology is valuable but we have no active UI redesign project. When the first such project arises, create `ZAI-STS-008 ui-clarity_sts` with the 6-phase methodology, citing the source package. Do NOT take the proposed `ZAI-STS-007` ID — it is taken.
+
+---
+
+### O-013: Reserve MAS agent IDs
+
+**Date raised:** 2026-06-18
+**Status:** OPEN (ID registry hygiene)
+
+**Source:** `Архитектура полноценной агентной системы MAS ...MD` (package "Про скилы"), §2.
+
+The source proposes 5 agent IDs for the MAS architecture (see O-008). Triage against our current registry:
+
+| Proposed ID | Source role | Currently in our INDEX.md? | Conflict? |
+|---|---|---|---|
+| `ZAI-ORCH-001` | Orchestrator | NO | NO -- free to reserve |
+| `ZAI-META-003` | Skill Forge | NO | NO -- free to reserve |
+| `ZAI-STD-001` | Standardizer | NO (ZAI-STD-* prefix unused) | NO -- but prefix `STD` may collide with standards (STD-ARCH-001 etc.). Recommend reserving `ZAI-META-005` instead to keep `STD` prefix exclusive to standards |
+| `ZAI-META-004` | Guardian | NO | NO -- free to reserve |
+| `ZAI-CORE-001` | Registry Manager | NO | NO -- free to reserve (but `CORE` is a new domain) |
+
+**Decision points:**
+
+1. Reserve all 5 IDs now (placeholder entries in INDEX.md with `status: reserved`)?
+2. Rename `ZAI-STD-001` to `ZAI-META-005` to avoid STD-prefix confusion?
+3. Add `CORE` as a new ZAI domain, or move Registry Manager under `META`?
+4. Should `ZAI-ORCH-001` be reserved for the Super Z orchestrator itself (the platform we run on), or only for our future Orchestrator agent?
+
+**Recommendation:**
+
+- Reserve `ZAI-ORCH-001`, `ZAI-META-003`, `ZAI-META-004`, `ZAI-CORE-001` as placeholder entries with `status: reserved` and `note: "MAS Phase 3, see O-008"`.
+- Do NOT reserve `ZAI-STD-001`. Use `ZAI-META-005` for Standardizer instead. The `STD-*` prefix must remain exclusive to standards (STD-ARCH-001, STD-META-001, etc.) to avoid ambiguity in `verify-id-graph.js`.
+- Add `CORE` as a new ZAI domain (currently: ARCH, DEV, FS, MEM, META, QA, SESSION, STS).
+
+**Decision needed from:** maintainer (stsgs1980)
+
+---
+
+### O-014: Z.ai Sandbox Documentation final triage -- DECIDED
+
+**Date raised:** 2026-06-18
+**Date decided:** 2026-06-18
+**Status:** DECIDED
+
+**Source:** `Z.ai Sandbox Documentation.zip` (7 files in `upload/`).
+Full analysis: `docs/sandbox-docs-analysis.md` (2026-06-18).
+Final decision recorded in `SESSION_NOTES.md` §10.
+
+**Decision:**
+
+KEEP 6 of 7 files in `upload/` as reference material:
+
+| File | Verdict | Notes |
+|---|---|---|
+| `Z.ai-Sandbox-Guide.md` | KEEP | Reference for fullstack sessions |
+| `Z.ai-Sandbox-Guide-Hooks.md` | KEEP | React hooks + z-ai-web-dev-sdk API routes cookbook |
+| `Z.ai-Sandbox-Migration Guide.md` | KEEP, needs update | STALE: replace `npm install --legacy-peer-deps` -> `bun install` |
+| `Z.ai-Sandbox-Super-Z-Subagents-Education.md` | KEEP | Architectural primer; partially stale on progressive disclosure |
+| `RELATIONS.md` | KEEP | Navigator + contradictions table |
+| `verify.sh` | KEEP, needs refresh | STALE: checks 1 and 6 assume npm |
+| `Z.ai-Sandbox-Guide_commands_reference.md` | DROP from active use | 47K, agent already knows these commands. May remain on disk as offline reference. |
+
+**Rationale:**
+
+1. The 6 kept files are the only known systematic documentation of Z.ai sandbox internals (idle timeout, allowedDevOrigins, port 81 proxy, migration procedure, subagent architecture, verify harness).
+2. None should be packaged as skills in their current form -- too large (10K-47K each), pre-date skill-creator progressive disclosure, partially contradict current Z.ai infrastructure.
+3. The dropped `commands_reference.md` is redundant with the agent's existing Linux knowledge; loading 47K into context violates skill-creator's "lean, < 500 lines" principle.
+4. If skill wrappers are needed later, write three short ones (< 500 lines each) that reference the docs on demand: `zai-fullstack-init`, `zai-sandbox-migration`, `zai-subagents-architecture`.
+
+**Action items:**
+
+- [ ] Patch `Z.ai-Sandbox-Migration Guide.md`: replace `npm install --legacy-peer-deps` -> `bun install`, `npm run build` -> `bun run build`.
+- [ ] Patch `verify.sh` checks 1 and 6: accept `bun` as primary, `npm` as fallback.
+- [ ] When fullstack session begins, write `zai-fullstack-init` skill wrapper.
+- [ ] When migration between sandboxes is needed, write `zai-sandbox-migration` skill wrapper.
+
+**No deletion of source files at this time.** The `upload/Z.ai-Sandbox-*.md` files and the `upload/Z.ai Sandbox Documentation.zip` are preserved as canonical reference.
+
+---
+
 ## Change History
 
 | Date | Change |
 |---|---|
 | 2026-06-17 | Initial creation. Added D-001 through D-010 (all decided in this session) and O-001 through O-007 (open questions identified). |
+| 2026-06-18 | Resolved O-006 and O-007 (sandbox persistence + consumer onboarding) via extraction from "Про скилы" package -- see SESSION_NOTES §9. Added O-008 (MAS roadmap), O-009 (standard typology), O-010 (R1-R18 recommendations triage), O-011 (88 vs 35 skill reconciliation), O-012 (ui-clarity_sts adoption), O-013 (MAS agent ID reservation), O-014 (Sandbox Documentation final triage -- DECIDED: keep 6/7, drop commands_reference). |
