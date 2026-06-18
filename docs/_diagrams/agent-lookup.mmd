@@ -1,0 +1,48 @@
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#dbeafe',
+  'primaryTextColor':'#1e3a8a',
+  'primaryBorderColor':'#1e40af',
+  'actorBkg':'#dcfce7',
+  'actorTextColor':'#14532d',
+  'actorBorder':'#166534',
+  'signalColor':'#666666',
+  'signalTextColor':'#374151',
+  'fontFamily':'Helvetica'
+}}}%%
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant A as Agent
+    participant SL as Skill Loader<br/>(/home/z/my-project/skills/)
+    participant IG as ID Graph<br/>(verify-id-graph.js)
+    participant S as Standard<br/>(standards/*.md)
+    participant R as Rule<br/>(guard/rules/*.md)
+
+    Note over U,A: User asks Agent to perform a task
+    U->>A: "Implement feature X"
+
+    Note over A: Agent consults workflow-discipline<br/>skill (RULE-MONOLITH-001)<br/>before acting
+    A->>SL: Skill(command="workflow-discipline_sts")
+    SL-->>A: SKILL.md loaded
+
+    Note over A: Skill says: check standards<br/>before writing code
+    A->>IG: query Related: edges for STD-FE-001
+
+    Note over IG: ID graph has 60 nodes<br/>and 111 edges<br/>(G01-G15 invariant: all resolve)
+    IG-->>A: Related: STD-ARCH-001, STD-A11Y-001<br/>Aligned_with: ZAI-FS-001
+
+    A->>S: open STD-FE-001 (frontend)
+    S-->>A: §2 anti-monolith thresholds<br/>§11 design system delegation
+
+    Note over A: FE-001 §11 delegates to<br/>DESIGN-001 — Agent must follow<br/>the Related: edge
+    A->>S: open STD-DESIGN-001
+    S-->>A: §4 color tokens<br/>§11 animation tokens
+
+    Note over A: FE-001 §11 references<br/>RULE-MONOLITH-002 (size cap)
+    A->>R: open RULE-MONOLITH-002
+    R-->>A: hard limit 250 lines/file
+
+    Note over A: Now Agent has full context<br/>across 3 layers + 1 rule
+    A->>A: write code compliant<br/>with all 4 sources
+
+    A-->>U: implementation + citation<br/>of STD-FE-001 §2.1, RULE-MONOLITH-002

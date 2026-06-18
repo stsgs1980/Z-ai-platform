@@ -85,6 +85,51 @@ jobs:
           echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
           exit $exit_code
 
+      # -------------------------------------------------------------------
+      # Graph generation — runs ALWAYS (even if verifiers failed, so the
+      # graph artifact is available for debugging the failure).
+      # Output: id-graph.svg, id-graph.png, id-graph.dot (uploaded as
+      # artifact, 30-day retention — longer than the failure-only 7 days
+      # because the graph is useful for review even on green builds).
+      # -------------------------------------------------------------------
+      - name: Install graphviz
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq graphviz
+          dot -V
+
+      - name: Install mermaid CLI + Chrome
+        run: |
+          # Mermaid CLI uses puppeteer, which needs a Chrome binary.
+          # Install both globally so render-diagrams.sh can find them.
+          npm install -g @mermaid-js/mermaid-cli
+          # puppeteer postinstall normally fetches Chrome, but if it skipped,
+          # fetch explicitly:
+          npx -y puppeteer browsers install chrome-headless-shell || true
+          mmdc --version
+
+      - name: Generate ID dependency graph
+        id: graph
+        run: |
+          mkdir -p docs/_graph
+          bash standards/scripts/graph-deps.sh --out=docs/_graph
+          ls -la docs/_graph/
+
+      - name: Generate Mermaid process diagrams
+        id: diagrams
+        run: |
+          bash standards/scripts/render-diagrams.sh
+          ls -la docs/_diagrams/
+
+      - name: Upload graph artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: id-graph
+          path: |
+            docs/_graph/
+            docs/_diagrams/
+          retention-days: 30
+
       - name: Upload verifier output (on failure)
         if: failure()
         uses: actions/upload-artifact@v4

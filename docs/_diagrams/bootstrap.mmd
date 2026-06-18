@@ -1,0 +1,62 @@
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#dbeafe',
+  'primaryTextColor':'#1e3a8a',
+  'primaryBorderColor':'#1e40af',
+  'actorBkg':'#dcfce7',
+  'actorTextColor':'#14532d',
+  'actorBorder':'#166534',
+  'signalColor':'#666666',
+  'signalTextColor':'#374151',
+  'fontFamily':'Helvetica'
+}}}%%
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant SB as Sandbox<br/>(Z.ai container)
+    participant BS as bootstrap.sh
+    participant Git as git
+    participant SM as Submodules<br/>(standards + guard + skills)
+    participant FS as Filesystem<br/>(/home/z/my-project/)
+    participant SK as Skill registry<br/>(/home/z/my-project/skills/)
+
+    Note over U,SB: Session start: fresh sandbox,<br/>no custom skills loaded
+
+    U->>SB: bash <(curl bootstrap.sh)
+    SB->>BS: invoke bootstrap.sh
+
+    Note over BS: Step 1: ensure Z-ai-platform<br/>is present
+    alt Not yet cloned
+        BS->>Git: clone --recurse-submodules<br/>github.com/stsgs1980/Z-ai-platform
+        Git->>FS: write /home/z/my-project/Z-ai-platform/
+    else Already cloned
+        BS->>Git: pull --recurse-submodules --ff-only
+        Git->>FS: update existing checkout
+    end
+
+    Note over BS: Step 2: symlink skills<br/>into sandbox-visible location
+    BS->>FS: mkdir -p /home/z/my-project/skills/
+
+    loop for each skill in Z-ai-platform/skills/skills/*/
+        BS->>FS: check if symlink exists
+        alt Symlink missing
+            BS->>FS: ln -s <skill_dir> <sandbox_skills>/<name>
+            Note right of FS: LINK <name>
+        else Symlink exists
+            BS->>FS: refresh symlink (rm + ln -s)
+            Note right of FS: updated
+        else Real dir conflict
+            BS->>FS: mv <name> <name>.sandbox-backup
+            BS->>FS: ln -s <skill_dir> <sandbox_skills>/<name>
+            Note right of FS: REPLACE<br/>(sandbox version backed up)
+        end
+    end
+
+    BS->>SB: print summary<br/>(Linked: N, Skipped: M)
+    SB-->>U: 35+ custom skills available<br/>via Skill(command="...")
+
+    Note over U: Now Agent can call<br/>any of the toolkit skills:<br/>skill-creator, gepetto,<br/>fullstack-dev, etc.
+
+    U->>SB: Skill(command="skill-creator")
+    SB->>SK: lookup symlink
+    SK-->>SB: /home/z/my-project/skills/skill-creator/SKILL.md
+    SB-->>U: skill loaded into context

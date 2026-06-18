@@ -1,0 +1,45 @@
+%%{init: {'theme':'base', 'themeVariables': {
+  'primaryColor':'#dbeafe',
+  'primaryTextColor':'#1e3a8a',
+  'primaryBorderColor':'#1e40af',
+  'lineColor':'#666666',
+  'fontFamily':'Helvetica'
+}}}%%
+flowchart TD
+    classDef action fill:#dbeafe,stroke:#1e40af,color:#1e3a8a,stroke-width:1.5px
+    classDef verify fill:#dcfce7,stroke:#166534,color:#14532d,stroke-width:1.5px
+    classDef artifact fill:#fef3c7,stroke:#92400e,color:#78350f,stroke-width:1.5px
+    classDef fail fill:#fee2e2,stroke:#991b1b,color:#7f1d1d,stroke-width:1.5px
+    classDef start fill:#e5e7eb,stroke:#4b5563,color:#1f2937,stroke-width:2px
+
+    Start([User pushes to main / opens PR]):::start
+    PreCommit{Local pre-commit hook}:::verify
+    VStd[verify-standards.js<br/>V04-V10]:::verify
+    VGraph[verify-id-graph.js<br/>G01-G15]:::verify
+
+    Start --> PreCommit
+    PreCommit -- commits touch .md/.js --> VStd
+    PreCommit -- platform repo only --> VGraph
+    VStd -- PASS --> VGraph
+    VStd -- FAIL --> Block1[BLOCK: commit rejected]:::fail
+    VGraph -- FAIL --> Block2[BLOCK: commit rejected]:::fail
+
+    Push([git push]):::start
+    VGraph -- PASS --> Push
+
+    Push --> CI[GitHub Actions workflow<br/>verify-id-graph.yml]:::action
+    CI --> Checkout[Checkout Z-ai-platform<br/>--recurse-submodules]:::action
+    Checkout --> Std2[verify-standards.js]:::verify
+    Std2 --> Graph2[verify-id-graph.js]:::verify
+
+    Graph2 -- HARD PASS --> InstallGv[Install graphviz]:::action
+    Graph2 -- HARD FAIL --> UploadFail[Upload verifier-output artifact<br/>7-day retention]:::artifact
+    UploadFail --> PRComment[Comment on PR<br/>with failing checks]:::fail
+
+    InstallGv --> GenGraph[graph-deps.sh<br/>--out=docs/_graph]:::action
+    GenGraph --> GenMermaid[render-diagrams.sh<br/>--out=docs/_diagrams]:::action
+    GenMermaid --> UploadGraph[Upload id-graph artifact<br/>30-day retention<br/>SVG + PNG + DOT]:::artifact
+    UploadGraph --> Done([Done]):::start
+
+    Nightly([Nightly 03:00 UTC<br/>06:00 Europe/Moscow]):::start
+    Nightly --> CI

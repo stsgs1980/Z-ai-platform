@@ -155,8 +155,13 @@ break references in another. See `standards/standards/STD-META-001-v2.0.md`
 The workflow:
 1. Checks out Z-ai-platform with `--recurse-submodules`
 2. Sets up Node.js 20
-3. Runs `node standards/scripts/verify-id-graph.js`
-4. On failure: uploads the verifier output as an artifact (7-day retention), posts a comment on the PR (if PR).
+3. Runs `node standards/scripts/verify-standards.js`
+4. Runs `node standards/scripts/verify-id-graph.js`
+5. Installs graphviz and runs `bash standards/scripts/graph-deps.sh`
+6. Uploads the rendered `id-graph.svg` + `id-graph.png` + `id-graph.dot` as a 30-day-retention artifact named **`id-graph`** (always — even on green builds, so the graph is available for review)
+7. On failure: uploads the verifier output as an artifact (7-day retention), posts a comment on the PR (if PR).
+
+The latest rendered graph can always be downloaded from the most recent successful workflow run on the Actions tab.
 
 ## Pre-commit hook
 
