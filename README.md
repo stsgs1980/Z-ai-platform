@@ -58,6 +58,31 @@ The 13/13 HARD PASS is enforced by:
 
 ## Quick start
 
+### In a fresh Z.ai sandbox session (your daily workflow)
+
+When you start a new sandbox session and want your custom skills back, run **one command**:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
+```
+
+This will:
+1. Clone `Z-ai-platform` (with all submodules) into `/home/z/my-project/Z-ai-platform/` if not already there.
+2. `git pull --recurse-submodules` if it is already there (gets latest skills).
+3. Symlink every skill from `Z-ai-platform/skills/skills/*` into `/home/z/my-project/skills/` so the sandbox can find them.
+4. Back up any sandbox-installed skill with the same name to `<name>.sandbox-backup/` (so your toolkit version always wins).
+5. Print a list of available custom skills at the end.
+
+After that, `Skill(command="skill-creator")` (and all 35+ of your toolkit skills) will load from your GitHub repo.
+
+> **If `curl` is unavailable in the sandbox**, run it manually in two steps:
+> ```bash
+> git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git /home/z/my-project/Z-ai-platform
+> bash /home/z/my-project/Z-ai-platform/bootstrap.sh
+> ```
+
+### First-time clone (for development / inspection)
+
 ```bash
 # Clone with submodules (one command)
 git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
