@@ -29,6 +29,22 @@ on:
 permissions:
   contents: read
 
+# Cancel in-progress runs of the same workflow when a new commit lands.
+# Without this, two pushes in quick succession (e.g. fix-up commit right
+# after the original) run in parallel — wasting runner minutes, especially
+# on cache-miss runs where each one downloads chrome-headless-shell (~7m).
+#
+# Behavior:
+#   - On push to main:     newer run cancels older in-progress run
+#   - On PR:               same — newer push to the same PR cancels older
+#   - On schedule/dispatch: runs standalone (no concurrent group to cancel)
+#
+# Note: cancelled runs are marked "cancelled", not "failure" — they do NOT
+# block PR merge or trigger failure notifications.
+concurrency:
+  group: verify-id-graph-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     name: verify-id-graph.js + verify-standards.js (all HARD PASS)
