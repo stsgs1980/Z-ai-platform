@@ -1495,3 +1495,215 @@ Stage Summary:
 - Hook fired on real commit (standards submodule) — both verifiers PASS.
 - All prior infrastructure-gap items remain CLOSED; this task was a
   content-level cleanup, not an infra fix.
+
+---
+Task ID: retire-dead-scripts-2026-06-18
+Agent: main (orchestrator)
+Task: Retire 4 dead scripts that are no longer used but still have
+ACTIVE references in live governance docs, creating a misleading
+impression that more verifiers exist than actually do.
+
+Dead scripts identified:
+  1. standards/scripts/verify-cascade.js
+     - Hard-codes path <repo>/upload/standards-v2/standards/ which
+       doesn't exist in the 4-repo split layout.
+     - One-shot "cascade L5-001/L5-002/L5-003 task" check from the
+       v1.0 release prep phase.
+     - Functionality fully covered by verify-standards.js V01-V10 +
+       verify-id-graph.js G01-G15.
+     - Listed as TOOL-VERIFY-003 ACTIVE in META-001 §4.15 —
+       misleading: implies a live verifier when it's a dead one-shot.
+
+  2. standards/scripts/cross-doc-consistency-check.js
+     - Hard-codes /home/z/my-project/_design/*.md paths (pre-split
+       design drafts).
+     - One-shot "Block 1.2 of v1.0 release" check.
+     - Functionality folded into verify-id-graph.js G02 (Related
+       edges resolve) + verify-standards.js V05 (version matches
+       STD-META-001 §4.x registry).
+
+  3. scripts/cross-validator-test.js
+     - Orchestrator harness that runs 4 verifiers in sequence.
+     - 2 of those 4 are scripts #1 and #2 above (dead). So this
+       harness is itself broken.
+     - Hard-codes SCRIPTS_DIR = '/home/z/my-project/scripts' (sandbox
+       path, won't work elsewhere).
+     - "Green build gate for v1.0 release" — historical.
+     - Replaced by .githooks/pre-commit (added in prior task) which
+       runs both live verifiers.
+
+  4. scripts/fix-unicode-compliance.js
+     - One-shot fixer for O-004 (118 MD files identified by the
+       2026-06-17 scan).
+     - Already applied. The policy is now continuously enforced by
+       verify-standards.js V04-V10 (Unicode checks).
+     - Useful as a recovery artifact if violations reappear in bulk,
+       but: (a) it hard-codes regex from "Skill assembler.txt"
+       which is itself a volatile source, and (b) the
+       verify-standards.js V-checks are the canonical enforcement
+       layer — fixer is redundant as a permanent artifact.
+
+References to clean up (12 live refs found; historical refs in
+docs/session/ preserved as immutable history):
+  - META-001 §4.15 line 237: TOOL-VERIFY-003 ACTIVE -> RETIRED
+  - META-001 §7.4 line 576: drop verify-cascade.js from pre-commit
+    hook bash comment (it never ran there anyway)
+  - ARCH-001 §4.1 line 119: drop verify-cascade.js from L1 verifier
+    list
+  - ARCH-001 §5 line 235: drop cross-validator-test.js from scripts/
+    listing
+  - ARCH-001 §6.2 line 392: replace "verified by cross-validator-test.js"
+    with "verified by verify-standards.js + verify-id-graph.js (in CI
+    and pre-commit hook)"
+  - ARCH-001 version bump 1.1.1 -> 1.1.2 + Change History entry
+  - parent README.md lines 20, 29, 31: drop dead scripts from tree
+  - standards/README.md lines 71, 73: drop dead scripts from tree
+  - standards/docs/verify-id-graph-spec-v1.0.md line 10: drop
+    TOOL-VERIFY-003 from Related
+  - standards/docs/verify-id-graph-spec-v1.0.md line 67: drop
+    verify-cascade.js mention
+  - standards/scripts/verify-standards.js line 7: rewrite header
+    comment to not compare against dead verify-cascade.js
+
+Historical references PRESERVED (immutable session record):
+  - docs/session/worklog.md
+  - docs/session/SESSION_NOTES.md
+  - docs/session/DECISIONS_LOG.md
+
+Plan (executed below):
+
+Phase 1 — Append this plan to worklog (DONE above).
+Phase 2 — Delete 4 files (rm).
+Phase 3 — Update META-001 (2 edits, no version bump — no Version
+         History section in this file, and the registry change is
+         self-documenting via the RETIRED status).
+Phase 4 — Update ARCH-001 (3 edits + v1.1.1 -> v1.1.2 + Change
+         History entry).
+Phase 5 — Update parent README.md (3 edits in tree block).
+Phase 6 — Update standards/README.md (2 edits in tree block).
+Phase 7 — Update standards/docs/verify-id-graph-spec-v1.0.md (2
+         edits).
+Phase 8 — Update standards/scripts/verify-standards.js header (1
+         edit).
+Phase 9 — Verify: node verify-standards.js + node verify-id-graph.js
+         -> 7/7 PASS + 13/13 HARD PASS.
+Phase 10 — Commit + push standards submodule first, then parent
+         (submodule pointer bump + worklog entry).
+
+Stage Summary (planned — to be filled after execution):
+
+Execution results (actual — supersedes preliminary plan above):
+
+Phase 1 — Plan recorded in worklog (DONE above).
+
+Phase 2 — Deleted 4 files via `rm`. Parent `scripts/` directory was
+  left empty after deletion; removed it via `rmdir` to keep the L0
+  tree clean (matches ARCH-001 §5 layout, which no longer lists
+  `scripts/*.js` as an L0 artifact).
+
+Phase 3 — META-001 (2 edits, no version bump — META-001 has no
+  Version History section; the RETIRED status is self-documenting):
+  - §4.15 line 237: TOOL-VERIFY-003 ACTIVE -> "RETIRED 2026-06-18
+    (one-shot v1.0 cascade check; superseded by TOOL-VERIFY-002 +
+    TOOL-VERIFY-004)".
+  - §7.4 line 576: pre-commit hook bash comment updated — replaced
+    "TOOL-VERIFY-003 (verify-cascade.js) as sub-checks" with
+    "TOOL-VERIFY-004 (verify-id-graph.js) as sub-checks" (the hook
+    never actually invoked verify-cascade.js — that was a misleading
+    comment; the real hook contract is verify-standards.js +
+    verify-id-graph.js, as documented in CONTRIBUTING.md §3.1).
+
+Phase 4 — ARCH-001 v1.1.1 -> v1.1.2 (3 content edits + version bump
+  in 2 places + Change History entry):
+  - §4.1 line 119: L1 verifier list narrowed to
+    `verify-standards.js`, `verify-id-graph.js` (dropped
+    `verify-cascade.js`).
+  - §5 line 235: dropped the entire `scripts/*.js` line from L0
+    layout (parent `scripts/` directory no longer exists).
+  - §6.2 line 392: replaced "verified by `cross-validator-test.js`
+    script in `Z-ai-platform/scripts/`" with "verified by
+    `verify-standards.js` and `verify-id-graph.js` scripts (run by
+    the `.githooks/pre-commit` hook and by the `verify-id-graph.yml`
+    CI workflow)".
+  - §12 Change History: added v1.1.2 row with full change description.
+
+Phase 5 — Parent README.md (1 MultiEdit covering 3 lines in the tree
+  block): dropped `scripts/` subtree entirely (3 dead entries —
+  `cross-validator-test.js`, `verify-cascade.js`,
+  `cross-doc-consistency-check.js`); kept the live
+  `verify-standards.js` + `verify-id-graph.js` entries under
+  `standards/scripts/`.
+
+Phase 6 — standards/README.md (1 MultiEdit covering 2 lines in the
+  tree block): dropped `verify-cascade.js` and
+  `cross-doc-consistency-check.js`; kept `verify-standards.js` +
+  `verify-id-graph.js`.
+
+Phase 7 — verify-id-graph-spec-v1.0.md (2 edits):
+  - Line 10 (Related): removed TOOL-VERIFY-003 (verify-cascade.js).
+  - Line 67 (body): removed "and `verify-cascade.js`" from the
+    sentence about scripts owned by the standards repo.
+
+Phase 8 — verify-standards.js header (1 edit): rewrote the PURPOSE
+  block to remove the "Unlike verify-cascade.js (one-shot check of
+  the 16 cascade tasks)" comparison (no longer applicable —
+  verify-cascade.js no longer exists). Header now reads "PERMANENT
+  invariant checker. Updated whenever ANY standard changes." with no
+  reference to the dead script.
+
+Phase 9 — Verification: ALL GREEN.
+  - grep for live refs (excluding docs/session/ historical record
+    and excluding the new RETIRED annotation + the new ARCH-001 §12
+    Change History entry that documents the retirement) -> only
+    the ARCH-001 §12 row remains, which is correct (Change History
+    is meant to record what changed).
+  - node scripts/verify-standards.js -> 7/7 PASS (V04-V10).
+  - node scripts/verify-id-graph.js  -> 13/13 HARD PASS, 2 unchanged
+    soft warnings (sandbox-hooks-cookbook.md 1011 lines,
+    DESIGN-001-profile-terminal-dashboard.md 1099 lines — both
+    pre-existing, unrelated to this task).
+  - Parent pre-commit hook fired: both verifiers PASS.
+  - Standards submodule pre-commit hook fired: both verifiers PASS.
+
+Phase 10 — Commit + push:
+  - Standards submodule: ebf668f -> 3a26f9e
+    ("chore(cleanup): retire 4 dead scripts (verify-cascade.js,
+    cross-doc-consistency-check.js, cross-validator-test.js,
+    fix-unicode-compliance.js)")
+    Pushed to GitHub stsgs1980/Z-ai-standards (main): SUCCESS
+  - Parent (Z-ai-platform): bumping standards submodule pointer +
+    parent README.md tree update + 2 parent script deletions +
+    this worklog entry.
+
+Stage Summary:
+- 4 dead scripts removed (-449 lines, +15 lines across 7 files in
+  standards submodule; -3 lines + 1 deletion in parent README tree).
+- 12 stale live references cleaned up across 6 files:
+    * META-001 §4.15 + §7.4
+    * ARCH-001 §4.1 + §5 + §6.2 (+ §12 Change History)
+    * parent README.md (tree block)
+    * standards/README.md (tree block)
+    * verify-id-graph-spec-v1.0.md (Related + body)
+    * verify-standards.js header comment
+- Historical references PRESERVED (immutable session record):
+    * docs/session/worklog.md
+    * docs/session/SESSION_NOTES.md
+    * docs/session/DECISIONS_LOG.md
+- TOOL-VERIFY-003 status now RETIRED with date + supersession note —
+  anyone reading META-001 §4.15 sees immediately that the script is
+  gone and why, instead of being told it's ACTIVE.
+- ARCH-001 bumped 1.1.1 -> 1.1.2 with explicit Change History row
+  documenting all 3 content edits.
+- Parent `scripts/` directory removed (was empty after deletions);
+  ARCH-001 §5 layout no longer mentions it as an L0 artifact.
+- Both verifiers (verify-standards.js + verify-id-graph.js) green
+  after all edits. Both pre-commit hooks (parent + standards
+  submodule) fired on the real commits for this task.
+- No regression in ID graph: still 47 IDs, 13/13 HARD PASS, 2
+  unchanged soft warnings (line-count warnings on sandbox cookbook
+  + DESIGN-001 profile — pre-existing, separate cleanup work).
+- Remaining "real infra-gap" items per prior session summary:
+    1. verify-standards.js broken     [CLOSED]
+    2. .githooks/ missing              [CLOSED]
+    3. templates/ sparse (only README) [STILL OPEN — next task]
+    4. Dead scripts leaving stale ACTIVE refs [CLOSED — this task]

@@ -16,8 +16,6 @@ Z-ai-platform/                  (this repo, L0)
 ├── README.md                   # This file
 ├── CONTRIBUTING.md             # How to make changes without breaking the ID graph
 ├── install-hooks.sh            # Bootstrap pre-commit hooks
-├── scripts/
-│   └── cross-validator-test.js # Cross-repo verifier integration test
 ├── .github/
 │   └── workflows/
 │       └── verify-id-graph.yml # CI: nightly + push + PR verification
@@ -25,10 +23,8 @@ Z-ai-platform/                  (this repo, L0)
 │   ├── standards/              #   6 STD-* files (4 stubs + 2 v1.0+)
 │   ├── docs/
 │   ├── scripts/
-│   │   ├── verify-standards.js
-│   │   ├── verify-cascade.js
-│   │   ├── verify-id-graph.js  #   The cross-repo verifier (13/13 HARD PASS)
-│   │   └── cross-doc-consistency-check.js
+│   │   ├── verify-standards.js #   Per-repo invariants (V01-V10)
+│   │   └── verify-id-graph.js  #   Cross-repo ID graph (13/13 HARD PASS)
 │   └── MIGRATIONS.md           #   M001 (ZAI-META-001 SUPERSEDED), M002 (RULE-MONOLITH)
 ├── guard/                      # → Z-ai-guard (submodule, L2)
 │   ├── rules/
