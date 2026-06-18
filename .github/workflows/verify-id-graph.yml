@@ -98,15 +98,56 @@ jobs:
           sudo apt-get install -y -qq graphviz
           dot -V
 
-      - name: Install mermaid CLI + Chrome
+      # -------------------------------------------------------------------
+      # Cache puppeteer Chrome binary.
+      # The chrome-headless-shell download (~150 MB) is the CI bottleneck
+      # — it takes 7+ minutes on a fresh run. With cache, the same binary
+      # is reused across runs as long as the puppeteer version doesn't
+      # change. Cache key includes the puppeteer major version so a bump
+      # of @mermaid-js/mermaid-cli (which pins puppeteer-core) invalidates
+      # the cache automatically.
+      #
+      # Expected savings: 7m 11s  ->  ~5s on cache hit.
+      # -------------------------------------------------------------------
+      - name: Detect puppeteer version
+        id: puppeteer-version
         run: |
-          # Mermaid CLI uses puppeteer, which needs a Chrome binary.
-          # Install both globally so render-diagrams.sh can find them.
+          # Resolve the puppeteer-core version that mermaid-cli will pull in.
+          # We use npm view to get the latest mermaid-cli, then extract its
+          # puppeteer-core dependency. This runs BEFORE npm install so we can
+          # form the cache key.
+          MMD_VERSION=$(npm view @mermaid-js/mermaid-cli version 2>/dev/null | tr -d '[:space:]')
+          PUP_VERSION=$(npm view "@mermaid-js/mermaid-cli@${MMD_VERSION}" dependencies.puppeteer-core 2>/dev/null | tr -d '"[:space:]')
+          echo "mmd_version=${MMD_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "pup_version=${PUP_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Detected mermaid-cli=${MMD_VERSION}, puppeteer-core=${PUP_VERSION}"
+
+      - name: Cache puppeteer Chrome binary
+        id: cache-chrome
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-chrome-linux-mmd${{ steps.puppeteer-version.outputs.mmd_version }}-pup${{ steps.puppeteer-version.outputs.pup_version }}
+          restore-keys: |
+            puppeteer-chrome-linux-mmd${{ steps.puppeteer-version.outputs.mmd_version }}-
+
+      - name: Install mermaid CLI + Chrome
+        env:
+          CACHE_HIT: ${{ steps.cache-chrome.outputs.cache-hit }}
+        run: |
+          # Always install mmdc (small, ~22s) — this is the CLI wrapper.
           npm install -g @mermaid-js/mermaid-cli
-          # puppeteer postinstall normally fetches Chrome, but if it skipped,
-          # fetch explicitly:
-          npx -y puppeteer browsers install chrome-headless-shell || true
           mmdc --version
+
+          # Only fetch chrome-headless-shell on cache miss.
+          if [ "$CACHE_HIT" = "true" ]; then
+            echo "[install] Cache HIT — skipping chrome download"
+            # Verify the cached binary is actually present
+            find ~/.cache/puppeteer -name 'chrome-headless-shell' -type f -executable | head -3
+          else
+            echo "[install] Cache MISS — fetching chrome-headless-shell"
+            npx -y puppeteer browsers install chrome-headless-shell
+          fi
 
       - name: Generate ID dependency graph
         id: graph
