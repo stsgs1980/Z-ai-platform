@@ -1230,3 +1230,107 @@ Phase 6 — Commit + push:
   - Push both
 
 Stage Summary (planned — to be filled after execution):
+
+Execution results (actual — supersedes preliminary plan above):
+
+Phase 1 — Parent .githooks/pre-commit: COMPLETED as planned.
+  - Created .githooks/pre-commit (executable, 4.1KB bash script).
+  - Two phases: (1) verify-standards.js, (2) verify-id-graph.js.
+  - Graceful skip if Node.js missing or submodule not checked out
+    (warns + allows commit; CI catches regressions).
+  - /tmp log files cleaned up on PASS.
+  - Clear error output on FAIL with bypass instruction.
+
+Phase 2 — Standards submodule .githooks/ + install-hooks.sh: COMPLETED.
+  - Created .githooks/pre-commit (executable, 4.0KB bash script).
+  - Runs verify-standards.js (full) + verify-id-graph.js (intra-repo
+    subset — cross-repo G02 expected to fail when running standalone,
+    hook tolerates that and only fails on other G-checks).
+  - Created install-hooks.sh (mirrors parent's script, ~1.4KB).
+
+Phase 3 — Documentation updates: COMPLETED.
+  - CONTRIBUTING.md §3 rewritten:
+      New §3.1 "Install git hooks (one-time, after cloning)" with
+        `bash install-hooks.sh` as the bootstrap step.
+      Lists both verifiers and what each checks.
+      Mentions standards submodule's own .githooks/ + install-hooks.sh
+        for standalone use.
+      §3.2 "Run the verifier manually" lists both commands with
+        expected PASS output formats.
+      Soft warning range corrected: W01-W10 -> W01-W15.
+  - CI workflow verify-id-graph.yml rewritten:
+      Header comment now describes both verifiers.
+      Job name: "verify-id-graph.js + verify-standards.js (all HARD PASS)".
+      New "Run verify-standards.js" step BEFORE "Run verify-id-graph.js".
+      Both must PASS for workflow to succeed.
+      PR comment lists which verifier(s) failed (was hard-coded to
+        ID-graph-only message before).
+      Artifact renamed: id-graph-verifier-output -> verifier-output
+        (covers both verifiers' inputs).
+      Fixed broken YAML in original (`branches: ain]` shell-mangled
+        form to `branches: [main]` proper form — was actually fine in
+        file, but my Bash cat earlier had been hiding the brackets;
+        rewrote file cleanly via Write tool).
+  - standards/README.md §Verification updated:
+      Dropped stale "Note" about verify-standards.js being broken
+        (it was fixed in prior task verify-standards-fix-2026-06-18).
+      Comment "V01-V10" corrected to "V04-V10" (V01/V02/V03 retired
+        in prior task).
+      Added mention of standalone install-hooks.sh path.
+      Clarified cross-repo checks run in CI + parent pre-commit hook.
+
+Phase 4 — Hook activation + test on real commits: COMPLETED.
+  - Ran `bash install-hooks.sh` in both parent and standards submodule.
+    Confirmed `git config --get core.hooksPath` returns `.githooks`
+    in both.
+  - Direct invocation tests:
+      `bash .githooks/pre-commit` in parent  -> exit 0, both verifiers PASS
+      `bash .githooks/pre-commit` in standards -> exit 0, both verifiers PASS
+  - Real-commit test (the actual commits for this task):
+      Standards submodule commit 2bbc778: hook fired, both verifiers PASS.
+      Parent commit 2f6f121: hook fired, both verifiers PASS.
+
+Phase 5 — Final verification (no regression): COMPLETED.
+  - `node scripts/verify-standards.js` -> exit 0 (7/7 PASS)
+  - `node scripts/verify-id-graph.js`  -> 13/13 HARD PASS, 2 soft
+    warnings (unchanged — sandbox cookbook 1011 lines + DESIGN-001
+    profile 1099 lines; both with documented split triggers).
+
+Phase 6 — Commit + push: COMPLETED.
+  - Standards submodule: 9e0f9c8 -> 2bbc778
+    ("feat(hooks): add .githooks/pre-commit + install-hooks.sh")
+    Pushed to GitHub stsgs1980/Z-ai-standards (main): SUCCESS
+  - Parent (Z-ai-platform): baed4a1 -> 2f6f121
+    ("feat(hooks): create .githooks/ + wire CI to run verify-standards.js")
+    Pushed to GitHub stsgs1980/Z-ai-platform (main): SUCCESS
+
+Stage Summary:
+- .githooks/ gap CLOSED. The directory that install-hooks.sh referenced
+  since the initial commit (2e163eb) finally exists, with a real
+  pre-commit hook that runs both verifiers.
+- Both repos (parent Z-ai-platform + standards submodule) now have
+  local pre-commit hooks active. `core.hooksPath=.githooks` set in both.
+- The hook fired on the actual commits for this task — proving the
+  wiring works end-to-end, not just in theory.
+- CI workflow now runs BOTH verifiers (was running only verify-id-graph.js
+  before — content-level invariants had no CI coverage at all, only the
+  previously-broken verify-standards.js script).
+- Documentation (CONTRIBUTING.md, standards/README.md) brought into
+  alignment with the actual hook contract.
+- Soft warning range corrected in CONTRIBUTING.md (W01-W10 was stale;
+  verifier actually checks W01-W15).
+- Stale "Note" removed from standards/README.md (verify-standards.js is
+  no longer broken — fixed in prior task).
+- Coverage now redundant across 3 layers (defense in depth):
+    Layer 1: Local pre-commit hook (parent + standards submodule)
+             -> catches regressions BEFORE push
+    Layer 2: CI on push/PR/nightly (both verifiers)
+             -> catches regressions that slip past local hooks
+                (e.g. --no-verify bypass, developer without install-hooks.sh)
+    Layer 3: CI nightly (03:00 UTC)
+             -> catches drift even if no pushes happen
+- Remaining "real infra-gap" items per prior session summary:
+    1. verify-standards.js broken     [CLOSED — prior task]
+    2. .githooks/ missing              [CLOSED — this task]
+    3. templates/ sparse (only README) [NEXT — add standard/skill/ZAI
+                                       templates as separate task]
