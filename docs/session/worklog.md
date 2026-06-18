@@ -1334,3 +1334,164 @@ Stage Summary:
     2. .githooks/ missing              [CLOSED — this task]
     3. templates/ sparse (only README) [NEXT — add standard/skill/ZAI
                                        templates as separate task]
+
+---
+Task ID: stack-signature-cleanup-2026-06-18
+Agent: main (orchestrator)
+Task: Fix Stack Signature cargo cult. Per audit: 17/21 standards have `Built with: Next.js 16 + TypeScript + Tailwind CSS` footer, but DOC-002 §8 Scope restricts the rule to README.md (root) + CHANGELOG.md (root) — NOT standards. The rule was misapplied. Fix: remove footer from 17 standards (restore compliance with DOC-002 §8), keep in README_TEMPLATE.md as the canonical example, mark Stack Signature as Optional in README_TEMPLATE §1 table (since most repos won't have CHANGELOG.md and README signature is informational not load-bearing), update README_TEMPLATE itself to remove its own footer (it's a governance doc per §8, not a README), close RMT-004 by scoping (not by reformatting).
+
+Audit findings (executed above):
+  - 17 standards with `Built with:` footer (all have identical content):
+      A11Y-001, AGENT-001, AGENT-002, ARCH-002, DESIGN-001-design-system,
+      DOC-002, DOC-003, ENV-001, ENV-002, ERR-001, ERR-002, FE-001,
+      GIT-001, GIT-002, SEC-001, SEC-002, TEST-001
+  - 4 standards without footer (already correct per §8):
+      ARCH-001, META-001, SKILL-001, DESIGN-001-profile-terminal-dashboard
+  - Parent README.md, standards README.md, guard README.md, skills README.md:
+    all 4 root README files do NOT have footer — VIOLATION of §8.
+    But: Z-ai-platform is an orchestrator meta-repo (no app stack),
+    Z-ai-standards/guard/skills are governance meta-repos (no app stack).
+    The footer would be cargo cult here too.
+  - DOC-002 §8 says "Root documentation files must contain a stack signature"
+    but the actual repo architecture has no application code — every
+    repo is meta/governance. The rule as written doesn't fit this project.
+  - README_TEMPLATE.md itself has a footer at end of file — this is
+    treating the template as if it were an application README. Wrong.
+
+Plan (executed below):
+
+Phase 1 — Update DOC-002 §8 (clarify scope):
+  - Current: "Root documentation files must contain a stack signature"
+  - New: "Root README.md of application repositories must contain a
+    stack signature. NOT applicable to governance repositories
+    (standards, rules, skills, orchestrator meta-repos) or to
+    normative standard files themselves. Optional for CHANGELOG.md
+    and nested docs/."
+  - Add explicit "Not applicable" list:
+      * Standards (standards/*.md) — they describe rules, not built with anything
+      * Rules (guard/rules/*.md) — same
+      * Skills (skills/skills/*/SKILL.md) — same
+      * Templates (templates/*.md) — meta-docs, not applications
+      * Orchestrator README — meta-repo, no app stack
+  - Bump DOC-002 version 2.3.1 -> 2.3.2 with Version History entry.
+
+Phase 2 — Remove footer from 17 standards:
+  - sed-style removal: delete the trailing `---\n\nBuilt with: Next.js 16 + TypeScript + Tailwind CSS\n` from each.
+  - Keep any "End of STD-X-NNN" epilogues intact (META-001 has one).
+  - 17 files, 4 lines each removed = ~68 lines net reduction.
+  - Each standard gets a Version History bump? No — too noisy. Just
+    add a single note in each §5A (Known Issues) referencing the
+    bulk cleanup. Actually, even simpler: do NOT bump individual
+    standard versions — this is a project-wide cleanup, not a
+    per-standard change. Document in worklog only.
+
+Phase 3 — Update README_TEMPLATE.md:
+  - §1 table row #12: Stack Signature
+      Required: Yes -> Optional
+      Description: "Mandatory footer for application README.md.
+        Not applicable to governance documents (standards, rules,
+        skills, templates, this template file itself)."
+  - §2 template (inside 4-backtick fence): keep the footer as the
+    canonical example, but add HTML comment marker:
+      <!-- Optional: include only for application README.md.
+           Not applicable to governance documents. -->
+      ---
+      Built with: Next.js 16 + TypeScript + Tailwind CSS
+  - §2 note after the fence: update to explain scope (application
+    READMEs only, not governance docs).
+  - §3 checklist: change "Stack Signature present at end" ->
+    "Stack Signature present (application README.md only —
+    skip for governance docs)".
+  - Remove the trailing footer from README_TEMPLATE.md itself (it
+    is a governance doc per the new §8 scope).
+  - RMT-004 [OPEN] -> [RESOLVED in v2.3] by scoping (was: format
+    contradiction; resolution: rule itself is scoped out for
+    governance docs, format contradiction becomes moot).
+  - Bump README_TEMPLATE version 2.2 -> 2.3.
+
+Phase 4 — Verify:
+  - `node scripts/verify-standards.js` -> exit 0 (7/7 PASS).
+    V10 (Badges) does not check Stack Signature, so unaffected.
+  - `node scripts/verify-id-graph.js` -> 13/13 HARD PASS.
+  - Manual: grep `Built with:` in standards/standards/ should
+    return 0 matches (was 17).
+
+Phase 5 — Commit + push:
+  - Standards submodule: DOC-002 v2.3.2 + README_TEMPLATE v2.3 +
+    17 standards footer removal.
+  - Parent: standards submodule pointer bump + this worklog entry.
+
+Stage Summary (planned — to be filled after execution):
+
+Execution results (actual):
+
+Phase 1 — DOC-002 §8 scope clarification: COMPLETED.
+  - DOC-002 v2.3.1 -> v2.3.2.
+  - §8 rewritten with explicit "Scope (applies to)" and "Scope (does NOT
+    apply to)" lists, plus scope test prose.
+  - Footer removed from DOC-002 itself.
+  - Version History entry added.
+
+Phase 2 — Bulk footer removal from 16 standards: COMPLETED.
+  - Created scripts/remove-stack-signature-footers.sh (perl multiline
+    regex; committed for repeatability).
+  - Ran script: 16 of 16 target files cleaned (A11Y-001, AGENT-001,
+    AGENT-002, ARCH-002, DESIGN-001-design-system, DOC-003, ENV-002,
+    ERR-001, ERR-002, FE-001, GIT-001, GIT-002, SEC-001, SEC-002,
+    TEST-001 + the script itself cleaned DOC-002 in Phase 1 via Edit).
+  - ENV-001 was missed by initial script pass (footer pattern varied
+    slightly). Caught in verification step, removed via direct Edit.
+  - 4 standards were already correct (no footer): ARCH-001, META-001,
+    SKILL-001, DESIGN-001-profile-terminal-dashboard.
+
+Phase 3 — README_TEMPLATE.md v2.2 -> v2.3: COMPLETED.
+  - §1 row #12: Required Yes -> Optional, with scope note.
+  - §2 note: 3-component format restriction removed.
+  - §3 checklist: Stack Signature item qualified with scope.
+  - RMT-004 [OPEN] -> [RESOLVED in v2.3] by scoping (not by reformatting).
+  - Removed cargo-cult footer from README_TEMPLATE.md itself.
+  - Version History entry added.
+
+Phase 4 — Verification: COMPLETED.
+  - node scripts/verify-standards.js -> exit 0 (7/7 PASS).
+    V10 (Badges) does not check Stack Signature, so unaffected.
+  - node scripts/verify-id-graph.js  -> 13/13 HARD PASS, 2 soft warnings
+    (unchanged: sandbox cookbook 1011 + DESIGN-001 profile 1099).
+  - EOF check: 0 files have 'Built with:' as last line (was 18).
+  - Remaining 'Built with:' mentions (all legit, inside code-fence
+    examples showing the format):
+      * DOC-002 §8 L273 + L280 (2 occurrences inside fenced examples)
+      * README_TEMPLATE §2 L119 (1 occurrence inside 4-backtick template)
+    These are NOT footers — they are the canonical examples the standard
+    uses to teach the format. Correct to keep.
+
+Phase 5 — Commit + push: COMPLETED.
+  - Standards submodule: 2bbc778 -> ebf668f
+    ("fix(doc-002): scope Stack Signature to application repos, remove
+    17 cargo-cult footers")
+    Pushed to GitHub stsgs1980/Z-ai-standards (main): SUCCESS
+  - Parent (Z-ai-platform): bumping standards submodule pointer + this
+    worklog entry.
+
+Stage Summary:
+- Stack Signature cargo cult eliminated. 18 files (17 standards + 1
+  template) no longer carry a misleading "Built with: Next.js 16 + ..."
+  footer for a project that ships no Next.js application.
+- DOC-002 §8 now self-consistent: rule says "application repos only"
+  and the standard itself (a governance doc) no longer has the footer.
+- README_TEMPLATE.md v2.3 published:
+  * §1 row #12 Stack Signature marked Optional with scope note.
+  * §2 note no longer contradicts DOC-002 §8 (3-component restriction
+    removed).
+  * §3 checklist qualified with scope.
+  * RMT-004 OPEN -> RESOLVED.
+  * Template itself no longer carries the footer it was telling app
+    READMEs to include.
+- 3 legit "Built with:" mentions remain, all inside fenced code blocks
+  showing the format. Not footers.
+- 1 new helper script committed: scripts/remove-stack-signature-footers.sh
+  (preserves the cleanup as a repeatable artifact if cargo cult ever
+  reappears).
+- Hook fired on real commit (standards submodule) — both verifiers PASS.
+- All prior infrastructure-gap items remain CLOSED; this task was a
+  content-level cleanup, not an infra fix.
