@@ -1160,3 +1160,73 @@ Stage Summary:
                                        a directory that doesn't exist]
     3. templates/ sparse (only README) [LATER — add standard/skill/ZAI
                                        templates as separate task]
+
+---
+Task ID: githooks-fix-2026-06-18
+Agent: main (orchestrator)
+Task: Fix missing `.githooks/` directory in parent Z-ai-platform. `install-hooks.sh` (committed at initial commit 2e163eb) references `.githooks/` which never existed — `core.hooksPath` is unset, only default `.git/hooks/*.sample` exist. Create real `.githooks/pre-commit` that runs both verifiers, make it executable, also wire up `.githooks/` in standards submodule (lighter hook — verify-standards.js only, since verify-id-graph.js needs cross-repo context), update CI workflow to also run verify-standards.js, update CONTRIBUTING.md §3 with install-hooks.sh step.
+
+Investigation findings:
+  - `git log --oneline --all -- '.githooks*'`: empty (no history)
+  - `git config --get core.hooksPath`: unset (exit 1)
+  - `ls .git/hooks/`: only `*.sample` files (git default)
+  - `.github/workflows/verify-id-graph.yml`: runs verify-id-graph.js only
+    (4 triggers: push main, PR main, nightly 03:00 UTC, workflow_dispatch)
+  - `standards/CONTRIBUTING.md`: doesn't exist
+  - CONTRIBUTING.md §3 "Pre-commit checks": instructs manual
+    `node standards/scripts/verify-id-graph.js` but doesn't mention hooks
+
+Plan (executed below):
+
+Phase 1 — Parent `.githooks/pre-commit` (Z-ai-platform):
+  - Create `.githooks/pre-commit` bash script
+  - Runs BOTH verifiers (verify-standards.js first — fast content-level;
+    then verify-id-graph.js — slower cross-repo structural)
+  - Exits 1 if either fails, with clear error message
+  - Skips gracefully if Node.js not installed (warns but allows commit,
+    since developer may be on minimal env)
+  - chmod +x
+
+Phase 2 — Standards submodule `.githooks/pre-commit`:
+  - Create `.githooks/pre-commit` in standards submodule
+  - Runs only `node scripts/verify-standards.js` (verify-id-graph.js needs
+    parent context with all 3 submodules; from inside standards submodule
+    it would only scan 1 repo — misleading result)
+  - chmod +x
+  - Add `install-hooks.sh` to standards submodule too (mirror parent's,
+    so submodule commits also get hook installation story)
+  - Update standards/README.md if it references hooks (TBD on read)
+
+Phase 3 — Documentation updates:
+  - CONTRIBUTING.md §3: add step 0 "Run `bash install-hooks.sh` once
+    after cloning" before the manual `node ... verify-id-graph.js` step
+  - CONTRIBUTING.md: mention that hooks now run verify-standards.js too
+  - CI workflow (verify-id-graph.yml): add second step that runs
+    `node standards/scripts/verify-standards.js` after the
+    verify-id-graph.js step, so CI catches both structural and content
+    invariants
+
+Phase 4 — Test the hook fires:
+  - Run `bash .githooks/pre-commit` directly to confirm it executes
+    both verifiers and exits 0
+  - Run `git config core.hooksPath .githooks` and confirm
+    `git config --get core.hooksPath` returns `.githooks`
+  - (Do NOT test by making a real commit yet — that's what the actual
+    commit for this task will do. If the hook is broken, the commit
+    will fail and we'll see the error inline.)
+  - In standards submodule: same — `bash .githooks/pre-commit` should
+    exit 0
+
+Phase 5 — Verify both verifiers still green (no regression):
+  - `node standards/scripts/verify-standards.js` → exit 0 (7/7 PASS)
+  - `node standards/scripts/verify-id-graph.js` → 13/13 HARD PASS,
+    2 soft warnings (unchanged)
+
+Phase 6 — Commit + push:
+  - Standards submodule: .githooks/ + install-hooks.sh
+    (if README needs update, that too)
+  - Parent: .githooks/ + CONTRIBUTING.md update + CI workflow update +
+    standards submodule pointer bump + this worklog entry
+  - Push both
+
+Stage Summary (planned — to be filled after execution):

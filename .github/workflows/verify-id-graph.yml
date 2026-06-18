@@ -1,4 +1,4 @@
-# Cross-repo ID graph verification
+# Cross-repo ID graph verification + content-level standards verification
 #
 # Triggers:
 #   - Push to main in Z-ai-platform (covers submodule pointer bumps)
@@ -8,6 +8,11 @@
 #
 # This workflow lives in Z-ai-platform (the orchestrator) because only
 # the orchestrator has all three submodules checked out together.
+#
+# Two verifiers run in sequence:
+#   1. verify-standards.js  — content-level invariants (V04-V10)
+#   2. verify-id-graph.js   — cross-repo ID-graph invariants (G01-G15)
+# Both must PASS for the workflow to succeed.
 
 name: Verify ID Graph
 
@@ -26,7 +31,7 @@ permissions:
 
 jobs:
   verify:
-    name: verify-id-graph.js (13/13 HARD PASS)
+    name: verify-id-graph.js + verify-standards.js (all HARD PASS)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -48,8 +53,24 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Run verify-standards.js
+        id: verify-standards
+        run: |
+          set +e
+          output=$(node standards/scripts/verify-standards.js 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "## verify-standards.js output"
+            echo '```'
+            echo "$output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          exit $exit_code
+
       - name: Run verify-id-graph.js
-        id: verify
+        id: verify-id-graph
         run: |
           set +e
           output=$(node standards/scripts/verify-id-graph.js 2>&1)
@@ -68,7 +89,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: id-graph-verifier-output
+          name: verifier-output
           path: |
             standards/
             guard/
@@ -80,13 +101,23 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const failed = [];
+            if (${{ steps.verify-standards.outputs.exit_code }} !== 0) failed.push('verify-standards.js (V04-V10 content-level invariants)');
+            if (${{ steps.verify-id-graph.outputs.exit_code }} !== 0) failed.push('verify-id-graph.js (G01-G15 cross-repo ID graph)');
             const body = [
-              '## ID graph verification FAILED',
+              '## Verification FAILED',
               '',
-              'The cross-repo ID graph verifier reported one or more HARD check failures.',
+              'The following verifier(s) reported HARD check failures:',
               '',
-              'Run `node standards/scripts/verify-id-graph.js` locally to see details.',
-              'See also: [STD-META-001 v2.0 §10.2](standards/standards/STD-META-001-v2.0.md) for the G01-G15 check catalogue.',
+              ...failed.map(f => `- **${f}**`),
+              '',
+              'Run the verifiers locally to see details:',
+              '```bash',
+              'node standards/scripts/verify-standards.js',
+              'node standards/scripts/verify-id-graph.js',
+              '```',
+              '',
+              'See also: standards/standards/META-001-standard-id-system.md §10 for the G01-G15 check catalogue.',
             ].join('\n');
             await github.rest.issues.createComment({
               owner: context.repo.owner,

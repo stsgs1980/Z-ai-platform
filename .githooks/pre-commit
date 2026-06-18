@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# ============================================================================
+# pre-commit hook — Z-ai-platform (parent orchestrator)
+# ============================================================================
+#
+# Purpose:
+#   Block commits that would break the standards tree or the cross-repo
+#   ID graph. Runs TWO verifiers:
+#
+#     1. verify-standards.js  — content-level invariants (V04-V10)
+#        Lives in the standards submodule. Fast (<1s).
+#        Checks: no emoji/Unicode graphic chars in code spans, fence
+#        language tags, English-only, anti-monolith threshold values,
+#        design-system delegation, README template structure.
+#
+#     2. verify-id-graph.js   — structural / ID-graph invariants (G01-G15)
+#        Cross-repo: needs all 4 repos visible (parent + 3 submodules).
+#        Lives in standards submodule. Slower (~2-3s, scans 4 repos).
+#        Checks: no duplicate IDs, Related-edge resolution, layer matrix,
+#        cycle detection, deprecated-ID window, typo-IDs, ZAI DAG,
+#        Aligned_with symmetry.
+#
+#   Soft warnings (W01-W15) do NOT block the commit — they are advisory
+#   and surface in CI summaries.
+#
+# Install (one-time, after cloning):
+#   bash install-hooks.sh
+#   (or equivalently: git config core.hooksPath .githooks && chmod +x .githooks/*)
+#
+# Bypass (NOT recommended — use only for emergencies like WIP snapshots):
+#   git commit --no-verify
+#
+# ============================================================================
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# Locate Node.js. If absent, warn but allow commit (developer may be on
+# minimal env; CI will catch any regressions).
+if ! command -v node >/dev/null 2>&1; then
+  echo "[pre-commit] WARNING: Node.js not found in PATH — skipping verifier runs."
+  echo "[pre-commit] CI will catch any regressions; install Node.js to enable local checks."
+  exit 0
+fi
+
+# Locate verifier scripts. They live in the standards submodule, which
+# MUST be checked out (`git submodule update --init --recursive`).
+VERIFY_STANDARDS="standards/scripts/verify-standards.js"
+VERIFY_ID_GRAPH="standards/scripts/verify-id-graph.js"
+
+if [ ! -f "$VERIFY_STANDARDS" ] || [ ! -f "$VERIFY_ID_GRAPH" ]; then
+  echo "[pre-commit] WARNING: standards submodule not checked out — skipping verifier runs."
+  echo "[pre-commit] Run: git submodule update --init --recursive"
+  echo "[pre-commit] CI will catch any regressions."
+  exit 0
+fi
+
+# --- Phase 1: verify-standards.js (fast, content-level) --------------------
+echo "[pre-commit] Phase 1/2: verify-standards.js (content-level invariants V04-V10)"
+if ! node "$VERIFY_STANDARDS" >/tmp/zai-precommit-vstandards.log 2>&1; then
+  echo "[pre-commit] FAIL: verify-standards.js reported invariant violations."
+  echo "[pre-commit] ---- output ----"
+  cat /tmp/zai-precommit-vstandards.log | sed 's/^/  /'
+  echo "[pre-commit] ---- end output ----"
+  echo "[pre-commit] Either fix the offending standard(s), or if the invariant"
+  echo "[pre-commit] itself changed, update the V## check in $VERIFY_STANDARDS."
+  echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+  exit 1
+fi
+echo "[pre-commit] OK: verify-standards.js PASS"
+rm -f /tmp/zai-precommit-vstandards.log
+
+# --- Phase 2: verify-id-graph.js (slower, cross-repo structural) -----------
+echo "[pre-commit] Phase 2/2: verify-id-graph.js (cross-repo ID-graph invariants G01-G15)"
+if ! node "$VERIFY_ID_GRAPH" >/tmp/zai-precommit-vgraph.log 2>&1; then
+  echo "[pre-commit] FAIL: verify-id-graph.js reported HARD check violations."
+  echo "[pre-commit] ---- output ----"
+  cat /tmp/zai-precommit-vgraph.log | sed 's/^/  /'
+  echo "[pre-commit] ---- end output ----"
+  echo "[pre-commit] HARD check failures block CI. Fix the offending file(s)"
+  echo "[pre-commit] (in the appropriate submodule if needed), then re-commit."
+  echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+  exit 1
+fi
+echo "[pre-commit] OK: verify-id-graph.js PASS (HARD checks)"
+rm -f /tmp/zai-precommit-vgraph.log
+
+echo "[pre-commit] All checks PASS — proceeding with commit."
+exit 0
