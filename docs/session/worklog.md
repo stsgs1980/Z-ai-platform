@@ -966,3 +966,197 @@ Stage Summary:
   84 (start of W11-W15 era) -> 8 (after W13 sweep) -> 2 (after W03+W12
   sweep) -> 2 (after W11 CRITICAL closure). 97.6% cumulative reduction.
   Remaining 2 are intentional soft-cap signals on reference docs.
+
+---
+Task ID: verify-standards-fix-2026-06-18
+Agent: main (orchestrator)
+Task: Fix broken `verify-standards.js` — retarget paths to current `standards/standards/` layout, run, analyze FAILs, decide disposition per V## check (keep / update / retire), document decisions, push.
+
+Work Log (planned — execution follows after this entry):
+
+Phase 1 — Path fixes (mechanical, no invariant changes):
+  - STANDARDS_DIR: `upload/standards-v2/standards` → `standards` (relative to
+    REPO_ROOT, i.e. `<standards-submodule>/standards/`)
+  - UPLOAD_DIR: removed (no longer exists). Guides now under `docs/sandbox/`.
+  - File name constants updated to current `<DOMAIN>-<NNN>-<name>.md` form:
+      STD_ENV_002:   ENV-002-zai-integration.md
+      STD_FE_001:    FE-001-frontend.md
+      STD_META_001:  META-001-standard-id-system.md
+      STD_DESIGN_001: DESIGN-001-design-system.md
+      STD_DOC_003:   DOC-003-unicode-policy.md
+      STD_ARCH_001:  ARCH-002-implementation-order.md
+      HOOKS_GUIDE:   docs/sandbox/sandbox-hooks-cookbook.md
+      SANDBOX_GUIDE: docs/sandbox/sandbox-guide.md
+  - V04/V08/V09: target list re-pointed at STANDARDS_DIR + 2 sandbox guides
+    (drop deprecated UPLOAD_DIR SKILL.md/MARKDOWN_STANDARD.md/UNICODE_POLICY.md
+    references — those files no longer exist at those paths).
+  - V10: README_TEMPLATE.md lookup moved from STANDARDS_DIR to
+    `templates/README_TEMPLATE.md` (actual location).
+
+Phase 2 — Run and triage FAILs (preliminary analysis from grep, to be
+confirmed by execution):
+  - V01 (ENV-002 §5.1 startup must use init-fullstack, not npx next dev):
+    OUTDATED. ENV-002 §5.2 currently mandates `npx next dev` for dev server.
+    `init-fullstack_*.sh` is the one-time BOOTSTRAP (§3.0.1 step 5), not the
+    recurring dev-server startup. The V01 invariant conflated bootstrap with
+    startup. DISPOSITION: retire with explanatory comment.
+  - V02 (ENV-002 must use .zscripts/dev.log, not /tmp/zdev.log):
+    OUTDATED. ENV-002 §3 "Allowed paths" table (line ~79) explicitly lists
+    `/tmp/zdev.log` as Allowed — "Dev server log (not in source code)". §5.2
+    uses it as the canonical log target. The V02 invariant contradicts the
+    standard's actual rule. DISPOSITION: retire with explanatory comment.
+  - V03 (Hooks cookbook uses Zod safeParse): OUTDATED. The cookbook
+    (sandbox-hooks-cookbook.md) has no `z.object` or `safeParse` references.
+    This was likely a one-shot cascade-task check that was never promoted to
+    a real permanent invariant. DISPOSITION: retire with explanatory comment.
+  - V05 (META-001 registry lists STD-DESIGN-001 + STD-FE-001 v2.5+): KEEP.
+    Still relevant. Should PASS after path fix.
+  - V06 (FE-001 §11/§12 delegate to DESIGN-001, no hardcoded hex): KEEP.
+    §11 delegates; §12 is Version History (mentions DESIGN-001 in changelog
+    entries; no hex). Should PASS.
+  - V07 (FE-001 §2 anti-monolith thresholds 50/80, 3+, 4+, inline 4+):
+    OUTDATED. FE-001 §2 evolved in v2.1: current thresholds are File 150/250,
+    Page/Route 30/50, custom hook 50/100, Barrel 30/50, useState 2 (3rd
+    triggers extraction), exception ceiling 300 (with) / 400 (absolute).
+    DISPOSITION: update V07 to current thresholds (File 150/250, Page 30/50,
+    useState 2→3, exception 300/400).
+  - V08 (code fence language tags): KEEP. Universal invariant. Should PASS.
+  - V09 (English-only <2% Cyrillic): KEEP. Universal invariant. Should PASS.
+  - V10 (README_TEMPLATE.md mandates badges, ≥3 shields.io): OUTDATED.
+    templates/README_TEMPLATE.md §1 row #2 marks Badges as "Optional" with
+    only 1 shields.io URL in §2 template. The "3 badges required" rule was
+    never actually adopted. DISPOSITION: update V10 — check Badges section
+    exists and template has ≥1 shields.io badge (current truth). Do not
+    invent a stricter invariant than the project actually enforces.
+
+Phase 3 — Update script (in-place edits, not full rewrite):
+  - Fix all paths per Phase 1.
+  - Retire V01/V02/V03: replace body with `// RETIRED <date>: <reason>` block.
+    Do NOT delete the V## IDs — preserve numbering so existing
+    `verified_by: V01, V05, V08` annotations in standards still resolve to
+    a documented (if retired) check.
+  - Update V07 thresholds.
+  - Update V10 to current truth (Badges section present + ≥1 badge URL).
+  - Bump script header version comment (no SemVer file; just date + reason).
+
+Phase 4 — Run final, verify exit 0, commit + push:
+  - `node scripts/verify-standards.js` must exit 0.
+  - Compare coverage vs verify-id-graph.js:
+      verify-id-graph.js: ID graph invariants (G01-G15) + soft warnings
+        (W11 line count, W12 §XA, W13 dangling refs, W14 OPEN count,
+        W15 naming). Structural/meta-level.
+      verify-standards.js: content-level invariants (V04 no emoji,
+        V08 fence language tags, V09 English-only, V05 META registry
+        mentions, V06 delegation, V07 thresholds, V10 README badges).
+    → Complementary, not overlapping. Both should run in CI.
+  - Commit standards submodule, push.
+  - Bump parent submodule pointer + worklog entry, push.
+
+Stage Summary (planned — to be filled in after execution):
+
+Execution results (actual — supersedes preliminary plan above):
+
+Phase 1 — Path fixes: COMPLETED as planned.
+  - All 9 path constants updated to current flat <DOMAIN>-<NNN>-<name>.md layout.
+  - UPLOAD_DIR constant removed; DOCS_DIR + TEMPLATES_DIR added.
+  - Script header comment block rewritten with COVERAGE section (vs
+    verify-id-graph.js) and HISTORY section.
+
+Phase 2 — V## dispositions (executed):
+  - V01 RETIRED: invariant conflated bootstrap (init-fullstack) with
+    dev-server startup (npx next dev). Standard is correct; invariant was
+    based on false premise. Body replaced with comment block preserving
+    the V01 ID and explaining retirement.
+  - V02 RETIRED: invariant forbade /tmp/zdev.log, but ENV-002 §3 explicitly
+    allows it ("Dev server log (not in source code)"). Standard is correct;
+    invariant contradicted standard. Retired with comment.
+  - V03 RETIRED: Hooks cookbook has no z.object/safeParse; was a one-shot
+    cascade check accidentally promoted to permanent invariant. Retired.
+  - V04 UPDATED: now strips both fenced code blocks AND inline code spans
+    before scanning. DOC-003 (the Unicode policy standard itself)
+    legitimately shows emoji inside `inline code` as "forbidden pattern"
+    examples — those were false positives before. Now PASS.
+  - V05 UPDATED: threshold relaxed from "STD-FE-001 v2.5+" to "v2.0+".
+    FE-001 is currently at v2.4 (per its version history); v2.5+ was
+    speculative. v2.0 is the real milestone (June 2026 Design System
+    integration rewrite of §11). Now PASS.
+  - V06 UNCHANGED: still PASS (FE-001 §11 delegates to DESIGN-001, no
+    hardcoded hex).
+  - V07 UPDATED: thresholds rewritten to match FE-001 v2.1+ actual values
+    (File 150/250, Component 100/200, Page 30/50, hook 50/100, Barrel
+    30/50, useState 2, ANTI-MONOLITH EXCEPTION marker). Switched from
+    regex `[^|]*` (which cannot span `|` cell separator) to line-based
+    matching. Now PASS.
+  - V08 UNCHANGED logic, but exposed real standards violations:
+      * SEC-001-security-core.md L403: plain ``` fence around
+        DATABASE_URL example → added `env` language tag.
+      * SKILL-001-skill-format.md L44: plain ``` fence around ASCII
+        box-drawing diagram → added `text` language tag.
+    Both standards fixed. V08 now PASS.
+  - V09 UNCHANGED logic, target list pruned (removed deprecated
+    upload/SKILL.md, MARKDOWN_STANDARD.md, UNICODE_POLICY.md references —
+    those files no longer exist). Now scans 24 files. PASS.
+  - V10 UPDATED: retuned to match README_TEMPLATE.md actual Badges=Optional
+    choice. Checks (a) §1 has Badges row, (b) §2 template has ≥1 shields.io
+    badge URL, (c) §3 checklist mentions badges. To satisfy (c), added a
+    checklist item to README_TEMPLATE.md §3:
+      "- [ ] Badges added (optional but recommended for public repos)"
+    This aligns the checklist with §1 (Badges row) and §2 (badge example).
+    V10 now PASS.
+
+Phase 3 — Final verification:
+  - `node scripts/verify-standards.js` exit 0:
+      Total: 7  |  PASS: 7  |  FAIL: 0
+      All invariants hold.
+  - `node scripts/verify-id-graph.js` still PASS:
+      HARD: 13/13 PASS (G01-G15)
+      SOFT: 2 warnings (unchanged — both reference docs, both with
+      documented split triggers; not affected by this task).
+
+Phase 4 — Coverage analysis (verify-standards.js vs verify-id-graph.js):
+  - verify-id-graph.js (STRUCTURAL):
+      * G01-G15: ID uniqueness, Related-edge resolution, layer matrix,
+        cycle detection, deprecated-ID window, self-references, typo-IDs,
+        ZAI compatibility DAG, Aligned_with symmetry.
+      * W01-W15: line counts (W11), §XA presence (W12), dangling refs
+        (W13), OPEN Known Issue count (W14), naming pattern (W15).
+  - verify-standards.js (CONTENT-LEVEL):
+      * V04: no emoji/Unicode graphic chars (code-spans stripped).
+      * V05: META-001 registry mentions STD-DESIGN-001 + STD-FE-001 v2.0+.
+      * V06: FE-001 §11/§12 delegate to DESIGN-001 (no hardcoded hex).
+      * V07: FE-001 §2 anti-monolith threshold values match v2.1+.
+      * V08: all 3-backtick code fences have language tag (DOC-002 §4.3).
+      * V09: all .md files English-only (<2% Cyrillic).
+      * V10: README_TEMPLATE.md badges guidance (§1 row + §2 example +
+        §3 checklist mention).
+  - Verdict: COMPLEMENTARY, not overlapping. Neither script subsumes the
+    other. Both should run in CI.
+
+Phase 5 — Commit + push:
+  - Standards submodule: this commit (verify-standards.js path/retire/
+    update + SEC-001 L403 + SKILL-001 L44 + README_TEMPLATE.md §3).
+  - Parent (Z-ai-platform): bumping standards submodule pointer + this
+    worklog entry.
+
+Stage Summary:
+- verify-standards.js restored to working state. Was broken (ENOENT on
+  upload/standards-v2/standards), now exit 0 with 7/7 PASS.
+- 3 invariants retired (V01/V02/V03) — premises contradicted current
+  standards. IDs preserved as comment blocks so existing
+  `verified_by: V01, ...` annotations still resolve to documented
+  (if retired) checks.
+- 4 invariants updated to match current standards (V04 strip code spans,
+  V05 v2.0+ not v2.5+, V07 v2.1+ thresholds + line-based regex, V10
+  Badges=Optional not mandatory).
+- 2 real standards violations fixed (SEC-001 L403 + SKILL-001 L44 —
+  missing fence language tags).
+- 1 template content fix (README_TEMPLATE.md §3 — added Badges checklist
+  item to align with §1 + §2).
+- Coverage documented in script header: verify-id-graph.js = structural,
+  verify-standards.js = content-level. Both should run in CI.
+- Remaining "real infra-gap" items per prior session summary:
+    1. verify-standards.js broken     [CLOSED — this task]
+    2. .githooks/ missing              [NEXT — install-hooks.sh references
+                                       a directory that doesn't exist]
+    3. templates/ sparse (only README) [LATER — add standard/skill/ZAI
+                                       templates as separate task]
