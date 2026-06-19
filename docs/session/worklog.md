@@ -2857,3 +2857,81 @@ Stage Summary:
 - Block mode = single atomic change touching 3 repos in 1 platform
   commit. No piecemeal, no half-states in the graph.
 - Next: pilot split of 3 long files remains pending (separate task).
+
+---
+Task ID: arch-002-v26-reconciliation-2026-06-19
+Agent: main
+Task: Reconcile ARCH-002 §1 declared prerequisites vs Related: header
+fields in each standard. Hybrid fix: 1 documented convention + 3 real
+fixes. User chose option 3 ("3 давай пробывать").
+
+Work Log:
+- Wrote scripts/reconcile_arch002_vs_headers.py to compare two views:
+  view-A: ARCH-002 §1 Prerequisites column (declared install-order deps)
+  view-B: each standard's Related: header field (self-declared deps)
+- First run found 15/20 mismatches. Categorized:
+  * 13 same pattern: header lists STD-META-001 explicitly, ARCH-002 §1
+    omits (treating it as implicit foundation). Both views correct in
+    spirit but technically inconsistent.
+  * 1 real cycle: A11Y-001 (#13) header lists TEST-001 (#18) -- A11Y
+    cannot depend on something installed later.
+  * 1 real undeclared dep: ENV-002 header lists ARCH-002, but §1
+    ENV-002 row didn't declare ARCH-002 as prereq.
+  * 1 real missing-from-header: DOC-002 §1 prereq had ARCH-002, but
+    DOC-002 header Related: didn't list ARCH-002.
+
+- Hybrid fix (option 3) applied:
+
+  * ARCH-002 v2.5 -> v2.6:
+    - Added "Implicit prerequisite" blockquote at top of §1:
+      STD-META-001 is required by all standards but only listed
+      explicitly in Prerequisites column for ARCH-001/002, DOC-002,
+      SKILL-001 (where META is the primary conceptual dep). Other
+      standards list META-001 in Related: for graph completeness.
+    - ENV-002 row: Prerequisites 'ENV-001' -> 'ENV-001, ARCH-002'
+      with rationale (bootstrap.sh / status.sh are ENV-002 §3.0
+      artifacts that follow ARCH-002's setup sequence §2-§6).
+    - A11Y-001 row: added note that TEST-001 is a forward reference
+      (A11Y at #13, TEST at #18) -- not a prereq. Header keeps the
+      ID for graph completeness.
+    - Added ARCH-008 [RESOLVED in v2.6] entry in §7A Known Issues.
+    - Added §8 Change History section.
+
+  * DOC-002 v2.4.1 -> v2.4.2:
+    - Header Related: 'STD-META-001' -> 'STD-META-001, STD-ARCH-002'
+      (sync with §1 prereq row #4 which already had ARCH-002).
+
+  * A11Y-001 v1.3 -> v1.3.1:
+    - Header Related: STD-TEST-001 entry clarified with inline note
+      "forward reference; A11Y-001 installed at #13, TEST-001 at #18;
+      see §11 for the testing cross-link". Cycle resolved by
+      documentation rather than removing the ID.
+
+  * Added scripts/reconcile_arch002_vs_headers.py:
+    - Audit script with implicit-META convention and forward-ref
+      convention encoded. Run: python3 scripts/reconcile_arch002_vs_headers.py
+    - Result after fixes: 20/20 perfect match (was 5/20 before).
+
+- Verification:
+  * verify-id-graph.js: 13/13 HARD PASS (warnings unchanged)
+  * verify-standards.js: 7/7 invariants PASS
+  * check-md.sh on 3 changed files: 3/3 PASS
+  * reconcile script: 20/20 perfect match
+  * File sizes all under their limits: ARCH-002 474/1200, DOC-002
+    1012/1200, A11Y-001 454/1200.
+
+- Pushed:
+  * standards: 1115cf3 -> 16b6f7f
+  * platform: 41cdec9 -> 07aa64c (submodule bump only, no guard/skills changes)
+
+Stage Summary:
+- ARCH-002 §1 (declared install-order deps) and each standard's
+  Related: header (self-declared deps) are now fully reconciled.
+- 13 of 15 original mismatches were the same pattern (implicit META)
+  -- resolved by a single documented convention in §1.
+- 3 real fixes (ENV-002 undeclared dep, A11Y-001 cycle, DOC-002
+  missing-from-header) -- all addressed.
+- The reconciliation script is now part of standards/scripts/ and can
+  be re-run on any future standard change to catch drift early.
+- "Как надо читать" (ARCH-002 §1) and "как задекларировано в шапках"
+  (Related: fields) now agree 20/20.
