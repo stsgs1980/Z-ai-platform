@@ -2660,3 +2660,115 @@ Stage Summary:
 - Net delta to the system: 1 standard version bump, 0 new files,
   0 new directories, 0 new IDs. This is what "only valuable"
   looks like.
+
+---
+Task ID: rule-012-v12-block-mode-2026-06-19
+Agent: main
+Task: Apply RULE-MONOLITH-012 v1.2 in block mode with full exempt list.
+Investigate root cause of missing IDs (user question).
+
+Work Log:
+- User question: "по поводу ID вроде у нас же есть система которая
+  должна ID применять, по этому не проблема в их отсутствие. Проблема
+  только выяснить почему не установились, а может просто не дошли до
+  момента" + directive "сразу block mode с полным exempt-списком".
+
+- ID system investigation (root cause analysis):
+  * META-001 v2.0.2 §0 explicitly states: IDs are MANDATORY for
+    STD/RULE/PROC/TOOL, OPTIONAL for ZAI skills (skill needs ID only
+    when referenced externally; runtime matches by `name:`, not ID)
+  * ZAI-META-001 (skill-id-system SKILL.md) §4 lists 20 "Z.ai sandbox
+    system skills" that intentionally have NO ZAI- prefix
+  * Of 12 SKILL.md files without ID:
+    - 7 are in §4 system-skill list (CORRECTLY without ID):
+      z-ai-web-dev-sdk, phi-layout, fallback, health-check, api-retry,
+      session-handoff, dev-watchdog
+    - 4 are NOT in §4 but have no external references (CORRECTLY
+      without ID per §0 optional rule): humanizer, react-dev, gepetto,
+      reducing-entropy
+    - 1 registry inconsistency: skill-creator declared as ZAI-META-002
+      Active in §5.8 but YAML frontmatter lacks `id:` field. Runtime
+      uses `name:` so no functional break; low-priority cleanup.
+  * Conclusion: user's hypothesis "maybe just didn't get to that
+    point yet" is correct. No systemic failure. 11 of 12 ID-less
+    SKILL.md files are correctly ID-less. Only 1 minor inconsistency
+    in skill-creator (deferred to a future cleanup commit).
+
+- RULE-012 v1.2 block-mode application (single coordinated change):
+
+  * Z-ai-guard (commit 7cfee85):
+    - Rewrote rules/RULE-MONOLITH-012.md from 51 lines (v1.1) to
+      214 lines (v1.2). New structure:
+      §1 Limits matrix (12 categories, hard limit + soft warn columns)
+      §1.1 How to pick category (path > filename > frontmatter id prefix)
+      §1.2 Parser-bound files (own ceiling per category, not blanket 250)
+      §2 Full exempt list (44 files, 18 579 lines) — 4 sub-tables:
+        §2.1 Append-only session logs (3 files: worklog, DECISIONS_LOG,
+             SESSION_NOTES)
+        §2.2 Append-only migration log (1 file: MIGRATIONS.md)
+        §2.3 Router INDEX.md (3 files)
+        §2.4 Externalised references (37 files, 14 036 lines)
+      §3 Auto-activation (3 trigger conditions)
+      §4 When threshold crossed (6-step procedure)
+      §4.1 Split pattern: INDEX.md + chapters/ (for independent sections)
+      §4.2 Split pattern: inline references (for SKILL.md > 800)
+      §5 Exceptions (valid vs invalid)
+      §6 Enforcement (today: soft warn via audit_md_files.py;
+           future: PROC-LINECOUNT-004 deferred)
+      §7 Relationship to other rules/standards
+      §8 Change history (v1.0 / v1.1 / v1.2)
+    - Updated rules/INDEX.md catalog row: v1.1 -> v1.2, title
+      "Anti-monolith (no file over 250 lines)" -> "Anti-monolith
+      (file size by category)", owning standard v2.0 -> v2.0.2
+
+  * Z-ai-standards (commit ab0eeaa):
+    - META-001 v2.0.2 -> v2.0.3:
+      * §4.13 row for RULE-MONOLITH-012: version 1.1 -> 1.2, title
+        updated, file path 'Z-ai-guard/AGENT_RULES.md' (stale since
+        M002) -> 'Z-ai-guard/rules/RULE-MONOLITH-012.md' (correct
+        post-M002 path)
+      * §15 Version History: added v2.0.3 entry with full rationale
+      * Note: other §4.13 rows still reference the stale pre-M002
+        path; cleanup deferred (pre-existing tech debt)
+    - STD-SKILL-001 aligned:
+      * §8.2 Size Guidelines: 250-line SKILL.md ceiling -> 800-line
+        ceiling (soft warn at 400); references/ subdirectory
+        explicitly exempt
+      * §10.1 verification table row: 'File under 250 lines' ->
+        'File under 800 lines (RULE-MONOLITH-012 v1.2 §1 — SKILL.md
+        row)'; PROC-LINECOUNT-004 marked (deferred)
+      * §13 checklist: 'under 250 lines' -> 'under 800 lines
+        (soft warn at 400)'
+
+  * Z-ai-platform (commit 10c1fb6):
+    - Bumped both submodule pointers (guard + standards) in a single
+      commit per STD-ARCH-001 §8.3 atomicity rule
+
+- Verification:
+  * verify-id-graph.js: 13/13 HARD PASS, 4+2 warnings (W11 long files,
+    W13 stale path refs — pre-existing, not introduced by this change)
+  * verify-standards.js: 7/7 invariants PASS
+  * check-md.sh on 4 changed files: 4/4 PASS
+
+- Pushed all 3 repos to GitHub origin/main:
+  * guard: f4a9391 -> 7cfee85
+  * standards: 0bba3ec -> ab0eeaa
+  * platform: 537ad02 -> 10c1fb6
+
+Stage Summary:
+- RULE-MONOLITH-012 v1.2 live on GitHub. The rule is now truthful:
+  every limit it threatens is enforceable, every exemption is
+  documented inline. The 75-file violation count from v1.1 drops to
+  ~0 hard violations under v1.2 (the 18 real split candidates are
+  still flagged via soft warnings, but they're no longer "violations
+  of an untrue rule").
+- ID system investigation complete. Root cause confirmed: no systemic
+  failure, just standard §0 optionality at work. skill-creator YAML
+  frontmatter missing `id:` field is the only real (low-priority)
+  inconsistency — deferred to a future micro-fix.
+- Block mode = single atomic change touching 3 repos (guard rule +
+  standards META-001 + standards SKILL-001) coordinated via 1 platform
+  commit. No piecemeal commits, no half-states in the graph.
+- Next: pilot split of 3 long files (sandbox-commands-cheatsheet 678,
+  sandbox-hooks-cookbook 1010, phi-layout/references/react-components
+  1449) — separate task, not part of this block.
