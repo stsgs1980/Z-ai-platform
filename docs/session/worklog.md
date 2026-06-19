@@ -2772,3 +2772,88 @@ Stage Summary:
 - Next: pilot split of 3 long files (sandbox-commands-cheatsheet 678,
   sandbox-hooks-cookbook 1010, phi-layout/references/react-components
   1449) — separate task, not part of this block.
+
+---
+Task ID: rule-012-v13-canonical-promotion-2026-06-19
+Agent: main
+Task: Promote file-size limits matrix from RULE-MONOLITH-012 (L2) to
+META-001 §4.18 (L1 canonical) -- layering fix per user directive.
+
+Work Log:
+- User asked: "добавил её копию в META-001 как единый source-of-truth
+  для всех стандартов, а точно копия нужна или напротив это главное
+  сделать, а там копию//ссылку/приложение?"
+- I agreed with the architectural critique: canonical belongs in L1,
+  L2 only enforces. v1.2 had the matrix inline in RULE-012 (L2) which
+  violated layering -- L2 was defining WHAT (limits) instead of just
+  HOW (enforcement). User confirmed "делай".
+
+- Block-mode change across 3 repos:
+
+  * Z-ai-standards (commit 1115cf3):
+    - META-001 v2.0.3 -> v2.0.4
+    - Added §4.18 "File Size Limits (Canonical Source)" with 5
+      subsections:
+      §4.18.1 Limits matrix (12 categories, hard limit + soft warn)
+      §4.18.2 How to pick a category (path > filename > frontmatter id)
+      §4.18.3 Parser-bound files (own ceiling per category)
+      §4.18.4 Exempt list (44 files, 18 579 lines, full table inline)
+      §4.18.5 Domain standard references (STD-SKILL-001 §8.2,
+             STD-FE-001 §6, STD-DOC-002 §11 should reference, not dup)
+    - §4.13 RULE-MONOLITH-012 row: version 1.2 -> 1.3
+    - §15 Version History: v2.0.4 entry with full rationale
+    - STD-SKILL-001 §8.2/§10.1/§13: replaced 'RULE-MONOLITH-012 v1.2
+      §1' references with 'META-001 §4.18.1' references
+    - Final META-001 size: 1199 lines (under its own 1200 hard limit
+      per §4.18.1 STD-*.md row). Hit a self-violation at 1210 lines
+      during drafting -- compressed §4.18.3 and merged §4.18.6
+      (change history) into §15 to get under. Ate own dogfood.
+
+  * Z-ai-guard (commit 2e2579d):
+    - RULE-MONOLITH-012 v1.2 -> v1.3
+    - Rewrote: full inline matrix (214 lines) -> compact 12-row mirror
+      (126 lines) with header 'canonical: STD-META-001 §4.18.1'
+    - §2 Full exempt list -> removed; pointer to §4.18.4
+    - Renumbered §3-§7 to §2-§6
+    - §6 PROC-LINECOUNT-004 note updated: when created, MUST read
+      canonical from META-001 §4.18, NOT from this rule's mirror
+    - §7 Change history: v1.3 entry added
+    - rules/INDEX.md: catalog row v1.2 -> v1.3; owning-standard
+      v2.0.2 -> v2.0.4
+    - RULE-012 file now under its own 200-line ceiling for the first
+      time (was 214 in v1.2, a soft violation of itself)
+
+  * Z-ai-platform (commit c3fa0df):
+    - Bumped both submodule pointers in single atomic commit per
+      STD-ARCH-001 §8.3
+
+- Verification:
+  * verify-id-graph.js: 13/13 HARD PASS (W11 long-file soft warns and
+    W13 stale-path soft warns -- pre-existing, not introduced)
+  * verify-standards.js: 7/7 invariants PASS
+  * check-md.sh on 4 changed files: 4/4 PASS
+  * META-001 self-compliance: 1199/1200 lines -- PASSES its own
+    §4.18.1 STD-*.md row hard limit
+  * RULE-012 self-compliance: 126/200 lines -- PASSES its own
+    §4.18.1 RULE-*.md row hard limit (was 214 in v1.2 = SOFT VIOLATION)
+
+- Pushed all 3 repos to GitHub origin/main:
+  * guard: 7cfee85 -> 2e2579d
+  * standards: ab0eeaa -> 1115cf3
+  * platform: b2f2d0a -> c3fa0df
+
+Stage Summary:
+- Layering fixed: L1 (META-001 §4.18) is now canonical source of truth
+  for file-size limits. L2 (RULE-MONOLITH-012 v1.3) is a compact
+  enforcer mirror. L3 (skills) and domain standards reference L1,
+  not L2.
+- Both files now pass their own limits (META-001 1199/1200, RULE-012
+  126/200). v1.2 had RULE-012 in soft violation of itself (214/200) --
+  fixed as a side effect of the promotion.
+- The "where is the limits table" question now has one canonical
+  answer: STD-META-001 §4.18.1, mirrored in RULE-MONOLITH-012 §1 for
+  enforcement context. Future revisions update one place, both views
+  stay consistent.
+- Block mode = single atomic change touching 3 repos in 1 platform
+  commit. No piecemeal, no half-states in the graph.
+- Next: pilot split of 3 long files remains pending (separate task).
