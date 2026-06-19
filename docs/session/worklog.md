@@ -2588,3 +2588,75 @@ Stage Summary:
 - Next: M003 (PROC migration) + M004 (TOOL migration) can now be
   planned with the gap matrix from the new README as the source
   of truth.
+
+---
+Task ID: phantom-id-audit-2026-06-19
+Agent: main
+Task: Apply "only valuable" filter to my own previous recommendations.
+Remove bloat, fix only the registry-truthfulness gaps.
+
+Work Log:
+- Re-reviewed my own 10-item proposal list from the previous session
+  against the user's directive "do not pile up, take only the valuable":
+  * REMOVED as bloat (7 items):
+    - PROC-SETUP-001, PROC-UPDATE-002 (duplicate bootstrap.sh + status.sh)
+    - TOOL-VERIFY-001 (duplicate verify-standards.js + verify-id-graph.js)
+    - instructions/ as separate directory (better inline in .sh headers)
+    - registry.json in guard/ (registry already in META-001 §4)
+    - MIGRATIONS.md in guard/ (already in standards/)
+    - New RULE-* (no need, only adds maintenance surface)
+  * KEPT as valuable (2 items):
+    - Fix phantom rows in META-001 §4.14/§4.15 (standard was lying)
+    - Cleanup PROC-PLATFORM-INSTALL-005/006/007 zombies (also lying)
+  * DEFERRED (3 items, design decision for user):
+    - PROC-COCHANGE-003 (co-change check) — no analog, but no urgent need
+    - PROC-LINECOUNT-004 (line count check) — no analog, closes RULE-012 gap
+    - TOOL-BUMP-005 (version bump) — no analog, but version bumps work via git
+  * NOT TOUCHED (1 item, deliberately):
+    - Fix dangling Related: edges in 5 rules (TOOL-MONOLITH-VERIFY etc.)
+      Reason: without creating TOOL-VERIFY-001 + TOOL-BUMP-005 files,
+      rewriting the rule refs would break G02 (target ID does not exist).
+      The verifier currently silently drops these non-format-matching
+      tokens — that's a verifier blind spot, not a runtime bug. Already
+      documented in guard/README.md "Known inconsistencies" §2.
+
+- Bumped STD-META-001 from v2.0.1 to v2.0.2 with the 2 valuable fixes:
+  * §4.14: 4 PROC-* (SETUP/UPDATE/COCHANGE/LINECOUNT) ACTIVE ->
+    ACTIVE (planned) — file not yet created
+  * §4.14: 3 PROC-PLATFORM-* (INSTALL/UPDATE/DOCTOR) ACTIVE (planned)
+    -> RETIRED 2026-06-19 with supersession notes pointing at
+    bootstrap.sh + status.sh
+  * §4.15: 2 TOOL-* (VERIFY-001/BUMP-005) ACTIVE -> ACTIVE (planned)
+  * §4.15: 1 TOOL-* (VERIFY-004) wording clarification — file exists,
+    status promotes on first green CI run post-v2.0.2
+  * Added §15 Version History section (v2.0.2, v2.0.1, v2.0)
+  * Added 2 explanatory blockquotes under §4.14 and §4.15 documenting
+    the phantom-ID fix and PROC-PLATFORM retirement
+
+- Verified: 13/13 HARD PASS, 32/32 md check PASS.
+
+- Committed in Z-ai-standards: 0bba3ec
+- Pushed to GitHub origin/main
+- Bumped standards submodule pointer in Z-ai-platform: c911e36 -> 0bba3ec
+  (commit 2f2b52f)
+- Pushed Z-ai-platform to GitHub origin/main
+
+Stage Summary:
+- META-001 §4 registry is now truthful: every ACTIVE entry corresponds
+  to a file that exists; every (planned) entry is labeled as such;
+  every RETIRED entry has a supersession note.
+- 3 zombie PROC-PLATFORM IDs (005/006/007) retired instead of left
+  in undead "ACTIVE (planned)" state. Per §9.2 no-reassignment rule,
+  these IDs will not be reused.
+- Deliberately did NOT add: new PROC files, new TOOL files, new RULE
+  files, instructions/ directory, registry.json, repo-local
+  MIGRATIONS.md. All of these were considered and rejected as
+  bloat under the "only valuable" directive.
+- The 5 dangling Related: edges in rules (TOOL-MONOLITH-VERIFY etc.)
+  remain as-is — fixing them without creating the target TOOL files
+  would break the verifier. They are documented in guard/README.md
+  "Known inconsistencies" §2 as a verifier blind spot to be
+  addressed when M003/M004 actually land.
+- Net delta to the system: 1 standard version bump, 0 new files,
+  0 new directories, 0 new IDs. This is what "only valuable"
+  looks like.
