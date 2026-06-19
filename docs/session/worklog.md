@@ -2382,3 +2382,140 @@ Stage Summary:
     on all 32 .md files in Z-ai-standards.
   - Next: commit + push v1.3 + FE-001 update + MD-004 fixes, then
     bump parent Z-ai-platform submodule pointer.
+
+---
+Task ID: graph-rendering-ci-2026-06-19
+Agent: main
+Task: Add graphviz-based ID-graph renderer + 3 Mermaid process diagrams + wire both into CI
+
+Work Log:
+- Discovered graphviz (`dot`) and Mermaid CLI (`mmdc`) both installed but unused
+- Created `standards/scripts/graph-deps.sh`:
+  - Reads verify-id-graph.js JSON output for node list
+  - Re-parses .md sources for Related:/Aligned_with: edges
+  - Emits DOT + SVG + PNG into docs/_graph/
+  - 3 layer clusters (L1 STD blue / L2 RULE amber / L3 ZAI green) + orphan cluster
+  - Flags: --out, --platform, --dot-only, --open
+- Created 3 Mermaid source files in docs/_diagrams/:
+  - pipeline.mmd      — flowchart: push → pre-commit → CI → verify → graph → upload
+  - agent-lookup.mmd  — sequence: User → Agent → Skill loader → ID-graph → Standard → Rule
+  - bootstrap.mmd     — sequence: sandbox start → clone → submodules → symlink → ready
+- Created `standards/scripts/render-diagrams.sh`:
+  - Reads docs/_diagrams/*.mmd sources
+  - Emits SVG + PNG via mmdc with proper puppeteer config (--no-sandbox for CI)
+  - Graceful skip if mmdc missing (exit 0 with warning)
+  - Flags: --src, --out
+- Fixed chrome binary path: puppeteer expected `linux-148.0.7778.97/chrome-linux64/chrome`
+  layout. The .zip had been downloaded but not extracted. Extracted manually and
+  placed at the expected path.
+- Updated .github/workflows/verify-id-graph.yml:
+  - Added 3 new steps: "Install graphviz", "Install mermaid CLI + Chrome",
+    "Generate ID dependency graph", "Generate Mermaid process diagrams"
+  - "Upload graph artifact" now uploads BOTH docs/_graph/ AND docs/_diagrams/
+    as part of the same 'id-graph' artifact (30-day retention)
+  - Graph generation runs ALWAYS (even on failure) so the artifact is
+    available for debugging
+- Updated README.md to document the new CI steps + artifact name
+- Committed + pushed to GitHub:
+  - standards submodule: c911e36 (adds graph-deps.sh + render-diagrams.sh)
+  - platform: 9a8ca11 (bumps standards pointer + CI workflow + README + diagrams)
+
+Stage Summary:
+- ID dependency graph (60 nodes / 111 edges) now auto-renders on every push,
+  PR, and nightly at 03:00 UTC. Available as artifact 'id-graph' (30-day
+  retention) on the Actions tab.
+- 3 Mermaid process diagrams (pipeline / agent-lookup / bootstrap) auto-render
+  alongside the ID graph in the same artifact.
+- Both renderers use the right tool for the right job:
+  - graphviz DOT for structural dependency graph (static relationships)
+  - Mermaid flowchart for process with branches (CI pipeline)
+  - Mermaid sequence for time-ordered interactions (agent lookup, bootstrap)
+- Total artifact contents: id-graph.{svg,png,dot} + 3 × {name}.{svg,png,mmd}
+  = 12 files, ~5 MB total.
+- Next: CI will pick up the changes on the next push (already triggered by
+  this push itself). The first auto-rendered graph should be available at
+  https://github.com/stsgs1980/Z-ai-platform/actions within ~5 minutes.
+
+---
+Task ID: review-uploaded-plantuml-2026-06-19
+Agent: main
+Task: Inspect 3 PlantUML SVGs uploaded by user to /home/z/my-project/upload/
+
+Work Log:
+- User uploaded 3 SVGs with mangled Windows 8.3 filenames:
+    FLZHRX~1.SVG (51 KB)
+    HLXRSZ~1.SVG (91 KB)
+    ZLTTRN~1.SVG (43 KB)
+- Decoded content — all 3 are PlantUML-rendered (signature:
+  `<?plantuml 1.2026.7beta1?>` inside SVG):
+    1. architecture-layers.svg (FLZHRX~1) — component diagram showing
+       shared infrastructure layers: Git/FS, State Management, Auditing,
+       Creation, Orchestration, JSON Registry (skill-registry.json)
+    2. flow-execution-server-side.svg (HLXRSZ~1) — sequence diagram
+       "3A Studio: Flow Execution - Server-Side Path":
+       User → useFlowActions → route.ts → flow-utils.ts → node-exec.ts
+    3. skill-creation-registration.svg (ZLTTRN~1) — sequence diagram
+       "Взаимодействие агентов: Создание и регистрация скилла":
+       User → Orchestrator (L2 Approved) → Creator → Guardian
+- Copied all 3 to /home/z/my-project/Z-ai-platform/docs/_diagrams/
+  uploaded-plantuml/ with descriptive names so they survive session
+  restart. NOT committed — pending user decision in next session.
+
+Stage Summary:
+- These PlantUML diagrams are PARALLEL to the Mermaid diagrams I
+  generated this session. They cover similar ground but from a
+  different angle (3A Studio server-side flow, skill lifecycle,
+  layered infrastructure).
+- Decision needed next session:
+  (a) Keep PlantUML as alternative view, link from README
+  (b) Convert PlantUML → Mermaid for unified toolchain
+  (c) Add PlantUML renderer alongside render-diagrams.sh
+  (d) Discard if these were just exploratory sketches
+- Files NOT deleted, NOT committed. Safe in upload/ and copied to
+  docs/_diagrams/uploaded-plantuml/.
+
+---
+Task ID: plantuml-discard-2026-06-19
+Agent: main
+Task: Decide fate of 3 uploaded PlantUML SVGs + close worklog tail
+
+Work Log:
+- Reviewed the 3 PlantUML SVGs in docs/_diagrams/uploaded-plantuml/:
+    1. architecture-layers.svg — "Shared Infrastructure Layers"
+    2. flow-execution-server-side.svg — "3A Studio: Flow Execution - Server-Side Path"
+    3. skill-creation-registration.svg — "Взаимодействие агентов: Создание и регистрация скилла"
+- Analyzed against 4 criteria: thematic match, render quality, duplication
+  with existing Mermaid, support cost.
+- Findings:
+  * Thematic mismatch: all 3 diagrams describe the 3A Studio project
+    (useFlowActions, route.ts POST handler, flow-utils.ts, node-exec.ts,
+    node-router.ts, node-helpers.ts, lib/llm/client.ts). None of this
+    codebase exists in Z-ai-platform.
+  * Phantom IDs: architecture-layers.svg references ZAI-CORE-001 and
+    ZAI-META-004 — neither ID exists in our graph (only ZAI-META-001,
+    ZAI-META-002, ZAI-ARCH-001/002, etc.).
+  * Render warning: flow-execution-server-side.svg contains an inline
+    PlantUML warning ("Please use CSS style instead of skinparam
+    ParticipantPadding") embedded in the rendered text.
+  * Toolchain cost: adding PlantUML support would require ~100MB Java
+    runtime + plantuml.jar in CI on top of existing graphviz + mermaid-cli
+    + cached chrome (~150MB). No comparable benefit.
+  * Partial duplication: skill-creation-registration.svg covers similar
+    ground to agent-lookup.mmd but with abstract roles instead of our
+    actual ID-graph edges (STD-FE-001 -> Related: STD-ARCH-001 etc.).
+- Decision: option (d) DISCARD. Deleted docs/_diagrams/uploaded-plantuml/
+  from the working tree. Original SVGs remain in /home/z/my-project/upload/
+  in case they need to be relocated to the 3A Studio project repo where
+  they belong.
+- No git history of the PlantUML files was ever created — they were
+  untracked, so the deletion does not appear in git diff. Only this
+  worklog entry records that the experiment happened and why it was
+  rejected.
+
+Stage Summary:
+- 3 PlantUML SVGs discarded from docs/_diagrams/uploaded-plantuml/. The
+  directory now contains only the 3 auto-rendered Mermaid diagrams
+  (pipeline, agent-lookup, bootstrap) in .mmd + .svg + .png formats.
+- Mermaid remains the single diagram toolchain for the platform: source
+  committed, render cached in CI artifact (30-day retention).
+- Worklog tail closed. Next session can start clean.
