@@ -2519,3 +2519,72 @@ Stage Summary:
 - Mermaid remains the single diagram toolchain for the platform: source
   committed, render cached in CI artifact (30-day retention).
 - Worklog tail closed. Next session can start clean.
+
+---
+Task ID: guard-readme-audit-2026-06-19
+Agent: main
+Task: Rewrite guard/README.md to close factual inaccuracy in external
+review feedback ("skeleton" claim). Audit actual state vs META-001 §4.14/§4.15.
+
+Work Log:
+- Audited Z-ai-guard repo actual contents:
+  * rules/ — 17 RULE-MONOLITH-*.md + INDEX.md ✅ (M002 complete)
+  * No scripts/, no tools/, no instructions/, no registry.json,
+    no MIGRATIONS.md in this repo
+- Cross-checked STD-META-001 §4.14 (Procedures) and §4.15 (Tools):
+  * 4 PROC-* (SETUP-001, UPDATE-002, COCHANGE-003, LINECOUNT-004)
+    listed as ACTIVE pointing to Z-ai-guard/... paths — files do
+    not exist. PHANTOM IDs.
+  * 2 TOOL-* (VERIFY-001, BUMP-005) listed as ACTIVE pointing to
+    Z-ai-guard/tools/verify-docs/... — files do not exist. PHANTOM IDs.
+- Cross-checked rules' Related: lists for PROC-*/TOOL-* references:
+  * 5 rules reference 4 dangling IDs that don't match <PREFIX>-<DOMAIN>-<NNN>
+    format (TOOL-MONOLITH-VERIFY, TOOL-MONOLITH-BUMP,
+    PROC-MONOLITH-SETUP, PROC-MONOLITH-LINECOUNT). Because the
+    verifier regex is \b(STD|RULE|PROC|TOOL|ZAI)-[A-Z]+-\d{3}\b,
+    these tokens are silently dropped — never become edges, never
+    trigger G02/G12. Hard checks report 13/13 PASS but the pass is
+    on the *filtered graph*, not on the rules as written.
+- Rewrote guard/README.md from scratch (226 line diff, +173/-53):
+  * Status: "PARTIAL — RULE migration complete (M002); PROC + TOOL
+    migration pending (M003, M004)"
+  * Current state table (count per component, what exists vs not)
+  * Actual repository layout (only rules/ + README.md)
+  * Planned layout (after M003 + M004)
+  * M002 section marked COMPLETE with full mapping table
+  * M003 section: PENDING, with planned PROC-* → file mapping +
+    "implements rule" column
+  * M004 section: PENDING, with planned TOOL-* → file mapping +
+    "used by rules" column
+  * Procedures table: 4 rows, all marked PENDING migration
+  * Tools table: 2 rows, marked PENDING migration, with note that
+    TOOL-VERIFY-002/004/006 live in standards/scripts/ and are
+    already active; TOOL-VERIFY-003 RETIRED 2026-06-18
+  * New "Known inconsistencies" section documenting all 3 issues
+    above (phantom IDs, dangling edges, missing instructions/)
+    with concrete file:line references
+  * Status summary explaining what enforces what today (L1 only;
+    L2 dormant)
+- Committed in Z-ai-guard: f4a9391 "docs(readme): rewrite to
+  reflect actual state"
+- Pushed to GitHub origin/main
+- Bumped submodule pointer in Z-ai-platform: ac2bcd5 -> f4a9391
+  (commit a7879f1)
+- Pushed Z-ai-platform to GitHub origin/main
+
+Stage Summary:
+- guard/README.md no longer claims "SKELETON — pending migration from
+  AHG v2.5.0" — that was inaccurate (rules ARE migrated). New status:
+  "PARTIAL — RULE migration complete (M002); PROC + TOOL migration
+  pending (M003, M004)".
+- 3 known inconsistencies are now documented in the README itself,
+  not buried in worklog. Each has concrete file references and a
+  fix path tied to M003/M004.
+- The 5 dangling Related: edges in rules (TOOL-MONOLITH-VERIFY etc.)
+  are flagged as a verifier blind spot — the regex silently drops
+  non-matching tokens, so G02 PASS does not mean what it appears
+  to mean. This is "structural assurance, not semantic assurance"
+  made concrete.
+- Next: M003 (PROC migration) + M004 (TOOL migration) can now be
+  planned with the gap matrix from the new README as the source
+  of truth.
