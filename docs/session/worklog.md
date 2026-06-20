@@ -3445,3 +3445,50 @@ Stage Summary:
 - No code changes, no verifier changes. Pure documentation commit.
 - Verifier status unchanged: verify-standards.js 8/8 PASS,
   verify-id-graph.js 13/13 PASS, 0 warnings.
+
+---
+Task ID: o-016-sequencing-decision-2026-06-21
+Agent: main (Super Z)
+Task: Update O-016 with sequencing decision after user clarified that
+skills integration comes first, dashboard adaptation after. P-MAS_init
+inspected to understand what infrastructure already exists.
+
+Work Log:
+- User clarified P-MAS_init status: "experimental init" that will be
+  brought to completion. Skills integration is next priority, dashboard
+  adaptation comes after.
+- Shallow-cloned github.com/stsgs1980/P-MAS_init.git to inspect.
+- Found: Next.js 16 + Prisma + SQLite + shadcn/ui dashboard. Currently
+  MAS (Multi-Agent System) visualization with 26 agents in 8 role
+  groups, 20 cognitive formulas. NOT a 4-module dashboard.
+- Reusable infrastructure: design system (monochrome cyan), W1280
+  layout, shadcn/ui kit (~50 components), Prisma+API pattern, WebSocket
+  mini-service, resilience layer (api-retry, circuit-breaker, fallback).
+- Domain model needs replacement: Agent/Task/role groups -> Repo/Event
+  for 4-module state. Either fork+rewrite (A1), add /repos view (A2),
+  or self-monitoring (A3).
+- Key finding: P-MAS_init is NOT yet a consumer of Z-ai-standards. Its
+  `standards/` folder contains custom standards (MARKDOWN_STANDARD_RU,
+  No-Unicode_Policy) -- not submodule pointers. Before P-MAS_init can
+  visualize Z-ai-platform state, it must onboard as consumer (part of
+  skills integration work).
+- Updated O-016: replaced T1/T2/T3 tiers (which mixed 3 independent
+  axes -- form factor, refresh model, scope -- into one spectrum) with
+  A1/A2/A3 approaches (form factor only, scope implicit). Added
+  sequencing decision section with explicit 3-step execution order.
+- Cleaned up: deleted P-MAS_init shallow clone (was only for inspection,
+  not needed in workspace).
+- Updated DECISIONS_LOG Change History with second 2026-06-21 entry.
+
+Stage Summary:
+- O-016 now has clear trigger condition: "after skills integration is
+  complete and P-MAS_init is onboarded as first consumer". NOT calendar-
+  based, NOT "when first consumer appears" -- specifically tied to the
+  skills integration milestone.
+- Skills integration is the next priority. NOT started yet -- user said
+  "первично нам надо будет разбираться со скилами" (will need to), which
+  is future tense, not "do it now".
+- 3-step execution order encoded in O-016 action items: (1) skills
+  integration, (2) P-MAS_init onboarding as first consumer, (3) dashboard
+  adaptation. Each step's output is the next step's input.
+- No code changes. Verifier status unchanged: 8/8 + 13/13, 0 warnings.
