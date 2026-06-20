@@ -3239,3 +3239,114 @@ Stage Summary:
   * ~5 more long files in skills/ that may benefit from same split
     (react-router 1002, grid-patterns 1393, react-19-patterns 638)
 - Mode-bit noise tail: CLOSED (this task).
+
+---
+Task ID: w11-tail-split-3-standards-2026-06-21
+Agent: main
+Task: Close the W11 long-file soft-warning tail by splitting 3 parser-bound
+standards (META-001 1165, DOC-002 1012, DESIGN-001-profile 1098) using the
+companion-file pattern established in pilot split (DESIGN-001 v3.1.0) and
+the LESSON-001 root-cause fix principle (refine check scope, don't whitelist).
+
+Work Log:
+- Recon: read top-level structure of all 3 files. Section-size analysis
+  revealed the natural split candidates:
+  * META-001 §4.13-4.17 (ID Registry tables, 173 lines, reference) + §12
+    FAQ (78 lines, explanatory) -- both safe to externalize.
+  * DOC-002 §10 ESLint Integration (354 lines, reference implementation
+    detail with code blocks) -- safe to externalize.
+  * DESIGN-001-profile §19 Card Archetypes (168 lines, concrete code
+    examples) -- safe to externalize as sub-companion.
+
+- Critical: §4.18 (File Size Limits, canonical source for RULE-MONOLITH-012
+  and PROC-LINECOUNT-004) STAYS in META-001. It is active enforcement
+  material read by guard scripts, not reference. This was the key
+  architectural decision -- extract reference material, keep canonical.
+
+- Wrote 3 split scripts in /home/z/my-project/scripts/ (persisted per
+  Rule 9 Script Persistence so future re-runs are deterministic):
+  * split_meta001.py           -- 1165 -> 941 lines (2 companions: registry 216, faq 106)
+  * split_doc002.py            -- 1012 -> 658 lines (1 companion: eslint-integration 389)
+  * split_design001_profile.py -- 1098 -> 947 lines (1 sub-companion: cards 209)
+
+- All 4 new companion files use the established pattern: "> Companion to:"
+  header line, no STD- ID, "Why this file exists" + "How cross-references
+  resolve" sections, section numbers preserved verbatim. Same pattern as
+  DESIGN-001-profile-terminal-dashboard.md (v3.1.0).
+
+- Header updates (block-mode, all in same commit per STD-ARCH-001 §8.3):
+  * META-001 v2.0.4 -> v2.0.6 (skipped v2.0.5 = pilot split, already on remote)
+    - Header: added "Companion files:" line listing 2 new files
+    - §4.18.4 exempt list: added new "Standards companion files" category
+      (5 files, 1867 lines -- includes the pre-existing
+      DESIGN-001-profile-terminal-dashboard.md which was not previously
+      in the exempt list)
+    - §4.18.4 counts updated: 49 -> 55 files, 17 165 -> 21 322 lines
+    - §4.18.4 sub-category counts refreshed: session logs 4110 -> 4827
+      (worklog + SESSION_NOTES grew), INDEX.md 291 -> 304 (sandbox/INDEX
+      grew after pilot split), references 42/12622 -> 43/14182 (pilot
+      split added components-* files)
+    - §15 Version History: v2.0.6 entry with full rationale
+  * DOC-002 v2.4.2 -> v2.4.3
+    - Header: added "Companion file:" line, updated entry-point note
+    - §14 Version History: v2.4.3 entry
+  * DESIGN-001 v3.1.0 -> v3.1.1
+    - Header: "Companion file:" -> "Companion files:" (now 2)
+    - Added v3.1.1 structural-change paragraph documenting sub-companion
+    - §14 stub: added note about §19 sub-companion
+  * DESIGN-001-profile-terminal-dashboard.md: no version bump (it is a
+    companion, not parser-bound; version inherits from parent)
+
+- Verifier fix (LESSON-001 root-cause again):
+  * After split, verify-id-graph.js fired 4 new W12 warnings on the 4
+    new companion files ("no §XA Known Issues section"). This was
+    because isNormative was determined by path only
+    (filePath.includes('standards/standards/')) -- any .md in that
+    directory was treated as normative.
+  * Per LESSON-001 (refine scope, don't whitelist each companion),
+    added isCompanion regex check: /^>\\s*Companion to:/m. Files
+    matching are excluded from isNormative, so W12 and W15 skip them.
+  * First attempt used too-narrow regex /^>\\s*Companion to:\\s+STD-/
+    which missed DESIGN-001-profile-cards.md (sub-companion, its
+    "Companion to:" points to another companion file, not to STD-).
+    Generalised to /^>\\s*Companion to:/ -- matches any companion,
+    direct or transitive. Root-cause fix scales O(1) for all future
+    companions of any depth.
+
+- Verification (final):
+  * verify-id-graph.js: 13/13 HARD PASS, **0 warnings** (was 3 W11 +
+    3 W12 + 2 W13 = 8 in earlier sessions; 3 W11 + 0 W12 + 0 W13 = 3
+    immediately before this task; now 0). Best result in project history.
+  * verify-standards.js: 7/7 PASS
+  * check-md.sh on 4 new companion files: 4/4 PASS (all skip ESLint +
+    lint-md.js as expected in fresh-clone mode)
+
+- Block-mode commit (this task):
+  * standards: split scripts + 4 new companion files + 3 updated
+    standards + verifier fix -- single atomic commit
+  * platform: submodule pointer bump only
+  * No guard or skills changes (no content changes in those repos)
+
+Stage Summary:
+- W11 tail: CLOSED. 3 long files (3275 lines total) reorganised into
+  3 parents (2546 lines) + 4 companions (920 lines). Each parent now
+  under 1000-line soft cap; each companion under 400-line soft cap.
+- verifier isNormative scope refined -- companion files (direct or
+  transitive) now correctly excluded from W12/W15. O(1) scaling for
+  future companion additions.
+- §4.18.4 exempt list now has 5 categories (was 4): session logs,
+  migration log, INDEX.md, references, standards companion files.
+  The new category makes the companion pattern first-class in the
+  file-size policy.
+- 0 warnings is a milestone -- the project has carried 3-8 soft
+  warnings since v2.0 (2026-06-17). This task closes the last 3 W11
+  warnings AND prevents W12 from firing on the new companions.
+- LESSON-001 (root-cause fix scales O(1), whitelist scales O(N))
+  applied twice in this task: (1) isNormative scope refinement for
+  W12, (2) isCompanion regex generalisation for sub-companions.
+  Both are candidates for promotion to LESSON-003 (or a unified
+  RULE-NNN on "automated check scope refinement") once a fourth
+  case appears.
+- Tail #2 still pending: ~5 long files in skills/ that may benefit
+  from same companion pattern (react-router 1002, grid-patterns 1393,
+  react-19-patterns 638, plus possibly others). Separate task.
