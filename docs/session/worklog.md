@@ -3492,3 +3492,63 @@ Stage Summary:
   integration, (2) P-MAS_init onboarding as first consumer, (3) dashboard
   adaptation. Each step's output is the next step's input.
 - No code changes. Verifier status unchanged: 8/8 + 13/13, 0 warnings.
+
+---
+Task ID: o-017-skills-cascade-plan-2026-06-21
+Agent: main (Super Z)
+Task: Draft O-017 — 6-phase cascade plan for skills execution contract,
+bridging governance (markdown rules) to execution (runtime enforcement).
+Triggered by user confirmation of 4 task areas (cataloging, integration
+shape, structure, tutorial) + governance/execution gap table + commit-work
+pilot shape, plus user authorization: "можешь сам набросать какскад задач".
+
+Work Log:
+- Read O-011 (88 vs 35 skill reconciliation, raised 2026-06-18). Was
+  deferred "until skill count exceeds 50". Cascade's Phase A1 formalizes
+  this as active work, not deferral.
+- Drafted governance/execution gap table as O-017 context section. 6
+  rows: skills/guard/standards/worklog/DECISIONS_LOG/SESSION_NOTES §12 —
+  each row shows what we have (governance) vs what we lack (execution)
+  vs why it matters for autonomous agents.
+- Identified bridge insight: skills/ is the critical bridge because
+  when skill is just .md, agent can read but not invoke. When skill
+  defines trigger/hook/guard-check/standard-check/success-criterion,
+  .md becomes callable capability. Defining this contract shape IS
+  the gateway to execution layer for other 3 modules.
+- Designed 6-phase cascade:
+  * Phase A (discovery, parallel-safe): A1 catalog 35 skills, A2 audit
+    gap table against actual repo state.
+  * Phase B (pilot, sequential after A): B1 design commit-work contract
+    (5-tuple shape), B2 implement as pre-commit hook in Z-ai-platform
+    (eat our own dogfood).
+  * Phase C (generalize, after B): C1 extract template from B2, C2
+    apply to 2-3 highest-value skills (database-schema-designer,
+    gepetto, qa-test-planner candidates).
+  * Phase D (governance, parallel after B1): D1 verify-skills.js (mirror
+    of verify-standards.js), D2 tiered hard caps (SKILL.md <=800,
+    references <=2000, CONTRACT.md <=200 -- NOT flat 1000, per O-015).
+  * Phase E (consumer, after C2+D1): E1 onboard P-MAS_init as first
+    consumer, E2 define install-and-use tutorial format.
+  * Phase F (dashboard, after E1): F1 decide A1/A2/A3, F2 implement
+    (this is O-016 final).
+- Documented iteration loops: B2 may revise B1, D1 may feed back to B1,
+  E1 may revise C1 template or D2 caps. Cascade is iterative not
+  waterfall.
+- Documented 3 honest uncertainties: contract shape is hypothesis (B1
+  will validate), 35-skill catalog may not match execution reality,
+  P-MAS_init onboarding may surface architectural issues.
+- Cross-referenced O-017 to O-011 (closes it), O-015 (feeds it), O-016
+  (enables it). All 4 open questions now linked in execution order.
+- Updated DECISIONS_LOG Change History.
+
+Stage Summary:
+- O-017 added. Total open: O-015, O-016, O-017 (plus older O-001..O-013
+  still open, O-014 was decided).
+- Cascade provides structure for "разбираться со скилами" — not as
+  abstract task, but as 6-phase plan with concrete outputs per phase.
+- commit-work chosen as pilot because: (1) clear trigger (git commit),
+  (2) clear guard (RULE-012), (3) clear standard (STD-DOC-002), (4)
+  Z-ai-platform itself can be dogfood consumer (we commit here daily).
+- Cascade status: OPEN, awaits user approval before Phase A execution.
+  Not started yet.
+- No code changes. Verifier status unchanged: 8/8 + 13/13, 0 warnings.

@@ -953,6 +953,199 @@ Consumer-project state (P-MAS_init's own view of itself):
 
 ---
 
+### O-017: Skills execution contract — cascade plan for governance-to-execution bridge
+
+**Date raised:** 2026-06-21
+**Status:** OPEN (cascade proposed, awaits approval before Phase A execution)
+
+**Source:** User confirmation after V11 + O-015/O-016 work: «если эти 4
+модуля (как мозговой нейоро центр) будет работать как задумано, ничего не
+помешает построить систему автономных агентов». User explicitly authorized
+cascade drafting: «можешь сам набросать какскад задач. это говорит только
+о том что ты видишь систему а не просто файлы и папки».
+
+**Context — governance/execution gap (documented as near-term goals):**
+
+The 4 modules currently provide governance (rules as markdown), not
+execution (runtime enforcement). Both layers are needed for autonomous
+agents.
+
+| What we have (governance) | What we lack (execution) | Why it matters |
+|---|---|---|
+| skills/ as descriptive .md | Runtime that loads skill by name and invokes it | Without runtime, skills are inert text |
+| guard/ as RULE-NNN markdown | Pre-flight check that blocks action before execution | Without pre-flight, RULE-NNN is advisory, not enforced |
+| standards/ as STD-NNN | Linter/loader that checks agent follows standard in real-time | Without linter, standards are enforced only by verifier runs |
+| worklog.md as append-only log | Memory: what agent tried, what worked, what didn't (RAG-style) | Without memory, agent repeats mistakes |
+| DECISIONS_LOG D-NNN | Decision mechanism: how agent chooses between alternatives | Without mechanism, decisions are LLM-guessed, not structured |
+| SESSION_NOTES §12 LESSON | Feedback loop: how experience becomes updated rule | Without loop, lessons stay in markdown, never feed back into rules |
+
+**Bridge insight:** skills/ is the critical bridge between governance and
+execution. When a skill is just .md, agent can read it but not invoke it.
+When a skill defines trigger/hook/guard-check/standard-check/success-
+criterion, .md becomes a callable capability. Defining this execution
+contract shape IS the gateway to building execution layer for the other
+3 modules.
+
+**Cascade — 6 phases, ~12 tasks, iterative (not strictly linear):**
+
+```
+Phase A (discovery, parallel)         Phase B (pilot, sequential)
+  A1 catalog 35 skills                  B1 design contract (commit-work)
+  A2 audit gap table                    B2 implement pilot
+         |                                    |
+         v                                    v
+Phase C (generalize, sequential)       Phase D (governance, parallel after B1)
+  C1 extract template from B2           D1 skills/scripts/verify-skills.js
+  C2 apply to next 2-3 skills           D2 hard caps for skills/ (V12 equiv)
+         |                                    |
+         +-------------+----------------------+
+                       v
+                Phase E (consumer, sequential)
+                  E1 onboard P-MAS_init as first consumer
+                  E2 define install-and-use tutorial format
+                       |
+                       v
+                Phase F (dashboard, sequential)
+                  F1 decide A1/A2/A3 approach (O-016)
+                  F2 implement dashboard adaptation (O-016 final)
+```
+
+**Phase A — Discovery (parallel-safe, no dependencies):**
+
+- **A1: Catalog all 35 skills.** For each skill in skills/skills/INDEX.md,
+  record: name, ZAI-ID (or none), domain, current state (active/skeleton/
+  duplicate/stale), source line count, has-SKILL.md, has-references/. This
+  is O-011's "35-skill catalog" formalized as a structured table, not just
+  INDEX.md prose. Output: `skills/docs/CATALOG.md`.
+- **A2: Audit governance/execution gap.** Confirm the 6-row table above by
+  checking each row against actual repo state. For each gap, classify as
+  "blocking autonomous agents" vs "acceptable for now". Output: section in
+  SESSION_NOTES §13 (new) or this O-017 update.
+
+**Phase B — Pilot (sequential, depends on A1+A2):**
+
+- **B1: Design execution contract for `commit-work` skill.** Define the
+  5-tuple shape concretely:
+  - trigger: what event invokes this skill (e.g., `git commit` intent)
+  - hook: what runtime hook this connects to (e.g., pre-commit)
+  - guard check: which RULE-NNN(s) pre-flight (e.g., RULE-012 block-mode)
+  - standard check: which STD-NNN(s) validate output (e.g., STD-DOC-002
+    commit message format)
+  - success criterion: what counts as "skill executed successfully"
+    (e.g., commit passed verifier, no rule violations)
+  Output: `skills/skills/commit-work/CONTRACT.md` (new file, becomes the
+  reference template for all future contracts).
+- **B2: Implement commit-work execution contract.** Eat our own dogfood —
+  Z-ai-platform itself becomes the consumer of commit-work skill. Install
+  the pre-commit hook in Z-ai-platform, wire it to verify-standards.js +
+  verify-id-graph.js + RULE-012 check. Prove the contract shape works
+  end-to-end on one skill before generalizing.
+
+**Phase C — Generalize (sequential, depends on B2):**
+
+- **C1: Extract execution contract template.** From commit-work pilot,
+  extract the abstract shape (5-tuple) into a template any skill can fill.
+  Output: `skills/templates/CONTRACT_TEMPLATE.md` + update STD-SKILL-001
+  to require CONTRACT.md as mandatory skill file (alongside SKILL.md).
+- **C2: Apply template to 2-3 highest-value skills.** Candidates:
+  `database-schema-designer` (high-value, clear trigger = "design DB"),
+  `gepetto` (planning skill, clear trigger = "before multi-step task"),
+  `qa-test-planner` (clear trigger = "before QA pass"). Validates that
+  the template is portable, not commit-work-specific.
+
+**Phase D — Governance (parallel-safe after B1):**
+
+- **D1: Create skills/scripts/verify-skills.js.** First verifier for
+  skills/ subtree, mirror of standards/scripts/verify-standards.js. Initial
+  checks (informed by B1's contract shape): every skill has SKILL.md, every
+  skill has CONTRACT.md (post-C1), file size caps, INDEX.md presence.
+- **D2: Add hard caps for skills/ (V12 equivalent).** Tiered caps (e.g.,
+  SKILL.md ≤ 800, references ≤ 2000, CONTRACT.md ≤ 200) — informed by A1
+  catalog and B1 contract shape. NOT a flat 1000-line cap (per O-015
+  rationale: reference docs may legitimately be long).
+
+**Phase E — Consumer integration (sequential, depends on C2 + D1):**
+
+- **E1: Onboard P-MAS_init as first consumer.** Replace P-MAS_init's
+  custom `standards/` folder with submodule pointers to Z-ai-standards.
+  Run bootstrap.sh. Install hooks. Verify skills trigger correctly in
+  P-MAS_init context. This is the action item from O-015 and O-016.
+- **E2: Define install-and-use tutorial format.** Based on real E1
+  experience, write the first "how to consume skill X in your project"
+  tutorial. Output: `skills/docs/CONSUMER_GUIDE.md` + per-skill
+  INSTALL.md where non-trivial.
+
+**Phase F — Dashboard (sequential, depends on E1):**
+
+- **F1: Decide A1/A2/A3 approach for P-MAS_init.** With P-MAS_init as a
+  live consumer producing real events (skill invocations, verifier runs,
+  drift signals), decide which dashboard approach fits. This is O-016's
+  Step 3.
+- **F2: Implement dashboard adaptation.** Final O-016 execution.
+
+**Iterative (not strictly linear):**
+
+The cascade has feedback loops, not just forward edges:
+- B2 (pilot implementation) may reveal contract shape issues that
+  require revising B1 (and propagating to C1 template).
+- D1 (verify-skills.js) may surface governance gaps that feed back into
+  B1 contract shape (e.g., "verify-skills.js can't check X because
+  CONTRACT.md doesn't declare it").
+- E1 (P-MAS_init onboarding) may surface integration issues that
+  require revising C1 template or D2 caps.
+
+Each phase's output is the next phase's input, but each phase may also
+send corrections backward. Treating this as waterfall would be wrong;
+treating it as completely ad-hoc would also be wrong. The cascade
+provides structure; iteration provides correction.
+
+**Honest uncertainties:**
+
+1. **Contract shape is a hypothesis, not confirmed design.** The 5-tuple
+   (trigger/hook/guard/standard/success) is my proposed shape based on
+   the commit-work example. B1 will validate or revise it. If B1 reveals
+   the shape is wrong (e.g., needs 7 fields, or 4), the cascade from B1
+   forward gets revised.
+2. **35-skill catalog may not match execution reality.** A1 may discover
+   that some "skills" in INDEX.md are documentation, not callable
+   capabilities — and some callable capabilities exist as scripts/ but
+   aren't in INDEX.md. Catalog may grow or shrink.
+3. **P-MAS_init onboarding may surface architectural issues.** E1 is the
+   first real consumer integration. It may reveal that our 4-repo split
+   (D-001) has flaws when actually consumed, requiring fixes back at the
+   source-repo layer.
+
+**Action items (execution order, NOT all sequential):**
+
+- [ ] **Phase A (start first, parallel-safe):**
+  - [ ] A1: Catalog 35 skills → `skills/docs/CATALOG.md`
+  - [ ] A2: Audit governance/execution gap → SESSION_NOTES §13 (new)
+- [ ] **Phase B (after A1+A2):**
+  - [ ] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md`
+  - [ ] B2: Implement pilot in Z-ai-platform (pre-commit hook + wiring)
+- [ ] **Phase C (after B2):**
+  - [ ] C1: Extract contract template → `skills/templates/CONTRACT_TEMPLATE.md` + STD-SKILL-001 update
+  - [ ] C2: Apply template to 2-3 skills (database-schema-designer, gepetto, qa-test-planner candidates)
+- [ ] **Phase D (parallel after B1):**
+  - [ ] D1: Create `skills/scripts/verify-skills.js`
+  - [ ] D2: Add tiered hard caps (V12 equivalent)
+- [ ] **Phase E (after C2 + D1):**
+  - [ ] E1: Onboard P-MAS_init as first consumer (O-015/O-016 action)
+  - [ ] E2: Define install-and-use tutorial format
+- [ ] **Phase F (after E1):**
+  - [ ] F1: Decide A1/A2/A3 dashboard approach (O-016 Step 3)
+  - [ ] F2: Implement dashboard adaptation (O-016 final)
+
+**Cross-references:**
+
+- Closes O-011 (35-skill catalog) by formalizing it as Phase A1.
+- Feeds O-015 (W11 scope) by defining skills/ governance in Phase D.
+- Enables O-016 (dashboard) by producing real consumer events in Phase E1.
+- Applies LESSON-001 (root-cause encoded fix) by encoding the contract
+  shape as a template (Phase C1), not as per-skill ad-hoc design.
+
+---
+
 ## Change History
 
 | Date | Change |
@@ -961,3 +1154,4 @@ Consumer-project state (P-MAS_init's own view of itself):
 | 2026-06-18 | Resolved O-006 and O-007 (sandbox persistence + consumer onboarding) via extraction from "Про скилы" package -- see SESSION_NOTES §9. Added O-008 (MAS roadmap), O-009 (standard typology), O-010 (R1-R18 recommendations triage), O-011 (88 vs 35 skill reconciliation), O-012 (ui-clarity_sts adoption), O-013 (MAS agent ID reservation), O-014 (Sandbox Documentation final triage -- DECIDED: keep 6/7, drop commands_reference). |
 | 2026-06-21 | Added O-015 (W11 scope = standards/ only — explicitly document, do NOT extend to skills/guard/platform; defer to consumer-integration phase). Added O-016 (dashboard for 4-module state — idea stage, 3 tiers under consideration T1/T2/T3, deferred pending first consumer project). Both raised as a result of V11 implementation investigation that revealed W11 was never project-wide — its scope was always standards/ subtree only. |
 | 2026-06-21 | Updated O-016 with sequencing decision after P-MAS_init inspection. P-MAS_init is "experimental init" Next.js dashboard (currently MAS visualization, 26 agents in 8 role groups). User clarified: skills integration comes first, dashboard adaptation after. Three approaches A1/A2/A3 deferred until P-MAS_init becomes a formal consumer (its `standards/` currently has custom files, not submodule pointers to Z-ai-standards). O-016 action items restructured into 3-step execution order: (1) skills integration, (2) P-MAS_init onboarding as first consumer, (3) dashboard adaptation. |
+| 2026-06-21 | Added O-017 (Skills execution contract — cascade plan). 6-phase cascade (A discovery, B pilot on commit-work, C generalize, D governance, E consumer integration, F dashboard) bridging governance (markdown rules) to execution (runtime enforcement). Governance/execution gap table documented as near-term goals context. Closes O-011 (formalizes 35-skill catalog as Phase A1), feeds O-015 (Phase D defines skills/ governance), enables O-016 (Phase E1 produces real consumer events). Cascade is iterative not waterfall — B2/D1/E1 may send corrections backward to B1 contract shape. Status: OPEN, awaits approval before Phase A execution. |
