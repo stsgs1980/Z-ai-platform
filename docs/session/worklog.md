@@ -2995,12 +2995,23 @@ Work Log:
     - Phase coverage: V04 now scans 31 .md (was 23); V09 scans 32 (was 24).
 
   * scripts/verify-id-graph.js:
-    - W13_WHITELIST: added 3 basenames (react-components.md,
-      sandbox-commands-cheatsheet.md, sandbox-hooks-cookbook.md)
-      referenced in META-001 §15 v2.0.5 change history. Without this,
-      W13 checker sees bare basenames in backticks and flags them as
-      missing files (they exist in skills/ or standards/docs/sandbox/
-      subtrees, not the standards/ tree W13 scans).
+    - W13 ROOT-CAUSE FIX (v1.1.4): added stripCh() function that strips the
+      body of any '## N. Version History' / '## N. Change History' / '## Changelog'
+      section before W13 scans. Such sections naturally mention old/renamed/split
+      filenames as historical facts (e.g. 'Removed: react-components.md (was
+      1449; now 55-line INDEX)') -- these are NOT navigational references and
+      should not trigger W13.
+    - Initial approach was to add 3 basenames to W13_WHITELIST; user pushed
+      back with 'если что то автоматом срабатывает и надо делать, значит надо
+      делать а не обходить!!!! Максимально автоматизировать'. Replaced the
+      whitelist approach with the stripCh root-cause fix. The whitelist
+      approach would have required a new entry for every future changelog
+      mention -- unbounded growth. stripCh generalises to any future
+      change-log entry mentioning a filename.
+    - W13_WHITELIST kept for its other 3 categories: generic filenames
+      (SKILL.md, INDEX.md), forward refs to planned files (validate.sh,
+      install.sh, etc.), and cross-repo structural refs (Z-ai-skills/
+      skills/INDEX.md).
 
   * skills/phi-layout/SKILL.md + skills/phi-layout_sts/SKILL.md:
     references/react-components.md description updated to "INDEX file
@@ -3011,23 +3022,27 @@ Work Log:
   * verify-id-graph.js: 13/13 HARD PASS
     - W11: 4 -> 3 (sandbox-hooks-cookbook.md removed from W11; was
       1011 lines, now 58-line INDEX)
-    - W13: 2 -> 1 (added 3 basenames to whitelist; pre-existing
-      Z-ai-guard/rules/RULE-MONOLITH-012.md tech debt remains documented
-      in META-001 §15 v2.0.3)
-    - Total warnings: 6 -> 4
+    - W13: 2 -> 0 (stripCh root-cause fix suppresses BOTH the 3 new
+      false-positives from this commit's changelog AND the 2 pre-existing
+      warnings on META-001 §15 v2.0.3 changelog entries that mentioned
+      'Z-ai-guard/AGENT_RULES.md' and 'Z-ai-guard/rules/RULE-MONOLITH-012.md')
+    - Total warnings: 6 -> 3
   * verify-standards.js: 7/7 PASS (V04/V08/V09 now cover all split files)
   * check-md.sh: 12/12 PASS (11 sandbox files + META-001)
   * All 14 sub-files under 400-line soft cap; all 3 INDEX files under
     100 lines.
 
 - Local commits (block-mode, atomic per STD-ARCH-001 §8.3):
-  * standards: 5091bcd "pilot split: 3 long files into 14 sub-files + 3 INDEX files"
+  * standards: 56127c7 "pilot split: 3 long files into 14 sub-files + 3 INDEX files"
+    (amended once to replace initial W13 whitelist approach with stripCh
+    root-cause fix per user feedback)
   * skills: 815df88 "pilot split: react-components.md (1449) -> 6 sub-files + INDEX"
-  * platform: (pending — this worklog entry + both submodule pointer bumps)
+  * platform: cd18cd1 "chore(submodule): bump standards + skills for pilot split"
+    (amended once after standards SHA changed due to amend above)
 
-- Push status: BLOCKED. GitHub PAT expired during this session.
-  All 3 commits are ready locally and will push as soon as the token is
-  refreshed. Platform commit will be created after the worklog append.
+- Push status: initially BLOCKED (GitHub PAT expired during session).
+  User provided fresh PAT via upload/Zai push.txt. Pushed all 3 repos
+  successfully after the root-cause fix was amended in.
 
 Stage Summary:
 - 3 pilot splits complete. 3137 lines (across 3 long files) reorganised
@@ -3041,7 +3056,14 @@ Stage Summary:
   naming (commands-{file,system,dev,media}, hooks-{basic,ai,routes,
   patterns}, components-{split-column,bento,grid,tailwind,server,
   dark-mode}), and the verifier infrastructure (verify-standards.js +
-  verify-id-graph.js W13 whitelist) was extended to cover the new files.
+  verify-id-graph.js stripCh root-cause fix) was extended to cover the
+  new files.
+- Architectural lesson: when an automated check fires on a legitimate
+  use case (here: changelog entries mentioning filenames), the fix is
+  to refine the check's scope (skip change-history sections), NOT to
+  whitelist each new trigger. Whitelist approaches scale O(N) with the
+  number of mentions; root-cause fixes scale O(1). User's directive:
+  'максимально автоматизировать, или я плакать буду от роста проблем'.
 - W11 long-file soft warnings: 4 -> 3. The remaining 3 (DESIGN-001
   1099, DOC-002 1013, META-001 1166) are pre-existing standards that
   would need their own split work — separate task, not part of this
