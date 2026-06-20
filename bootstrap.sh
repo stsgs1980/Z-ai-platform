@@ -8,9 +8,13 @@
 # What it does:
 #   1. Clones (or updates) stsgs1980/Z-ai-platform into /home/z/my-project/Z-ai-platform/
 #      with all submodules (skills, standards, guard).
-#   2. Symlinks every skill from Z-ai-platform/skills/skills/* into
+#   2. Normalizes git mode-bit handling (core.fileMode=false on platform + all
+#      submodules). Sandbox fs mount sets +x on all files, which git's default
+#      core.fileMode=true flags as 'modified' (17-file noise). See
+#      SESSION_NOTES.md §12 LESSON-002.
+#   3. Symlinks every skill from Z-ai-platform/skills/skills/* into
 #      /home/z/my-project/skills/ so the sandbox can find them.
-#   3. Prints a list of available custom skills at the end.
+#   4. Prints a list of available custom skills at the end.
 #
 # Run this once at the start of any new sandbox session where you want your
 # custom skills back.
@@ -33,7 +37,20 @@ else
 fi
 
 echo ""
-echo "=== Step 2: Symlink custom skills into sandbox skills dir ==="
+echo "=== Step 2: Normalize git mode-bit handling ==="
+# Sandbox fs mount sets +x on all files (so .sh scripts run). Git's default
+# core.fileMode=true flags the index/working-tree mismatch as 'modified'.
+# Setting false makes git ignore mode bit changes. Existing index modes are
+# preserved: .sh files stay 100755, docs stay 100644. New .sh files need
+# explicit 'git update-index --chmod=+x'.
+# See SESSION_NOTES.md §12 LESSON-002 for full rationale.
+cd "$PLATFORM_DIR"
+git config core.fileMode false
+git submodule foreach --recursive 'git config core.fileMode false' 2>/dev/null || true
+echo "  core.fileMode=false applied to platform + submodules"
+
+echo ""
+echo "=== Step 3: Symlink custom skills into sandbox skills dir ==="
 
 mkdir -p "$SANDBOX_SKILLS_DIR"
 
@@ -75,7 +92,7 @@ for skill_dir in "$TOOLKIT_SKILLS_DIR"/*/; do
 done
 
 echo ""
-echo "=== Step 3: Available custom skills ==="
+echo "=== Step 4: Available custom skills ==="
 echo "Linked: $LINKED_COUNT"
 echo "Skipped (already exist as real dirs): $SKIPPED_COUNT"
 echo ""

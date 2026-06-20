@@ -3076,3 +3076,166 @@ Stage Summary:
   1393, react-19-patterns 638) without further protocol design work.
 - Block mode = single atomic change touching 3 repos in 1 platform
   commit. No piecemeal, no half-states in the graph.
+
+---
+Task ID: lessons-registry-section-12-2026-06-21
+Agent: main
+Task: Add §12 "Structured lessons registry" to SESSION_NOTES.md as the
+missing layer between §1-5 (topic-organized operational gotchas) and §8
+(bridge table "Lesson -> D-NNN"). Captures cross-cutting lessons with
+explicit structured fields (Trigger / Root cause / Fix principle /
+Applies-to / Source / Promoted-to). First entry = the W13 stripCh
+root-cause lesson already documented in the pilot-split worklog entry
+above, but now elevated from chronicle to structured registry.
+
+Work Log:
+- User asked: "ADR / Decisions.md / Аналог у нас ведется?" plus "Z.ai
+  Agent Toolkit либо будет убит либо будет сильно изменен. на него не
+  ориентируемся" plus "принимаю/можем документировать как решено, и
+  продолжить хвосты".
+- Recon found the existing dual-layer ADR analog:
+  * DECISIONS_LOG.md (D-NNN formal ADR + O-NNN open questions) -- formal
+    layer, 810 lines, 10 decided + 14 open.
+  * SESSION_NOTES.md §1-5 = operational gotchas by topic + §8 = bridge
+    table to D-NNN -- informal layer, 638 lines pre-this-task.
+- Original proposal was a new file standards/lessons-registry.md. After
+  finding §8, refined to: extend SESSION_NOTES.md with §12 instead of
+  creating a new file. Avoids reinventing a layer that already exists
+  and keeps all session knowledge in one navigable document.
+- T3 (ChromaDB via session-experience skill) explicitly deprecated per
+  user guidance. §12.3 documents why: toolkit may be killed/reworked,
+  and architecting the lessons layer around a toolkit-dependent runtime
+  creates coupling that survives only as long as the toolkit does.
+  Revised T3 = portable markdown; cross-project = copy the bundle.
+
+- Edits to SESSION_NOTES.md (4 atomic edits in single MultiEdit):
+  * "Last Updated: 2026-06-18" -> "2026-06-21"
+  * TOC: added §12 line
+  * Inserted §12 between §11.4 and Change History:
+    - §12.1 Purpose and layering (positioning vs §1-5 and §8; promote
+      path diagram)
+    - §12.2 Entry format (7-field table)
+    - §12.3 Portability and toolkit-deprecation note
+    - §12.4 LESSON-001: root-cause fix scales O(1), whitelist scales O(N)
+      (the W13 stripCh lesson, structured into the 7 fields)
+  * Change History: added 2026-06-21 row
+
+- LESSON-001 source ref: worklog Task ID
+  `pilot-split-3-long-files-2026-06-21`, commit `362c65d`. The lesson
+  was already in that worklog entry as prose (lines 3061-3066); §12.4
+  elevates it to structured form so it is searchable and ready to
+  promote to a future RULE-NNN on "automated check design".
+
+Stage Summary:
+- §12 added. SESSION_NOTES.md 638 -> 736 lines (still well under
+  any size cap; this is a session doc, not a parser-bound standard).
+- Layering now three-tier:
+  T1 (chronicle)  = worklog.md (task-specific, append-only)
+  T2 (registry)   = SESSION_NOTES.md §12 (structured, promote-ready)
+  T3 (formal ADR) = DECISIONS_LOG.md D-NNN (architectural decisions)
+- T3-via-toolkit plan is dead; T3 stays portable markdown by design.
+- LESSON-001 is RECOGNIZED (single forceful case + clear principle).
+  Candidate for promotion to RULE-NNN once a second corroborating case
+  appears. No premature formalisation.
+- Tails still pending (separate tasks, not part of this entry):
+  * 17 mode-bit noise files in platform root (100644 -> 100755; cleanup
+    via `git checkout .` or `.gitattributes` with `* text=auto`)
+  * 3 pre-existing W11 long-file warnings (DESIGN-001 1099, DOC-002
+    1013, META-001 1166) -- pilot split protocol ready to apply
+  * ~5 more long files in skills/ that may benefit from same split
+    (react-router 1002, grid-patterns 1393, react-19-patterns 638)
+- No commits made in this task. SESSION_NOTES.md is modified in
+  working tree; user decides whether to commit standalone or fold
+  into the next block-mode change.
+
+---
+Task ID: mode-bit-noise-cleanup-2026-06-21
+Agent: main
+Task: Clean up the 17 mode-bit noise files in platform root (and 4 in
+skills submodule) that were flagged as modified with 0 insertions/0
+deletions -- pure 100644 (index) -> 100755 (working tree) mismatches.
+User asked "что это?" about "mode-bit noise", then approved fix with
+"да" after I (incorrectly) proposed .gitattributes. Investigation
+revealed .gitattributes is the wrong tool; core.fileMode=false is the
+correct root-cause fix.
+
+Work Log:
+- User message 1: "mode-bit noise (5 минут, косметика) - что это?" --
+  asked for explanation of the term I used in the previous summary.
+- I explained: 17 files in Z-ai-platform root had only their mode bit
+  changed (100644 -> 100755), zero content changes. I proposed
+  .gitattributes with `* text=auto` as the fix. User said "да".
+- BEFORE applying the fix, I did root-cause investigation per LESSON-001
+  principle (investigate before fixing):
+  * No .gitattributes file exists in repo.
+  * grep for chmod across all .sh files: only 2 hits, both
+    `chmod +x .githooks/*` in install-hooks.sh (root and standards/).
+    Does NOT touch the 17 noisy files.
+  * core.fileMode unset (defaults to true = track mode bits).
+  * Working tree mode of all 17 files: rwxr-xr-x (755).
+  * Index mode (git ls-files --stage): 100644 for all 16 docs/configs,
+    100755 for 4 .sh files (bootstrap, install-hooks, save-work, status).
+    Index is perfectly clean -- only working tree has noise.
+  * Conclusion: source is environmental (sandbox fs mount sets +x on
+    all files so .sh scripts can run). NOT a script bug.
+
+- My original .gitattributes suggestion was WRONG. .gitattributes
+  controls text/binary detection and line endings, NOT executable bits.
+  Admitted this to user before applying the actual fix.
+
+- Real fix applied:
+  * `git config core.fileMode false` in platform repo
+  * Same in skills/ (had 4 mode-noise files: README.md,
+    skills/INDEX.md, skills/session-experience/SKILL.md,
+    skills/workflow-discipline_sts/SKILL.md)
+  * Same in standards/ and guard/ for consistency (they were clean at
+    the moment but would catch noise in future sessions)
+  * Result: platform status went from 17+2+1 modified to 0 mode-noise,
+    only 2 real edits (SESSION_NOTES, worklog) remained.
+
+- Durability: core.fileMode=false lives in .git/config, which is NOT
+  tracked by git. On fresh clone or session restart, the config is lost.
+  Baked the fix into bootstrap.sh as new Step 2:
+    git config core.fileMode false
+    git submodule foreach --recursive 'git config core.fileMode false'
+  Step numbering updated: was 1-2-3, now 1-2-3-4 (inserted Step 2
+  "Normalize git mode-bit handling", shifted symlink step to 3,
+  print-skills step to 4). Header comment updated to reflect.
+
+- Added LESSON-002 to SESSION_NOTES.md §12.5 (Structured lessons
+  registry). Same 7-field format as LESSON-001. Notable: LESSON-002
+  corroborates LESSON-001 -- same root-cause-over-symptom principle in
+  a different domain (fs mount mode bits vs W13 changelog scanning).
+  This is the first corroboration; if a third case appears, both
+  lessons become candidates for promotion to a single RULE-NNN on
+  "root-cause investigation before applying fixes".
+
+- Updated SESSION_NOTES.md Change History with 2026-06-21 row for
+  LESSON-002.
+
+- Block-mode commit (this task):
+  * Platform repo: bootstrap.sh + SESSION_NOTES.md + worklog.md in
+    single atomic commit. No submodule pointer bumps needed (no
+    content changes in submodules -- only .git/config which is local).
+  * No changes to standards/ or guard/ submodules.
+  * No new commits in skills/ submodule (its 4 mode-noise files were
+    local .git/config fix only, no content change).
+
+Stage Summary:
+- 17 + 4 = 21 mode-bit noise files eliminated. `git status` in all 4
+  repos (platform + 3 submodules) now shows only real edits.
+- core.fileMode=false applied locally to all 4 .git/config files.
+- bootstrap.sh Step 2 ensures fix survives session restarts and fresh
+  clones -- anyone running bootstrap.sh gets the config automatically.
+- LESSON-002 added to SESSION_NOTES.md §12.5 as second entry in the
+  structured lessons registry. Corroborates LESSON-001.
+- My initial .gitattributes suggestion was wrong; corrected after
+  investigation. This itself is a meta-lesson: even when proposing
+  fixes, verify the tool actually does what you claim. (Could become
+  LESSON-003 if it recurs.)
+- Tails still pending (carried forward from previous entry):
+  * 3 pre-existing W11 long-file warnings (DESIGN-001 1099, DOC-002
+    1013, META-001 1166) -- pilot split protocol ready to apply
+  * ~5 more long files in skills/ that may benefit from same split
+    (react-router 1002, grid-patterns 1393, react-19-patterns 638)
+- Mode-bit noise tail: CLOSED (this task).

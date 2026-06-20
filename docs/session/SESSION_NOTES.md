@@ -7,7 +7,7 @@
 > reusable knowledge for future sessions.
 >
 > Location: `Z-ai-platform/docs/session/SESSION_NOTES.md`
-> Last Updated: 2026-06-18
+> Last Updated: 2026-06-21
 
 ---
 
@@ -24,6 +24,7 @@
 9. [Sandbox persistence model (mount points)](#9-sandbox-persistence-model-mount-points)
 10. [Z.ai Sandbox Documentation — keep / drop decision](#10-zai-sandbox-documentation--keep--drop-decision)
 11. [Ready-to-use Unicode regex filters](#11-ready-to-use-unicode-regex-filters)
+12. [Structured lessons registry](#12-structured-lessons-registry)
 
 ---
 
@@ -630,9 +631,146 @@ Full 4-repo scan is pending O-003/O-004 decision in DECISIONS_LOG.md.
 
 ---
 
+## 12. Structured lessons registry
+
+### 12.1. Purpose and layering
+
+This section is the **structured registry** for cross-cutting lessons that
+emerge from real work but are not yet formal architectural decisions.
+It sits between two existing layers:
+
+- **§1-5** = topic-organized operational gotchas (GitHub Actions, PAT,
+  submodules, ID graph, Unicode). Each entry is a self-contained surprise
+  tied to a specific tool or subsystem.
+- **§8** = bridge table "Lesson → Decision". Each row is a one-line
+  summary of a lesson that has already been promoted to a formal D-NNN
+  entry in `DECISIONS_LOG.md`.
+
+§12 fills the gap between these two: a lesson may be **more than a
+topic-specific gotcha** (it generalises across multiple subsystems) but
+**not yet mature enough to formalise** as D-NNN (the pattern hasn't
+repeated enough, or the right normative shape isn't clear). §12 captures
+such lessons with explicit structured fields so they are searchable,
+comparable, and ready to promote when the pattern crystallises.
+
+The promote path is:
+
+```
+§1-5 (topic gotcha)
+  → §12 (structured registry entry, status DRAFT or RECOGNIZED)
+    → §8 (bridge row, when promoted)
+      → D-NNN in DECISIONS_LOG.md (formal ADR)
+        → optional: RULE-NNN in guard/ (normative enforcer)
+```
+
+### 12.2. Entry format
+
+Each entry uses these fields:
+
+| Field | Meaning |
+|---|---|
+| `ID` | `LESSON-YYYY-MM-DD-NNN`, monotonic |
+| `Status` | DRAFT / RECOGNIZED / PROMOTED |
+| `Trigger` | What observable event fires the lesson |
+| `Root cause` | Why the event happened, in structural terms |
+| `Fix principle` | The generalisable rule (not the specific patch) |
+| `Applies-to` | Which kinds of systems / checks / processes this generalises to |
+| `Source` | Worklog Task ID or commit SHA where the lesson was learned |
+| `Promoted-to` | D-NNN / RULE-NNN if status == PROMOTED; else empty |
+
+### 12.3. Portability and the toolkit-deprecation note
+
+Earlier drafts of this section proposed a third tier T3 = ChromaDB via
+the `session-experience` skill for cross-project semantic search. That
+plan is **deprecated**: the Z.ai Agent Toolkit itself may be killed or
+substantially reworked, and architecting the lessons layer around a
+toolkit-dependent runtime creates a coupling that survives only as long
+as the toolkit does.
+
+Instead, §12 is **portable markdown**: this file travels with the repo,
+and "export to another project" means "copy the markdown bundle". If a
+future project wants semantic search over lessons, it can index this
+markdown into whatever DB it prefers — but the source of truth stays
+plain text. This keeps the lessons layer format-agnostic and decoupled
+from any specific runtime.
+
+### 12.4. LESSON-001: root-cause fix scales O(1), whitelist scales O(N)
+
+- **ID:** LESSON-2026-06-21-001
+- **Status:** RECOGNIZED
+- **Trigger:** `verify-id-graph.js` W13 (stale-path warning) fired on
+  legitimate changelog entries in `META-001` §15 that mentioned old
+  filenames like `react-components.md` (was 1449 lines, became a 55-line
+  INDEX after the pilot split). The initial reaction was to add the
+  offending basenames to `W13_WHITELIST`.
+- **Root cause:** The W13 check scanned the entire file body for
+  filename-like tokens, with no scope exclusion for change-history
+  sections. Such sections *naturally* mention old, renamed, or split
+  filenames as historical facts — these are not navigational references
+  and should not trigger W13.
+- **Fix principle:** When an automated check fires on a legitimate use
+case, **refine the check's scope** (skip change-history sections), NOT
+whitelist each new trigger. Whitelist approaches scale O(N) with the
+number of mentions; root-cause fixes scale O(1) and generalise to any
+future changelog entry mentioning any filename.
+- **Applies-to:** Any validator that scans free-text markdown for
+structural references (file paths, IDs, links). Concretely in our stack:
+W11 (long-file warning), W13 (stale-path), W14 (orphan-ID), and any
+future check in the same family.
+- **Source:** Worklog Task ID `pilot-split-3-long-files-2026-06-21`,
+commit `362c65d` (worklog update reflecting W13 root-cause fix). User
+directive at the time: «максимально автоматизировать, или я плакать
+буду от роста проблем».
+- **Promoted-to:** (empty; candidate for a future RULE-NNN on
+"automated check design — scope refinement over whitelisting")
+
+### 12.5. LESSON-002: core.fileMode=false beats repeated `git checkout .`
+
+- **ID:** LESSON-2026-06-21-002
+- **Status:** RECOGNIZED (corroborates LESSON-001 — same principle in a
+different domain)
+- **Trigger:** 17 files in `git status` of Z-ai-platform flagged as
+modified with `0 insertions, 0 deletions` — pure mode bit changes
+(100644 in index -> 100755 in working tree). Affected files: .gitmodules,
+.github/workflows/*.yml, *.md, *.mmd, *.dot, *.png, *.svg.
+- **Root cause:** Sandbox fs mount sets +x bit on all files (presumably
+so .sh scripts can run without per-file chmod). Git's default
+`core.fileMode=true` flags the mismatch between index (644) and
+working tree (755) as 'modified'. The noise was environmental, not
+from any script in the repo — confirmed by grep on all .sh files:
+only `chmod +x .githooks/*` calls in install-hooks.sh, which doesn't
+ touch the 17 noisy files.
+- **Fix principle:** `git config core.fileMode false` makes git ignore
+mode bit changes entirely (O(1) one-time config per clone). Beats:
+  - `git checkout .` repeated cleanup (O(N) per session, symptom not
+    cause)
+  - `.gitattributes` (wrong tool — controls text/binary detection and
+    line endings, not executable bits)
+  - `git config --global core.fileMode false` (too broad — would affect
+    repos where mode bits matter)
+Existing index modes are preserved: 4 .sh files stay 100755, 16 docs
+stay 100644. New .sh files need explicit `git update-index --chmod=+x`.
+- **Applies-to:** Any git repo on a fs that doesn't preserve mode bits
+correctly — sandbox mounts, Windows shares, certain container fs.
+Concretely in our setup: platform repo + each of 3 submodules
+(standards, guard, skills), each has own .git/config. Fix is local-only
+(.git/config is not tracked), so must be re-applied on fresh clones —
+this is what bootstrap.sh Step 2 now does automatically.
+- **Source:** Worklog Task ID `mode-bit-noise-cleanup-2026-06-21`. User
+directive: "да" after I proposed `.gitattributes` — which was the
+wrong tool, corrected after investigating root cause. Same lesson as
+LESSON-001: investigate before fixing, root-cause over symptom.
+- **Promoted-to:** (empty; baked into bootstrap.sh Step 2 as automatic
+application, no separate RULE-NNN needed unless the principle
+generalises beyond fs-mount scenarios)
+
+---
+
 ## Change History
 
 | Date | Change |
 |---|---|
 | 2026-06-17 | Initial creation. Captured all lessons from the 2026-06-17 session: GitHub Actions gotchas (3), PAT gotchas (2), submodule gotchas (4), verifier gotchas (4), Unicode findings (3), standards inventory (20 files), workspace persistence (3 subsections). |
 | 2026-06-18 | Added §9 (sandbox persistence model from "Про скилы" package), §10 (final keep/drop decision for Z.ai Sandbox Documentation), §11 (ready-to-use Unicode regex filters with implementation pointer). Closes O-006, O-007; introduces O-008..O-014 in DECISIONS_LOG.md. |
+| 2026-06-21 | Added §12 (Structured lessons registry) with LESSON-001 (W13 stripCh root-cause fix vs whitelist). Fills the layer between §1-5 topic gotchas and §8 bridge table to D-NNN. T3 = ChromaDB-via-toolkit plan explicitly deprecated per user guidance (toolkit may be killed/reworked); §12 stays portable markdown. |
+| 2026-06-21 | Added §12.5 LESSON-002 (core.fileMode=false beats repeated `git checkout .` for sandbox fs-mount mode-bit noise). Corroborates LESSON-001: same principle (root-cause fix O(1) beats symptom cleanup O(N)) in a different domain. Fix baked into bootstrap.sh Step 2 for durability across session restarts. |
