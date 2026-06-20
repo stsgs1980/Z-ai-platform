@@ -3350,3 +3350,60 @@ Stage Summary:
 - Tail #2 still pending: ~5 long files in skills/ that may benefit
   from same companion pattern (react-router 1002, grid-patterns 1393,
   react-19-patterns 638, plus possibly others). Separate task.
+
+---
+Task ID: v11-hard-cap-promotion-2026-06-21
+Agent: main (Super Z)
+Task: Promote W11 soft warning (1000-line markdown cap) to V11 hard
+invariant in verify-standards.js, closing the "W11=0 fragile" gap
+diagnosed when user asked «это система работает?» after pilot split
+reached 13/13 PASS, 0 warnings.
+
+User chose option B (encoded prevention, O(1)) over option A (cosmetic
+split of 2 long skills files, O(N)) -- decision aligned with LESSON-001
+principle already encoded in SESSION_NOTES §12.4.
+
+Work Log:
+- Read verify-standards.js (560 lines) to understand V## check structure.
+- Read verify-id-graph.js W11 implementation -- confirmed 1000-line soft
+  cap, 1500 critical, scans all .md.
+- Listed all .md in STANDARDS_DIR + docs/sandbox + templates -- max is
+  META-001 at 977 lines. All < 1000. V11 will not break current state.
+- Added V11 to verify-standards.js between V10 and Output section. Used
+  fs.readdirSync (NOT enumerated list like V04/V08/V09) so any NEW .md
+  added to covered dirs is automatically subject to the cap.
+- Updated HISTORY comment with 2026-06-21 entry explaining V11 rationale
+  and LESSON-001 linkage.
+- Smoke test: created templates/_v11_smoketest.md with 1004 lines,
+  ran verify-standards.js -- V11 FAIL (7/8 PASS, 1 FAIL). Removed file
+  -- 8/8 PASS. Negative path verified.
+- Confirmed verify-id-graph.js still 13/13 PASS, 0 warnings from platform
+  root. (Note for future: verify-id-graph.js must be run from PLATFORM
+  ROOT, not standards/ -- otherwise glob templates/**/*.md resolves to
+  wrong path. Adding to SESSION_NOTES gotcha list if recurs.)
+- Added LESSON-003 to SESSION_NOTES §12.6 with full root-cause analysis,
+  fix principle, scope, smoke test record, and applies-to guidance for
+  future SOFT->HARD promotions (W12, W14 candidates; W13 NOT promoted
+  because already root-cause-fixed).
+- Updated SESSION_NOTES Change History with 2026-06-21 LESSON-003 entry.
+
+Stage Summary:
+- V11 implemented: 8/8 PASS (was 7/7). verify-standards.js grows from
+  560 to ~640 lines. New check uses readdirSync across 3 dirs (40 files
+  scanned, vs 35 for V04/V08/V09 enumerated lists).
+- W11=0 is now STRUCTURAL, not coincidental. Any future commit adding
+  a >1000-line .md to standards/ + docs/sandbox/ + templates/ will
+  FAIL the verifier and block merge (assuming CI runs verify-standards.js).
+- LESSON-003 corroborates LESSON-001 in a third domain (verifier design
+  itself): same O(1)/O(N) principle, now applied to the meta-question
+  of how to harden the verifier pipeline.
+- LESSON-001 (W13 stripCh) -> LESSON-002 (core.fileMode) -> LESSON-003
+  (V11 promotion): three corroborating instances of the same root-cause
+  principle in three different domains. Pattern is now strong enough
+  that a future RULE-NNN on "automated check design -- prefer encoded
+  prevention over manual cleanup" would be justified.
+- Tail #2 (2 long skills files: grid-patterns 1393, react-router 1002)
+  deliberately DEFERRED. With V11 in place, these do not need cosmetic
+  splitting -- they are in skills/ which V11 does not cover, and skills/
+  has its own governance. If skills/ ever gets a similar hard cap, it
+  would be a separate check (V12? or skills-specific verifier).

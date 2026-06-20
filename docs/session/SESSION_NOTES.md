@@ -764,6 +764,55 @@ LESSON-001: investigate before fixing, root-cause over symptom.
 application, no separate RULE-NNN needed unless the principle
 generalises beyond fs-mount scenarios)
 
+### 12.6. LESSON-003: promote soft warning to hard invariant (W11 → V11)
+
+- **ID:** LESSON-2026-06-21-003
+- **Status:** RECOGNIZED (corroborates LESSON-001 — same O(1)/O(N) principle
+in a third domain: verifier design)
+- **Trigger:** After pilot split of 3 long standards files (DESIGN-001,
+DOC-002, META-001), `verify-id-graph.js` reported `13/13 HARD PASS, 0
+warnings` — the cleanest result in project history. User asked: «это
+система работает?» I diagnosed that W11=0 was **fragile**: W11 is a SOFT
+warning (does not fail CI), so any future commit could add a >1000-line
+file and silently regress to W11>0 without the pipeline objecting.
+- **Root cause:** Two-layer verifier design where SOFT warnings (W-prefix,
+exit 0) detect anomalies but cannot enforce prevention. The 1000-line
+markdown cap existed as W11 since v1.1.0, but stayed a suggestion, not a
+gate. The pilot split fixed the 3 existing offenders, but the next
+contributor writing a 1100-line file would slip through unless they
+happened to run the verifier and read its output.
+- **Fix principle:** Promote W11's 1000-line markdown soft cap to V11, a
+HARD invariant in `verify-standards.js` that exits 1 on violation. The
+check uses `fs.readdirSync` (not an enumerated target list like V04/V08/V09)
+so any NEW .md file added to `standards/` + `docs/sandbox/` + `templates/`
+is automatically subject to the cap. This is the LESSON-001 pattern applied
+to verifier design itself: O(1) encoded check beats O(N) manual review.
+Beats the alternative (option A: cosmetic split of 2 long skills files)
+which would have been O(N) — fix the 2 today, but the 3rd, 4th, 5th long
+file could appear without resistance.
+- **Applies-to:** Any SOFT warning that has fired ≥2 times in project
+history and whose threshold has a clear "right answer" (split the file,
+extract a sub-module, etc.). Candidate future promotions: W12 (§XA Known
+Issues missing) → V12 if pattern recurs; W14 (excessive OPEN issues) → V14
+if the open-issue backlog ever crosses the threshold twice in a quarter.
+W13 was NOT promoted because it was already root-cause-fixed (LESSON-001)
+— it cannot recur structurally, so a V13 hard check would add no value.
+- **Scope of V11:** `standards/` + `docs/sandbox/` + `templates/` only.
+Deliberately EXCLUDED: `docs/session/*.md` (worklog/SESSION_NOTES/
+DECISIONS_LOG are append-only journals that grow by design); `scripts/*.js`
+(verifier self-checking is a chicken-egg); `README.md` at repo root
+(project landing page, not a standard). Threshold = 1000 lines (matches
+W11 soft cap exactly — no threshold inflation).
+- **Smoke test:** Created `templates/_v11_smoketest.md` with 1004 lines,
+ran `verify-standards.js` → V11 FAIL (7/8). Removed file → 8/8 PASS.
+Negative path verified.
+- **Source:** Worklog Task ID `v11-hard-cap-promotion-2026-06-21`. User
+chose option B over option A after I framed both: «A = O(N) cosmetic
+split of 2 skills files; B = O(1) encoded prevention». Decision aligned
+with LESSON-001 principle already encoded in §12.4.
+- **Promoted-to:** (empty; the principle is now self-documenting via V11
+itself — any future SOFT→HARD promotion follows the same recipe)
+
 ---
 
 ## Change History
@@ -774,3 +823,4 @@ generalises beyond fs-mount scenarios)
 | 2026-06-18 | Added §9 (sandbox persistence model from "Про скилы" package), §10 (final keep/drop decision for Z.ai Sandbox Documentation), §11 (ready-to-use Unicode regex filters with implementation pointer). Closes O-006, O-007; introduces O-008..O-014 in DECISIONS_LOG.md. |
 | 2026-06-21 | Added §12 (Structured lessons registry) with LESSON-001 (W13 stripCh root-cause fix vs whitelist). Fills the layer between §1-5 topic gotchas and §8 bridge table to D-NNN. T3 = ChromaDB-via-toolkit plan explicitly deprecated per user guidance (toolkit may be killed/reworked); §12 stays portable markdown. |
 | 2026-06-21 | Added §12.5 LESSON-002 (core.fileMode=false beats repeated `git checkout .` for sandbox fs-mount mode-bit noise). Corroborates LESSON-001: same principle (root-cause fix O(1) beats symptom cleanup O(N)) in a different domain. Fix baked into bootstrap.sh Step 2 for durability across session restarts. |
+| 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file → FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
