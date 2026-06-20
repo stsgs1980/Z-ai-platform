@@ -3407,3 +3407,41 @@ Stage Summary:
   splitting -- they are in skills/ which V11 does not cover, and skills/
   has its own governance. If skills/ ever gets a similar hard cap, it
   would be a separate check (V12? or skills-specific verifier).
+
+---
+Task ID: o-015-o-016-open-questions-2026-06-21
+Agent: main (Super Z)
+Task: Document two open questions discovered during V11 implementation:
+O-015 (W11 scope = standards/ only) and O-016 (dashboard for 4-module
+state visualization).
+
+Work Log:
+- Investigated verify-id-graph.js line 1046 to confirm W11 scope. Found
+  `if (!repos.standards) return;` -- W11 Phase 10 walks standardsTreeRoot
+  only, never skills/guard/platform. The "13/13 PASS, 0 warnings" was
+  technically correct but did NOT mean project-wide <=1000 lines.
+- Drafted O-015: decision NO -- do not extend W11/V11 to skills/guard/
+  platform now. Three rationales: (1) cap designed for normative
+  standards, not reference docs; (2) cross-repo invariant smell violates
+  D-001 4-repo split; (3) skills/ structure still in flux per user
+  context ("когда начнем разбирать скилы они встроятся триггерами хуками
+  eslint").
+- Drafted O-016: dashboard idea deferred. Three tiers T1/T2/T3 with
+  trade-off table. Rationale for deferring: (1) no consumer project yet
+  so Phase 1 alone has limited value; (2) toolkit deprecation constraint
+  (§12.3) makes T3 risky; (3) LESSON-001 applies -- building T3 now is
+  O(N) speculation before knowing real consumer data shapes.
+- Updated DECISIONS_LOG.md Change History with 2026-06-21 entry.
+
+Stage Summary:
+- 2 open questions formally documented. Total open: O-015, O-016
+  (O-001 through O-014 were already open or decided previously).
+- O-015 closes the architectural ambiguity I created when I said "W11=0
+  fragile" without checking W11 scope. The scope limit is now explicit,
+  not implicit.
+- O-016 captures the dashboard wish without committing to premature
+  implementation. The 3-tier table gives a decision framework for when
+  the consumer project arrives.
+- No code changes, no verifier changes. Pure documentation commit.
+- Verifier status unchanged: verify-standards.js 8/8 PASS,
+  verify-id-graph.js 13/13 PASS, 0 warnings.
