@@ -2935,3 +2935,122 @@ Stage Summary:
   be re-run on any future standard change to catch drift early.
 - "Как надо читать" (ARCH-002 §1) and "как задекларировано в шапках"
   (Related: fields) now agree 20/20.
+
+---
+Task ID: pilot-split-3-long-files-2026-06-21
+Agent: main
+Task: Pilot split of 3 long .md files into 14 sub-files + 3 INDEX files.
+Continuation of worklog entry "rule-012-v13-canonical-promotion" which
+flagged this as the next pending task. Block-mode change touching 2
+submodule repos (standards + skills) coordinated via 1 platform commit.
+
+Work Log:
+- Identified 3 candidate files from worklog:
+  * standards/docs/sandbox/sandbox-commands-cheatsheet.md (678 lines, 25
+    sections, NOT in W11)
+  * standards/docs/sandbox/sandbox-hooks-cookbook.md (1011 lines, 8
+    sections, IN W11 — only one of 3 actually flagged)
+  * skills/skills/phi-layout/references/react-components.md (1449 lines,
+    9 sections + Appendix, in §4.18.4 exempt list as externalised ref)
+
+- Wrote 3 split scripts in /home/z/my-project/scripts/ (persisted per
+  Rule 9 Script Persistence so future re-runs are deterministic):
+  * split_cheatsheet.py — 678 -> 4 sub-files (file/system/dev/media) + INDEX
+  * split_cookbook.py    — 1011 -> 4 sub-files (basic/ai/routes/patterns) + INDEX
+  * split_react_components.py — 1449 -> 6 sub-files (split-column/bento/grid/
+                                tailwind/server/dark-mode) + INDEX
+
+- Sub-file sizes (all under 400-line soft cap for references):
+  * sandbox-commands-*.md: 167/177/182/232 lines (vs 678 original)
+  * hooks-*.md: 86/362/226/391 lines (vs 1011 original)
+  * components-*.md: 109/161/246/318/334/372 lines (vs 1449 original)
+
+- INDEX files (rewrite of original at same path, 55-87 lines each):
+  * File Index table (file/theme/sections/when-to-load)
+  * Section Index (quick lookup by section number)
+  * Quick Hook/Command/Component Lookup tables
+  * Related Files section
+
+- Coordinated updates (block-mode, all in same commit per STD-ARCH-001 §8.3):
+
+  * META-001 v2.0.4 -> v2.0.5:
+    - §4.18.4 exempt list: removed react-components.md (was 1449); added
+      6 components-*.md sub-files (1540 lines total). Counts 44 -> 49
+      files, 18 579 -> 17 165 lines.
+    - §15 Version History: added v2.0.5 entry; compressed v2.0.4/v2.0.3/
+      v2.0.2 entries to keep file under 1200-line STD-*.md hard limit
+      (final: 1165 lines; was 1199 before this commit, peaked at 1225
+      during drafting).
+
+  * docs/sandbox/INDEX.md: §1 file list rewritten with all split files
+    (now 14 rows, was 7); §2 read-on-demand matrix expanded with 4 new
+    scenarios (React hooks basics, File ops, Network/Process, Python/Node/Git).
+
+  * scripts/verify-standards.js:
+    - PATHS object: added HOOKS_GUIDE_PARTS (4 files) and
+      CHEATSHEET_PARTS (4 files) arrays.
+    - 3 verifier phases (V04 unicode, V08 fences, V09 ratio): spread
+      both arrays into targets so split files get the same STD-DOC-003 /
+      fence / English-ratio checks as the original INDEX files.
+    - Phase coverage: V04 now scans 31 .md (was 23); V09 scans 32 (was 24).
+
+  * scripts/verify-id-graph.js:
+    - W13_WHITELIST: added 3 basenames (react-components.md,
+      sandbox-commands-cheatsheet.md, sandbox-hooks-cookbook.md)
+      referenced in META-001 §15 v2.0.5 change history. Without this,
+      W13 checker sees bare basenames in backticks and flags them as
+      missing files (they exist in skills/ or standards/docs/sandbox/
+      subtrees, not the standards/ tree W13 scans).
+
+  * skills/phi-layout/SKILL.md + skills/phi-layout_sts/SKILL.md:
+    references/react-components.md description updated to "INDEX file
+    (6 sub-files: split-column, bento, grid, tailwind, server,
+    dark-mode). Load on demand."
+
+- Verification (final):
+  * verify-id-graph.js: 13/13 HARD PASS
+    - W11: 4 -> 3 (sandbox-hooks-cookbook.md removed from W11; was
+      1011 lines, now 58-line INDEX)
+    - W13: 2 -> 1 (added 3 basenames to whitelist; pre-existing
+      Z-ai-guard/rules/RULE-MONOLITH-012.md tech debt remains documented
+      in META-001 §15 v2.0.3)
+    - Total warnings: 6 -> 4
+  * verify-standards.js: 7/7 PASS (V04/V08/V09 now cover all split files)
+  * check-md.sh: 12/12 PASS (11 sandbox files + META-001)
+  * All 14 sub-files under 400-line soft cap; all 3 INDEX files under
+    100 lines.
+
+- Local commits (block-mode, atomic per STD-ARCH-001 §8.3):
+  * standards: 5091bcd "pilot split: 3 long files into 14 sub-files + 3 INDEX files"
+  * skills: 815df88 "pilot split: react-components.md (1449) -> 6 sub-files + INDEX"
+  * platform: (pending — this worklog entry + both submodule pointer bumps)
+
+- Push status: BLOCKED. GitHub PAT expired during this session.
+  All 3 commits are ready locally and will push as soon as the token is
+  refreshed. Platform commit will be created after the worklog append.
+
+Stage Summary:
+- 3 pilot splits complete. 3137 lines (across 3 long files) reorganised
+  into 16 smaller files (14 sub-files + 3 INDEX files, with overlap
+  because each split produces N+1 files where N is sub-files and 1 is
+  INDEX). Total content grew ~10% due to per-file TOC/header overhead,
+  but each file is now under 400-line soft cap and can be loaded on
+  demand without overflowing agent context.
+- The split protocol worked cleanly: each original file's INDEX keeps
+  the same path (so external refs remain valid), sub-files use thematic
+  naming (commands-{file,system,dev,media}, hooks-{basic,ai,routes,
+  patterns}, components-{split-column,bento,grid,tailwind,server,
+  dark-mode}), and the verifier infrastructure (verify-standards.js +
+  verify-id-graph.js W13 whitelist) was extended to cover the new files.
+- W11 long-file soft warnings: 4 -> 3. The remaining 3 (DESIGN-001
+  1099, DOC-002 1013, META-001 1166) are pre-existing standards that
+  would need their own split work — separate task, not part of this
+  pilot.
+- The "pilot" framing was deliberate: this run validated the split
+  protocol (script-driven, INDEX-preserving, verifier-aware) on 3
+  representative cases (sandbox doc, sandbox doc with verifier dep,
+  skill reference). The protocol can now be applied to the remaining
+  ~5 long files (DESIGN-001, DOC-002, react-router 1002, grid-patterns
+  1393, react-19-patterns 638) without further protocol design work.
+- Block mode = single atomic change touching 3 repos in 1 platform
+  commit. No piecemeal, no half-states in the graph.
