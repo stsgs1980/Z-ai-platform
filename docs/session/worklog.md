@@ -4618,3 +4618,33 @@ Stage Summary:
 - W13 root-cause fix from O-018 (expanded candidates list) proved its value again: caught a false-positive reference to "references/readme-supplement.md" in-flight, fixed in same patch instead of needing a separate baseline-update cycle.
 - v2.5.0 release tag (task D): ALREADY EXISTS from previous session (ef9c3d5, 2026-06-21). Reports this to user — asks whether to cut v2.6.0 for post-v2.5.0 work (Phase C + Phase D2 + O-018 + S10c).
 - Pending tasks remaining: E1 (P-MAS_init onboarding) explicitly DEFERRED per user. E2 (Consumer tutorial) blocked by E1. v2.6.0 release tag pending user decision.
+
+---
+Task ID: v2.6.0-release-tag-2026-06-22
+Agent: Super Z (main)
+Task: Cut annotated tag v2.6.0 on platform HEAD to release all post-v2.5.0 work (O-017 Phase C, O-017 Phase D2 V12a+b, O-018 verify-id-graph.js modularization, S10c V12c). User instruction: "резать если не навредим" — only proceed if no harm.
+
+Work Log:
+- Verified environment: 3 repos under /home/z/my-project/Z-ai-platform/ (platform + skills + standards submodules). All clean, all synced with origin/main. No ahead/behind drift.
+- Confirmed v2.5.0 tag ALREADY EXISTS (annotated, ef9c3d5, 2026-06-21 15:39 UTC) — re-cutting v2.5.0 would harm (duplicate). Pivoted to v2.6.0 for post-v2.5.0 work.
+- Verified v2.6.0 does NOT exist locally or on origin (would otherwise harm: rejected force-push).
+- Ran all 3 verifiers to confirm green state at HEAD:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files, max: META-001 962 lines, well under 1000 cap)
+  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings, snapshot compare OK
+  - verify-skills.js --strict (v1.1.1): 9/9 HARD PASS, 0 SOFT warnings (S10a 36 SKILL.md ≤ 800, S10b 2 CONTRACT.md ≤ 500, S10c 10 README.md ≤ 400 — max 392 react-dev)
+- Catalogued post-v2.5.0 work included in this tag:
+  - platform/ (5 commits): 78879d0 O-017 Phase C+D1 worklog → 5b86c19 O-018 worklog → 794b10b O-017 Phase D2 complete → 7702111 O-018 complete → 2cb7787 S10c shipped + 2 submodule bumps (HEAD)
+  - standards/ submodule (4 commits since 7dd54d1): 613122e O-018 modularize → 4c03289 O-017 Phase D2 V12 caps → 9c4fdd1 O-018 complete → a259a6b S10c v1.1.1 (HEAD pointer)
+  - skills/ submodule (2 commits since 3bddaa5): a685d9a O-017 Phase C session-handoff + template → 9797e69 READMEs remediation for S10c (HEAD pointer)
+  - guard/ submodule: unchanged (2e2579d, same as at v2.5.0 — no guard rules changed in this window)
+- Wrote annotated tag message to /home/z/my-project/scripts/v2.6.0-tag-message.txt covering: (1) O-017 Phase D2 V12a+b tiered hard caps, (2) O-018 verify-id-graph.js modularization into 8 lib/ modules, (3) S10c V12c README.md ≤ 400 HARD cap activation, (4) final verifier status, (5) submodule pointers, (6) O-017 cascade status, (7) intentional deferrals (E1/E2/Phase E/F).
+- Created annotated tag: `git tag -a v2.6.0 -F <message-file> HEAD`. Points to 2cb778724a0b477b84b0b85ee3e4baed74e0d5ad. Tag object SHA: 53e1648c64ddbbc75a1896de6909f5b964004b95.
+- Pushed to origin: `git push origin v2.6.0` → * [new tag] v2.6.0 -> v2.6.0. Verified via `git ls-remote --tags origin v2.6.0` → 53e1648c64ddbbc75a1896de6909f5b964004b95 refs/tags/v2.6.0.
+
+Stage Summary:
+- v2.6.0 ANNOTATED TAG CUT AND PUSHED. Located at platform HEAD 2cb7787. Backed by clean green state across all 3 repos.
+- No harm done: did not re-cut v2.5.0 (would have created duplicate), did not force-push (no overwrite), all submodule pointers in tag are reachable on their respective origins.
+- Closes task D from prior plan. With this, the "резать" instruction is satisfied without risk.
+- READMEs remediation (S10c) was ALREADY DONE in the previous session (skills/ submodule 9797e69, standards/ a259a6b). No further remediation needed.
+- Remaining pending items (intentional, not blockers): O-017 Phase E (dashboard) + Phase F (feedback loop) PENDING; E1 (P-MAS_init onboarding) DEFERRED per user; E2 (Consumer tutorial) blocked by E1.
+- AWAITING USER INSTRUCTIONS for next step. No further autonomous work scheduled.
