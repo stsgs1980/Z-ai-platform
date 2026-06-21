@@ -4498,3 +4498,33 @@ Stage Summary:
   (a) standards/ submodule: 4 new lib/ files + verify-id-graph.js
       refactor + snapshot baseline update
   (b) platform/: worklog entry + standards submodule pointer bump
+
+---
+Task ID: D2
+Agent: main
+Task: O-017 Phase D2 — Tiered hard caps (V12) for skills/ subtree. Implement S10 check in verify-skills.js: S10a SKILL.md ≤ 800 lines, S10b CONTRACT.md ≤ 500 lines.
+
+Work Log:
+- Measured all .md files in skills/skills/: 36 SKILL.md (max 782, z-ai-web-dev-sdk), 2 CONTRACT.md (368 commit-work, 466 session-handoff), 35 references files (max 1393 phi-layout/grid-patterns.md).
+- Found original O-017 proposed cap of 200 for CONTRACT.md was invalidated by measured reality (both pilots would violate by 1.8×–2.3×). Per LESSON-001, adjusted cap to 500 to fit measured reality rather than compressing structural 10-section shape.
+- Found O-017 proposed cap of 2000 for references/ was wrong — references are exempt per META-001 §4.18.1. Corrected in implementation.
+- Updated META-001 §4.18.1: added CONTRACT.md row (500/300).
+- Added META-001 §4.18.6: cap rationale (validated against 2 pilot contracts, LESSON-001 root-cause adjustment from O-017's pre-pilot estimate).
+- Updated META-001 §4.18.5: added cross-link for CONTRACT.md to STD-SKILL-001 §8.2.
+- Updated STD-SKILL-001 §8.2: added CONTRACT.md ceiling line.
+- Updated STD-SKILL-001 §10.1: replaced deferred PROC-LINECOUNT-004 row with active verify-skills.js S10a/S10b rows.
+- Implemented S10 in verify-skills.js v1.0.0 → v1.1.0: S10a (SKILL.md ≤ 800, HARD, all skills) + S10b (CONTRACT.md ≤ 500, HARD, if present). HARD from day 1 (current corpus passes). References explicitly NOT scanned (exempt per §4.18.1). README.md cap deferred (2 violations need remediation first).
+- V11 regression: META-001 grew to 1017 lines (>1000 hard cap) after adding §4.18.6 rationale. Compressed §4.18.6 from ~38 lines to ~14 lines → META-001 now 994 lines, V11 PASS.
+- Snapshot baseline updated twice: first after §4.18.6 addition (4 new W13 false positives from prose mentions of CONTRACT.md in META-001/SKILL-001), then after §9.3.3 addition to CI-AND-TESTING.md (4 more W13 false positives from prose mentions of CONTRACT.md paths). Final baseline: 61 IDs, 115 edges, 11 warnings. W13 root-cause fix (whitelist scales as O(N) per LESSON-001) deferred to O-018.
+- Updated CI-AND-TESTING.md §9.3.3: IMPLEMENTED badge, full rationale, what was NOT added (README cap, references cap), companion standard changes list, verification output.
+- Updated DECISIONS_LOG.md O-017: Phase D marked COMPLETE (both D1 + D2 done). Change history entry added.
+
+Stage Summary:
+- Phase D fully COMPLETE. D1 (verify-skills.js v1.0.0, 9 checks) + D2 (v1.1.0, +S10a/S10b tiered hard caps) both shipped.
+- verify-skills.js v1.1.0: 8/8 HARD PASS in --strict mode (S01/S02/S03/S04/S05/S09/S10a/S10b), 0 SOFT warnings.
+- verify-standards.js: 8/8 PASS (META-001 compressed to 994 lines after §4.18.6 trim).
+- verify-id-graph.js: 13/13 HARD + snapshot OK (61 IDs, 115 edges, 11 warnings — 8 new W13 false positives from prose mentions, root-cause fix deferred to O-018).
+- Tiered caps: SKILL.md ≤ 800 (existing §4.18.1 row, NEW enforcement), CONTRACT.md ≤ 500 (NEW row, validated against 2 pilots), references exempt (O-017's "≤2000" rejected as wrong per §4.18.1). README.md ≤ 400 deferred (2 violations need remediation first: gepetto 485, react-dev 404).
+- LESSON-001 applied: original O-017 estimate of 200 for CONTRACT.md was pre-pilot; cap adjusted to fit measured reality (500) rather than compressing structural 10-section shape. Symptom-fix (compress pilots to fit wrong cap) scales as O(N) over time; root-cause fix (set cap to fit reality) scales as O(1).
+- Files changed: META-001-standard-id-system.md (+CONTRACT.md row in §4.18.1, +§4.18.6 rationale, +cross-link in §4.18.5), SKILL-001-skill-format.md (§8.2 + CONTRACT.md line, §10.1 replaced PROC-LINECOUNT-004 with S10a/S10b), verify-skills.js (v1.0.0 → v1.1.0, +S10 check, +help text, +header docstring), CI-AND-TESTING.md (+§9.3.3 IMPLEMENTED), DECISIONS_LOG.md (O-017 Phase D status + change history), worklog.md (this entry), standards/_snapshots/id-graph-baseline.json (updated, +8 W13 warnings).
+- Next: O-018 (verify-id-graph.js modularization — 1355 lines, target ≤1000).
