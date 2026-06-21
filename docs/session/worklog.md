@@ -4200,3 +4200,83 @@ Stage Summary:
       entry + standards submodule pointer bump
 
 
+
+---
+Task ID: p0-s02-s03-s05-remediation-2026-06-21
+Agent: Super Z (main)
+Task: Remediate all 15 verify-skills.js violations (8× S02, 3× S03, 4× S05) and flip verifier to --strict default in pre-commit Phase 3 + CI workflow.
+
+Work Log:
+- Read verify-skills.js S02/S03/S05 logic to understand exact rules.
+- Read frontmatter of all 15 violating SKILL.md files.
+- Cross-referenced STD-SKILL-001 §3.3 vs §9.1 vs §11 checklist and
+  found a contradiction: §3.3 said "name must match folder name
+  without _sts suffix for STS skills" while §9.1 + §11 said "name
+  matches folder name with _sts suffix". Verifier v1.0.0 had
+  implemented §3.3 literally — causing 7 false-positive S02
+  violations on every STS skill.
+- S02 fix (verifier bug + 1 real data fix):
+  - STD-SKILL-001 §3.3: clarified "Must match folder name exactly
+    (including _sts suffix for STS skills); see §9.1".
+  - STD-SKILL-001 §3.3 author row: clarified "if set to STS, skill
+    follows §9 STS conventions (folder must have _sts suffix)".
+  - STD-SKILL-001 §10.1 V11c row: clarified "folder-name-driven +
+    author-driven".
+  - verify-skills.js S02: removed .replace(/_sts$/, '') — now
+    expected = s.name (exact folder match).
+  - skills/skills/phi-layout/SKILL.md: name "golden-grid" ->
+    "phi-layout" (v2.2 -> v2.3, the only real S02 data bug).
+- S03 fix (3 system skills incorrectly tagged author=STS):
+  - skills/skills/anti-monolith/SKILL.md: dropped author: STS line.
+  - skills/skills/session-experience/SKILL.md: dropped author: STS.
+  - skills/skills/session-log/SKILL.md: dropped author: STS.
+  - Rationale: these are system skills (ZAI-ARCH-002, ZAI-SESSION-001,
+    ZAI-SESSION-003), not personal STS skills. Per §9, author=STS
+    triggers the _sts folder-suffix requirement; system skills must
+    not set it. Git history preserves attribution.
+- S05 fix (4 skills missing version field):
+  - skills/skills/gepetto/SKILL.md: added version: 1.0.
+  - skills/skills/reducing-entropy/SKILL.md: added version: 1.0.
+  - skills/skills/session-handoff/SKILL.md: added version: 1.0.
+  - skills/skills/skill-creator/SKILL.md: added version: 1.0.
+- Promoted --strict to default in two places:
+  - .githooks/pre-commit Phase 3: now runs `verify-skills.js --strict`
+    and BLOCKS commits on any HARD failure (was soft-default WARN-only).
+  - .github/workflows/verify-id-graph.yml: CI step renamed to
+    "Run verify-skills.js (skills-side format, --strict)" and runs
+    `verify-skills.js --strict`.
+- Updated CI-AND-TESTING.md §9.2.2 to mark REMEDIATED:
+  - Status badge updated to "IMPLEMENTED + REMEDIATED (--strict since
+    2026-06-21)".
+  - Strictness column updated to "HARD (--strict default since
+    2026-06-21)" for S02/S03/S05.
+  - Added 15-row remediation log table (was / now per violation).
+  - Added "Root-cause finding (verifier bug, not data bug)" subsection
+    explaining the §3.3 vs §9.1 contradiction and the 7 false-positives.
+  - Added Change History entry for 2026-06-21 remediation.
+- Final verifier sweep:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files, all ≤1000).
+  - verify-id-graph.js: 13/13 HARD PASS, 3 W13 soft warnings
+    (unchanged — known cross-submodule limitation in §10.5.1).
+  - verify-skills.js --strict: 6/6 HARD PASS, 0 SOFT warnings
+    (was 3/3 HARD PASS + 3 SOFT warnings before this patch).
+  - snapshot compare: OK — graph unchanged (no Related: edges modified).
+
+Stage Summary:
+- 15 violations closed in one coordinated patch across 3 submodules
+  (skills + standards + platform).
+- Root-cause finding: 7 of 15 violations were false-positives caused
+  by an internal contradiction in STD-SKILL-001 itself (§3.3 vs §9.1).
+  This is a LESSON-001/003 pattern: fixing the standard (root cause)
+  auto-closed 7 violations without touching any SKILL.md. Only 8
+  violations required data fixes (1 S02 rename + 3 S03 author drops +
+  4 S05 version adds).
+- v2.5.0 blocker §9.2.2 fully closed. Pre-commit + CI now enforce
+  HARD on all 6 invariant checks (S01/S02/S03/S04/S05/S09). SOFT
+  checks S06/S07/S08 remain advisory per STD-SKILL-001 §10.1.
+- Next: commit + push. Three commits:
+  (a) skills/ submodule: 8 SKILL.md fixes (commit 3bddaa5)
+  (b) standards/ submodule: STD-SKILL-001 §3.3+§10.1 + verify-skills.js
+      S02 fix + CI-AND-TESTING.md §9.2.2 update (commit 7dd54d1)
+  (c) platform/: pre-commit Phase 3 -> --strict + verify-id-graph.yml
+      CI step -> --strict + worklog entry + 2 submodule pointer bumps

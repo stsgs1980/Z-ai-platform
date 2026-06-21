@@ -116,30 +116,28 @@ fi
 echo "[pre-commit] OK: verify-id-graph.js PASS (HARD checks)"
 rm -f /tmp/zai-precommit-vgraph.log
 
-# --- Phase 3: verify-skills.js (skills-side format, SOFT default) ------------
-# Added 2026-06-21 per §9.2.2 of CI-AND-TESTING.md. Runs verify-skills.js
-# in soft-default mode (S01/S04/S09 are HARD; S02/S03/S05 are SOFT until
-# the existing 15 violations are remediated, then --strict can be flipped).
-# Phase 3 is WARN-only at this stage — it reports violations but does NOT
-# block commits. Once §9.2.2 remediation is complete, promote to BLOCK.
+# --- Phase 3: verify-skills.js (skills-side format, --strict HARD) -----------
+# Added 2026-06-21 per §9.2.2 of CI-AND-TESTING.md. Promoted to --strict
+# mode 2026-06-21 after §9.2.2 remediation closed all 15 pre-existing
+# violations (8× S02, 3× S03, 4× S05). Phase 3 now BLOCKS commits on any
+# HARD failure (S01/S02/S03/S04/S05/S09). SOFT checks S06/S07/S08 are
+# reported but never block (per STD-SKILL-001 §10.1).
 VERIFY_SKILLS="standards/scripts/verify-skills.js"
 if [ -f "$VERIFY_SKILLS" ]; then
-  echo "[pre-commit] Phase 3: verify-skills.js (skills-side format, SOFT default)"
-  if ! node "$VERIFY_SKILLS" >/tmp/zai-precommit-vskills.log 2>&1; then
-    echo "[pre-commit] WARN: verify-skills.js reported HARD violations (S01/S04/S09)."
+  echo "[pre-commit] Phase 3: verify-skills.js --strict (skills-side HARD invariants)"
+  if ! node "$VERIFY_SKILLS" --strict >/tmp/zai-precommit-vskills.log 2>&1; then
+    echo "[pre-commit] FAIL: verify-skills.js --strict reported HARD violations."
     echo "[pre-commit] ---- output ----"
     cat /tmp/zai-precommit-vskills.log | sed 's/^/  /'
     echo "[pre-commit] ---- end output ----"
-    echo "[pre-commit] SOFT warnings (S02/S03/S05) are pre-existing tech debt;"
-    echo "[pre-commit] see standards/docs/CI-AND-TESTING.md §9.2.2 for remediation plan."
-    echo "[pre-commit] NOT blocking commit — fix in a follow-up if this is your change."
+    echo "[pre-commit] Fix the offending SKILL.md to conform to STD-SKILL-001 v1.1."
+    echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+    exit 1
+  fi
+  if grep -q "WARN" /tmp/zai-precommit-vskills.log 2>/dev/null; then
+    echo "[pre-commit] OK: verify-skills.js --strict HARD PASS (SOFT warnings present, see log)"
   else
-    # Even on PASS, check if there were SOFT warnings to surface
-    if grep -q "WARN" /tmp/zai-precommit-vskills.log 2>/dev/null; then
-      echo "[pre-commit] OK: verify-skills.js HARD PASS (SOFT warnings present, see log)"
-    else
-      echo "[pre-commit] OK: verify-skills.js PASS"
-    fi
+    echo "[pre-commit] OK: verify-skills.js --strict PASS"
   fi
   rm -f /tmp/zai-precommit-vskills.log
 else

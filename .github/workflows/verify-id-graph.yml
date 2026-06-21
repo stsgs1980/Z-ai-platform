@@ -139,26 +139,23 @@ jobs:
 
       # -------------------------------------------------------------------
       # verify-skills.js (§9.2.2 in standards/docs/CI-AND-TESTING.md).
-      # Skills-side format verifier. Runs in soft-default mode at this
-      # stage: S01/S04/S09 are HARD (block CI on fail), S02/S03/S05 are
-      # SOFT (15 pre-existing violations tracked as Phase D1 remediation
-      # backlog). Once remediated, flip --strict on.
+      # Skills-side format verifier. Runs in --strict mode after the
+      # §9.2.2 remediation closed all 15 pre-existing violations on
+      # 2026-06-21. All HARD checks (S01/S02/S03/S04/S05/S09) now
+      # block CI; SOFT checks S06/S07/S08 are reported but never fail.
       # -------------------------------------------------------------------
-      - name: Run verify-skills.js (skills-side format, soft-default)
+      - name: Run verify-skills.js (skills-side format, --strict)
         run: |
           set +e
-          output=$(node standards/scripts/verify-skills.js 2>&1)
+          output=$(node standards/scripts/verify-skills.js --strict 2>&1)
           exit_code=$?
           echo "$output"
           {
-            echo "## verify-skills.js output"
+            echo "## verify-skills.js output (--strict)"
             echo '```'
             echo "$output"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          # In soft-default mode, exit 0 means HARD checks (S01/S04/S09) passed.
-          # SOFT warnings (S02/S03/S05) do not fail CI yet — they are tracked
-          # in §9.2.2 remediation backlog.
           exit $exit_code
 
       # -------------------------------------------------------------------
