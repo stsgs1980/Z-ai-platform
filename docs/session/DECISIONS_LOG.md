@@ -956,13 +956,84 @@ Consumer-project state (P-MAS_init's own view of itself):
 ### O-017: Skills execution contract — cascade plan for governance-to-execution bridge
 
 **Date raised:** 2026-06-21
-**Status:** OPEN (cascade proposed, awaits approval before Phase A execution)
+**Status:** OPEN — Phase A COMPLETE (2026-06-21), awaits Phase B approval
 
 **Source:** User confirmation after V11 + O-015/O-016 work: «если эти 4
 модуля (как мозговой нейоро центр) будет работать как задумано, ничего не
 помешает построить систему автономных агентов». User explicitly authorized
 cascade drafting: «можешь сам набросать какскад задач. это говорит только
 о том что ты видишь систему а не просто файлы и папки».
+
+**Phase A outcome (2026-06-21):**
+
+Phase A executed in a single session after user said «давай начнем с A».
+Both deliverables produced:
+
+- **A1 — Catalog:** `skills/docs/CATALOG.md` (374 lines). Machine-generated
+  by `scripts/catalog_skills.py` then hand-curated. Found 36 skills (not 35
+  — INDEX.md was stale, missing `zai-skill-registry`). Found skill-creator
+  ID misregistration (ZAI-STS-008 in SKILL.md vs ZAI-META-002 in INDEX.md).
+  Classified 30 active / 5 stale / 1 duplicate-candidate (phi-layout vs
+  phi-layout_sts, interpreted as convergent STS re-registration). INDEX.md
+  corrected in the same commit.
+- **A2 — Gap audit:** `SESSION_NOTES.md` §13 (new). Audited the 6-row
+  governance/execution gap table against actual repo state. Result: 4
+  BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade
+  ordering. Surfaces 2 new open question candidates: O-019 (guard/
+  execution contract, parallel to skills contract) and O-020 (feedback-
+  loop mechanism, long-term).
+
+Phase A confirmed 3 unanticipated findings that affect Phase B:
+
+1. **Only 3 of 36 skills (8%) have callable `scripts/`.** The contract
+   layer Phase B designs will be the FIRST execution layer for 33 of
+   36 skills. The 3 existing scripts-bearing skills (skill-creator,
+   session-handoff, qa-test-planner) are the only models. Phase B's
+   commit-work pilot will not have a sibling to copy from — it will
+   set the precedent.
+2. **session-handoff is the most execution-ready skill in the repo.**
+   4 Python scripts, evals/ directory, references/. It is the model
+   to follow for Phase C2 generalization, not Phase B pilot (commit-work
+   remains the pilot per O-017 original design).
+3. **5 stale skills need frontmatter remediation.** api-retry, dev-
+   watchdog, fallback, health-check, z-ai-web-dev-sdk. Real body
+   content (290-781 lines) but no frontmatter `description:`, no ZAI-ID,
+   version=v?. Estimated 15 min/skill × 5 = 75 min. Can be done in
+   parallel with Phase B (independent of contract shape).
+
+**Status of cascade phases (as of 2026-06-21):**
+
+- [x] **Phase A (discovery):** COMPLETE.
+  - [x] A1: Catalog 36 skills → `skills/docs/CATALOG.md`
+  - [x] A2: Audit governance/execution gap → SESSION_NOTES §13
+- [ ] **Phase B (pilot, awaits approval):**
+  - [ ] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md`
+  - [ ] B2: Implement pilot (pre-commit hook integration)
+- [ ] **Phase C (generalize, after B):**
+  - [ ] C1: Extract template from B2
+  - [ ] C2: Apply to session-handoff (first generalization target, per Phase A finding)
+- [ ] **Phase D (governance, parallel after B1):**
+  - [ ] D1: `skills/scripts/verify-skills.js`
+  - [ ] D2: Tiered hard caps (V12 equivalent)
+- [ ] **Phase E (consumer, after C2+D1):**
+  - [ ] E1: Onboard P-MAS_init as first consumer
+  - [ ] E2: Define install-and-use tutorial format
+- [ ] **Phase F (dashboard, after E1):**
+  - [ ] F1: Decide A1/A2/A3 dashboard approach (O-016 Step 3)
+  - [ ] F2: Implement dashboard adaptation
+
+**New open question candidates surfaced by Phase A (not yet raised as
+O-019/O-020 — pending user approval to formalize):**
+
+- **O-019 candidate** — guard/ execution contract. Apply the same
+  5-tuple shape (trigger/hook/guard-check/standard-check/success-
+  criterion) to RULE-NNN. Pilot: RULE-MONOLITH-004 (one logical block,
+  one commit). Natural fit with commit-work Phase B pilot — the same
+  pre-commit hook could enforce both.
+- **O-020 candidate** — feedback-loop mechanism. How does experience
+  (worklog/SESSION_NOTES §12) feed back into rules (RULE-NNN) and
+  invariants (V01-V11)? Long-term, depends on Phase F dashboard +
+  Phase G memory layer (not yet in cascade).
 
 **Context — governance/execution gap (documented as near-term goals):**
 
@@ -1115,30 +1186,10 @@ provides structure; iteration provides correction.
    (D-001) has flaws when actually consumed, requiring fixes back at the
    source-repo layer.
 
-**Action items (execution order, NOT all sequential):**
-
-- [ ] **Phase A (start first, parallel-safe):**
-  - [ ] A1: Catalog 35 skills → `skills/docs/CATALOG.md`
-  - [ ] A2: Audit governance/execution gap → SESSION_NOTES §13 (new)
-- [ ] **Phase B (after A1+A2):**
-  - [ ] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md`
-  - [ ] B2: Implement pilot in Z-ai-platform (pre-commit hook + wiring)
-- [ ] **Phase C (after B2):**
-  - [ ] C1: Extract contract template → `skills/templates/CONTRACT_TEMPLATE.md` + STD-SKILL-001 update
-  - [ ] C2: Apply template to 2-3 skills (database-schema-designer, gepetto, qa-test-planner candidates)
-- [ ] **Phase D (parallel after B1):**
-  - [ ] D1: Create `skills/scripts/verify-skills.js`
-  - [ ] D2: Add tiered hard caps (V12 equivalent)
-- [ ] **Phase E (after C2 + D1):**
-  - [ ] E1: Onboard P-MAS_init as first consumer (O-015/O-016 action)
-  - [ ] E2: Define install-and-use tutorial format
-- [ ] **Phase F (after E1):**
-  - [ ] F1: Decide A1/A2/A3 dashboard approach (O-016 Step 3)
-  - [ ] F2: Implement dashboard adaptation (O-016 final)
-
 **Cross-references:**
 
 - Closes O-011 (35-skill catalog) by formalizing it as Phase A1.
+  **Phase A1 confirmed 36 skills (not 35)** — see CATALOG.md §6.
 - Feeds O-015 (W11 scope) by defining skills/ governance in Phase D.
 - Enables O-016 (dashboard) by producing real consumer events in Phase E1.
 - Applies LESSON-001 (root-cause encoded fix) by encoding the contract
@@ -1155,3 +1206,4 @@ provides structure; iteration provides correction.
 | 2026-06-21 | Added O-015 (W11 scope = standards/ only — explicitly document, do NOT extend to skills/guard/platform; defer to consumer-integration phase). Added O-016 (dashboard for 4-module state — idea stage, 3 tiers under consideration T1/T2/T3, deferred pending first consumer project). Both raised as a result of V11 implementation investigation that revealed W11 was never project-wide — its scope was always standards/ subtree only. |
 | 2026-06-21 | Updated O-016 with sequencing decision after P-MAS_init inspection. P-MAS_init is "experimental init" Next.js dashboard (currently MAS visualization, 26 agents in 8 role groups). User clarified: skills integration comes first, dashboard adaptation after. Three approaches A1/A2/A3 deferred until P-MAS_init becomes a formal consumer (its `standards/` currently has custom files, not submodule pointers to Z-ai-standards). O-016 action items restructured into 3-step execution order: (1) skills integration, (2) P-MAS_init onboarding as first consumer, (3) dashboard adaptation. |
 | 2026-06-21 | Added O-017 (Skills execution contract — cascade plan). 6-phase cascade (A discovery, B pilot on commit-work, C generalize, D governance, E consumer integration, F dashboard) bridging governance (markdown rules) to execution (runtime enforcement). Governance/execution gap table documented as near-term goals context. Closes O-011 (formalizes 35-skill catalog as Phase A1), feeds O-015 (Phase D defines skills/ governance), enables O-016 (Phase E1 produces real consumer events). Cascade is iterative not waterfall — B2/D1/E1 may send corrections backward to B1 contract shape. Status: OPEN, awaits approval before Phase A execution. |
+| 2026-06-21 | Updated O-017 — Phase A COMPLETE. A1 produced `skills/docs/CATALOG.md` (36 skills, not 35 — INDEX.md was stale, missing `zai-skill-registry`; also corrected skill-creator ID from ZAI-META-002 to actual ZAI-STS-008). A2 produced SESSION_NOTES §13 (gap audit: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE; confirms cascade ordering). 3 unanticipated findings: (1) only 3/36 skills have callable scripts/, (2) session-handoff is the most execution-ready skill, (3) 5 stale skills need frontmatter remediation. Removed original "Action items" checklist (now replaced by "Status of cascade phases" with [x]/[ ] marks). Surfaces 2 new open question candidates: O-019 (guard/ execution contract), O-020 (feedback-loop mechanism) — not yet formalized. Verifier status unchanged: 8/8 + 13/13, 0 warnings. |

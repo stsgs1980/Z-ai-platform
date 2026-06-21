@@ -815,6 +815,259 @@ itself — any future SOFT→HARD promotion follows the same recipe)
 
 ---
 
+## 13. Phase A2 — Governance/execution gap audit
+
+> Source: O-017 Phase A2 (skills execution contract cascade).
+> Date: 2026-06-21.
+> Companion file: `skills/docs/CATALOG.md` (Phase A1 deliverable).
+
+This section audits the 6-row governance/execution gap table documented
+in O-017's context section. For each row, it asks: does the repo today
+contain ANY execution mechanism for this governance artifact? If yes,
+how partial? If no, is the gap **blocking autonomous agents** or
+**acceptable for now** (manual lookup works at current scale)?
+
+The audit uses Phase A1's catalog findings (see CATALOG.md §5 — only
+3 of 36 skills have `scripts/`, only 1 has `evals/`) as evidence.
+
+### 13.1 Summary table
+
+| # | Governance artifact | Execution mechanism present? | Classification |
+|---|---|---|---|
+| 1 | skills/ as descriptive .md | **Partial** — sandbox `Skill()` tool loads SKILL.md, but no contract (trigger/hook/guard-check). Only 3/36 skills have callable `scripts/`. | **BLOCKING** for autonomous agents |
+| 2 | guard/ as RULE-NNN markdown | **None** — pre-commit hook enforces standards invariants (V01-V11, G01-G15), NOT RULE-NNN semantics. RULE-NNN is advisory only. | **BLOCKING** for autonomous agents |
+| 3 | standards/ as STD-NNN | **Partial** — pre-commit hook runs `verify-standards.js` + `verify-id-graph.js` at commit boundary. This IS runtime (vs only-on-CI). No real-time linter (no eslint integration despite STD-DOC-002 existing). | **ACCEPTABLE FOR NOW** (pre-commit is strong; real-time linter is Phase D work) |
+| 4 | worklog.md as append-only log | **None** — 3554-line append-only markdown. No ChromaDB instance. `memory-store`/`session-log`/`session-experience` skills describe the target architecture but no runtime wires it up. | **BLOCKING** for autonomous agents |
+| 5 | DECISIONS_LOG D-NNN | **None** — 1157-line append-only markdown. No retrieval-by-context mechanism. No "trigger condition" on open questions (O-NNN). | **ACCEPTABLE FOR NOW** at current scale (~30 items); becomes blocking at 100+ decisions |
+| 6 | SESSION_NOTES §12 LESSON | **None** — 3 LESSON entries in markdown. LESSON-003 → V11 promotion was done MANUALLY by user+agent. No automatic "pattern fired N times, promote to invariant". No reverse feedback (V11 blocking doesn't generate a new lesson). | **BLOCKING** for autonomous agents (the most sophisticated gap to close) |
+
+**Score: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE.**
+
+### 13.2 Per-row findings
+
+#### Row 1 — skills/ runtime
+
+**Evidence from CATALOG.md §5:**
+- 3 of 36 skills (8%) have `scripts/` — real callable code:
+  `skill-creator` (9 scripts), `session-handoff` (4), `qa-test-planner` (2).
+- 1 of 36 skills (3%) has `evals/` — `session-handoff` only.
+- 1 of 36 skills (3%) has `agents/` — `skill-creator` only.
+- 33 of 36 skills (92%) are pure markdown — agent must read,
+  interpret, and act manually.
+
+**What's missing for autonomy:** A contract layer (the 5-tuple proposed
+in O-017: trigger / hook / guard-check / standard-check / success-
+criterion). Without it, agent must self-select which skill to invoke
+for which situation, which is exactly what an autonomous runtime
+should NOT do — it should be told.
+
+**Closing phase:** O-017 Phase B (commit-work pilot contract) + Phase
+C (generalize template). The 3 skills with `scripts/` are the only
+existing models; `session-handoff` in particular is the model to
+follow because its 4 scripts already implement create/validate/list/
+check-staleness — the contract layer would wrap these, not invent them.
+
+#### Row 2 — guard/ pre-flight
+
+**Evidence from `.githooks/pre-commit`:** The pre-commit hook runs
+`verify-standards.js` and `verify-id-graph.js`. Neither enforces
+RULE-MONOLITH-NNN semantics. Examples of unenforced rules:
+- `RULE-MONOLITH-001` (answer before act): no runtime checks "is agent
+  about to take action without being asked? BLOCK."
+- `RULE-MONOLITH-002` (worklog before/after every action): no runtime
+  injects worklog checkpoints.
+- `RULE-MONOLITH-003` (read before write): no pre-flight check exists
+  that fails a write when no preceding read was logged.
+- `RULE-MONOLITH-004` (one logical block, one commit): no commit-size
+  check exists in the pre-commit hook.
+
+**What's missing for autonomy:** A pre-flight checker that maps
+RULE-NNN semantics to runtime guards. The guard format already
+includes `level: [C|W|I]` (critical/warning/info) — the runtime needs
+to respect this. Critical rules block; warning rules log.
+
+**Closing phase:** Not directly in the O-017 cascade. Phase D
+(governance) addresses skills/ governance; guard/ governance is a
+parallel track that should be raised as a new open question (O-019
+candidate) once Phase B's contract shape is validated. The contract
+shape itself can be reused for guard rules: trigger / hook / guard-
+check / standard-check / success-criterion applies just as well to
+RULE-NNN as to skills.
+
+#### Row 3 — standards/ linter
+
+**Evidence from `.githooks/pre-commit` + `standards/scripts/`:** The
+pre-commit hook is a real runtime enforcement layer — it runs at
+every `git commit` (not just CI), blocks on failure (exit 1), and
+covers 11 invariants (V01-V11) plus 15 hard structural checks
+(G01-G15) plus 5 soft warnings (W11-W15). This is the **strongest
+execution layer in the 4-module system today**.
+
+**What's missing for autonomy:** Real-time linter integration. The
+agent writes code/commits without immediate feedback; the pre-commit
+hook catches issues only at commit time. STD-DOC-002 already specifies
+eslint integration but no `.eslintrc` exists in the platform.
+
+**Closing phase:** Phase D (governance). Specifically:
+- D1 (`verify-skills.js`) creates a skills-side verifier analogous to
+  `verify-standards.js`. Same pre-commit runtime, new check surface.
+- A separate task (not yet in O-017 cascade, candidate for O-020)
+  would add the actual eslint integration — this is downstream of
+  Phase D1 because eslint rules may reference skill contracts.
+
+**Why "acceptable for now":** Pre-commit is a strong boundary. Real-
+time linter is a quality-of-life improvement, not a blocker for
+autonomous agents. The agent CAN commit broken work and fix it on the
+next iteration; what it cannot do is commit work that violates
+invariants (V01-V11, G01-G15 block).
+
+#### Row 4 — worklog.md memory
+
+**Evidence from `docs/session/worklog.md`:** 3554-line append-only
+markdown with structured per-task entries (Task ID / Agent / Task /
+Work Log / Stage Summary). No semantic-retrieval layer.
+
+**Evidence from skills/:** Three skills describe the target architecture:
+- `session-log` (ZAI-SESSION-001) — auto-log session activity to ChromaDB.
+- `session-experience` (ZAI-SESSION-003) — extract lessons via GLM-4.5,
+  one lesson per ChromaDB record.
+- `memory-store` (ZAI-MEM-001) — references `~/.zcode/tools/memory_cli.py`
+  for ChromaDB access.
+
+None of these skills is wired up in Z-ai-platform. `~/.zcode/tools/
+memory_cli.py` does not exist. No ChromaDB instance is running. The
+skills are governance (how to use memory if you have it); the runtime
+(actual ChromaDB) is missing.
+
+**What's missing for autonomy:** Persistent memory with semantic
+retrieval. Without it, agent repeats mistakes — it cannot ask "what
+did I try last time I hit this bug?" or "what was the rationale for
+D-005?".
+
+**Closing phase:** Phase E (consumer integration). Specifically:
+- E1 (onboard P-MAS_init as first consumer) will install ChromaDB in
+  a real consumer context. The session-* skills will become callable
+  for the first time.
+- Until E1, the gap stays blocking. The 3554-line worklog is a
+  fallback (full-text search works at this scale), but it doesn't
+  scale to "agent retrieves relevant past experience by semantic
+  similarity".
+
+#### Row 5 — DECISIONS_LOG decision mechanism
+
+**Evidence from `docs/session/DECISIONS_LOG.md`:** 1157-line markdown
+with structured entries (D-NNN decided, O-NNN open). Includes Date,
+Status, Context, Decision, Rationale, Trade-offs, Cross-references.
+
+**What's missing for autonomy:** Two things:
+1. **Retrieval-by-context.** Agent must read the entire log to find a
+   relevant decision. At 30 items, this is fine. At 100+, it becomes
+   a real cost.
+2. **Trigger conditions on open questions.** O-NNN entries sit in
+   markdown. No mechanism auto-resurfaces O-NNN when its trigger
+   condition is met (e.g., O-015 said "defer to consumer-integration
+   phase" — nothing automatically reopens O-015 when Phase E starts).
+
+**Why "acceptable for now":** At 1157 lines / ~30 items, manual lookup
+works. The cost of building retrieval infrastructure exceeds the cost
+of manual lookup. This changes when DECISIONS_LOG grows past ~100
+items, OR when an autonomous agent needs to make decisions faster than
+human-reads-markdown speed.
+
+**Closing phase:** Not directly in O-017 cascade. Candidate for a
+future Phase G (memory layer) that would address Rows 4+5+6 together
+since all three need a persistent semantic store. The session-*
+skills + memory-* skills already define the API; what's missing is
+the runtime. P-MAS_init onboarding (Phase E1) will surface this need
+concretely.
+
+#### Row 6 — SESSION_NOTES §12 feedback loop
+
+**Evidence from §12 of this file:** 3 LESSON entries (LESSON-001/002/
+003). Each follows the pattern: Problem → Wrong fix → Root-cause fix
+→ Pattern → Cross-references → Promoted-to. The pattern across all 3
+is "root-cause fix scales as O(1), symptom/whitelist fix scales as
+O(N)" — three corroborations in three domains (W13 stripCh,
+core.fileMode, V11 promotion).
+
+**What's missing for autonomy:** The feedback loop is the most
+sophisticated gap. Three missing pieces:
+1. **Detection.** No mechanism that recognizes "this pattern has fired
+   N times" automatically. LESSON-001/002/003 were all recognized by
+   the human+agent pair, not by a runtime.
+2. **Promotion.** No mechanism that promotes a lesson into a runtime
+   rule. LESSON-003 → V11 was done manually (user asked "is the system
+   really working?", agent diagnosed W11=0 as fragile, agent proposed
+   V11, user approved, agent implemented, agent ran smoke test).
+3. **Reverse feedback.** V11 blocking a commit doesn't generate a new
+   lesson. The hard cap just fires; the agent doesn't learn "this is
+   the 3rd time a 1200-line file was attempted, maybe the cap should
+   be raised" or "this is the 1st time a 1100-line file was attempted,
+   maybe it should be split into 2 files of 550 each".
+
+**Why BLOCKING:** Without the feedback loop, the system can grow
+governance (more rules, more invariants) but cannot grow execution
+(better runtime decisions). The 4-module system today is in a state
+where every improvement is manual — agent proposes, user approves,
+agent implements. That is not autonomous.
+
+**Closing phase:** Long-term. Phase F (dashboard) is a prerequisite —
+the dashboard visualizes the gap, making detection possible. Phase G
+(memory layer, candidate) is the actual implementation. Realistically
+this is 6-12 months out, post-Phase E. The LESSON-001 pattern (root-
+cause beats symptom) is the principle that should guide every closure:
+don't build a mechanism that catches violations, build a mechanism
+that makes violations impossible.
+
+### 13.3 Cascade implications
+
+The audit confirms O-017's cascade is correctly ordered:
+
+- **Phase B (commit-work pilot)** addresses Row 1 directly.
+- **Phase C (generalize template)** addresses Row 1 for the next 2-3
+  skills, building evidence for the contract shape.
+- **Phase D (governance: verify-skills.js + tiered caps)** addresses
+  Row 3's skills-side runtime (analogous to verify-standards.js).
+- **Phase E (consumer integration)** addresses Row 4 (memory runtime
+  gets wired up in a real consumer context) and surfaces Rows 5+6 as
+  concrete needs.
+- **Phase F (dashboard)** addresses Row 6's detection gap by making
+  patterns visible.
+
+Rows 2 (guard pre-flight) and 6 (feedback loop) are NOT directly in
+the cascade. They should be raised as new open questions:
+- **O-019 candidate** (Row 2): guard/ execution contract. Same 5-
+  tuple shape as skills contract, applied to RULE-NNN. Pilot rule:
+  RULE-MONOLITH-004 (one logical block, one commit) — natural fit
+  with commit-work Phase B pilot.
+- **O-020 candidate** (Row 6): feedback-loop mechanism. Long-term,
+  depends on Phase F dashboard + Phase G memory layer.
+
+### 13.4 Honest uncertainties
+
+1. **"Blocking for autonomous agents" is a threshold call.** A system
+   without Row 1 (skills contract) is clearly not autonomous. A
+   system without Row 5 (decision retrieval) is arguably still
+   autonomous at small scale — the agent can read all 30 decisions
+   in 2 minutes. The classification "blocking" assumes target scale
+   of 100+ decisions / 100+ skills / multiple consumer projects.
+
+2. **Closing order may diverge from cascade order.** Phase B might
+   reveal that the contract shape doesn't generalize, forcing a
+   redesign that affects Phase D's verifier. Phase E might surface
+   that P-MAS_init's dashboard needs feedback-loop data (Row 6) that
+   doesn't exist yet, pulling Phase G forward.
+
+3. **Row 6 (feedback loop) is genuinely hard.** It requires the agent
+   to recognize patterns, abstract them, and propose rule updates —
+   exactly the cognitive task that distinguishes "agent" from
+   "script". A partial implementation (e.g., "log every V11 trigger
+   to a file; agent reviews weekly") is achievable; a full
+   implementation (agent proposes rule updates autonomously) is
+   research-grade.
+
+---
+
 ## Change History
 
 | Date | Change |
@@ -824,3 +1077,4 @@ itself — any future SOFT→HARD promotion follows the same recipe)
 | 2026-06-21 | Added §12 (Structured lessons registry) with LESSON-001 (W13 stripCh root-cause fix vs whitelist). Fills the layer between §1-5 topic gotchas and §8 bridge table to D-NNN. T3 = ChromaDB-via-toolkit plan explicitly deprecated per user guidance (toolkit may be killed/reworked); §12 stays portable markdown. |
 | 2026-06-21 | Added §12.5 LESSON-002 (core.fileMode=false beats repeated `git checkout .` for sandbox fs-mount mode-bit noise). Corroborates LESSON-001: same principle (root-cause fix O(1) beats symptom cleanup O(N)) in a different domain. Fix baked into bootstrap.sh Step 2 for durability across session restarts. |
 | 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file → FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
+| 2026-06-21 | Added §13 (Phase A2 governance/execution gap audit). O-017 Phase A2 deliverable. Audits the 6-row gap table from O-017 context against actual repo state. Result: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade ordering (Phase B→C→D→E→F). Surfaces 2 new open question candidates: O-019 (guard/ execution contract, parallel to skills contract) and O-020 (feedback-loop mechanism, long-term). Companion to `skills/docs/CATALOG.md` (Phase A1 deliverable). |

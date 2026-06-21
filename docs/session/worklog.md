@@ -3552,3 +3552,94 @@ Stage Summary:
 - Cascade status: OPEN, awaits user approval before Phase A execution.
   Not started yet.
 - No code changes. Verifier status unchanged: 8/8 + 13/13, 0 warnings.
+
+---
+Task ID: phase-a-cascade-2026-06-21
+Agent: main (Super Z)
+Task: Execute O-017 Phase A — discovery phase of the skills execution
+contract cascade. Two deliverables: A1 (catalog 35 skills) and A2
+(audit governance/execution gap table against actual repo state).
+
+Work Log:
+- Read O-017 in DECISIONS_LOG.md (lines 956-1158) for cascade context.
+  Confirmed 6-phase plan (A discovery, B pilot, C generalize, D
+  governance, E consumer, F dashboard) with iterative feedback loops.
+- Read prior worklog entry (o-017-skills-cascade-plan-2026-06-21) to
+  understand what was already planned vs what needs execution.
+- Wrote `scripts/catalog_skills.py` (200 lines, Python). Reads each
+  skill directory, parses YAML frontmatter, extracts metadata (ZAI-ID,
+  version, description, line counts, refs/scripts/evals/agents/assets
+  presence), classifies (active/stale/skeleton/duplicate-candidate),
+  emits JSON + Markdown preview.
+- Ran cataloger. Found 36 skill directories (not 35 — INDEX.md was
+  stale). Classification: 30 active / 5 stale / 1 duplicate-candidate.
+  No skeletons.
+- Cross-checked against INDEX.md. Found 3 drifts:
+  (1) `zai-skill-registry` (ZAI-META-002, v1.2) missing from INDEX.md.
+  (2) `skill-creator` recorded as ZAI-META-002 in INDEX.md but actual
+  frontmatter says ZAI-STS-008. The ID ZAI-META-002 actually belongs
+  to zai-skill-registry.
+  (3) STS domain count was 7 in INDEX.md but should be 8 (skill-creator
+  is ZAI-STS-008).
+- Wrote `skills/docs/CATALOG.md` (374 lines). 12 sections: headline
+  numbers, classification summary, full catalog table (36 rows),
+  skills by domain (8 ARCH+DEV+FS+MEM+META+QA+REQ+SESSION+STS
+  groups), execution layer coverage (only 3/36 have scripts/, only
+  1/36 has evals/), INDEX.md drift findings, duplicate-candidate
+  analysis (phi-layout vs phi-layout_sts — interpreted as convergent
+  STS re-registration, NOT a bug), skill-creator domain misregistration
+  (defer to Phase D1 verifier), Phase B pilot selection (commit-work
+  confirmed, session-handoff surfaced as first Phase C2 target), stale
+  skills remediation queue (5 skills, ~75 min total), cross-references,
+  change history.
+- Fixed `skills/skills/INDEX.md` (5 edits): bumped count 35→36,
+  corrected skill-creator ID, added zai-skill-registry row, updated
+  META section (skill-creator→zai-skill-registry), updated STS section
+  (7→8 skills, added skill-creator). Added correction note at top.
+- Ran verify-standards.js + verify-id-graph.js after INDEX.md fix.
+  Both PASS: 8/8 + 13/13, 0 warnings.
+- Wrote SESSION_NOTES §13 (250 lines, new section). 4 subsections:
+  summary table (6 rows: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1
+  ACCEPTABLE), per-row findings (Rows 1-6 each with evidence +
+  what's missing + closing phase), cascade implications (confirms
+  B→C→D→E→F ordering; surfaces O-019 and O-020 candidates), honest
+  uncertainties (3: blocking-threshold call, closing-order may
+  diverge, Row 6 feedback-loop is research-grade).
+- Updated O-017 in DECISIONS_LOG.md: status OPEN→"Phase A COMPLETE,
+  awaits Phase B approval". Added "Phase A outcome" section with A1
+  + A2 deliverable descriptions, 3 unanticipated findings affecting
+  Phase B, status-of-cascade-phases checklist ([x] for A1+A2, [ ]
+  for B1-F2), new open question candidates O-019/O-020. Removed
+  original "Action items" checklist (replaced by status checklist).
+  Added Change History entry.
+- Verified DECISIONS_LOG.md (1209 lines) and SESSION_NOTES.md (1080
+  lines) — both exceed 1000 lines, but V11 scope is standards/ +
+  docs/sandbox/ + templates/ only (per O-015). docs/session/ is NOT
+  scanned. No V11 violation.
+
+Stage Summary:
+- Phase A complete. Two deliverables:
+  1. `skills/docs/CATALOG.md` (374 lines) — formal catalog of 36
+     skills with classification, execution-layer coverage, drift
+     findings, pilot selection analysis.
+  2. `docs/session/SESSION_NOTES.md` §13 (250 lines, new section) —
+     gap audit with 6-row classification, per-row evidence, cascade
+     implications, 3 honest uncertainties.
+- INDEX.md corrected (35→36 skills, skill-creator ID fixed, zai-
+  skill-registry added).
+- O-17 status updated: Phase A COMPLETE, awaits Phase B approval.
+- 2 new open question candidates surfaced (NOT yet formalized):
+  O-019 (guard/ execution contract, parallel to skills contract),
+  O-020 (feedback-loop mechanism, long-term, depends on Phase F+G).
+- Verifier status unchanged: 8/8 + 13/13, 0 warnings. Phase A did
+  not break any invariants.
+- Phase A confirmed 3 findings that affect Phase B:
+  (1) Only 3/36 skills have callable scripts/ — Phase B's commit-work
+      pilot will set precedent, no sibling to copy from.
+  (2) session-handoff is the most execution-ready skill (4 scripts +
+      evals + references) — natural first Phase C2 generalization
+      target.
+  (3) 5 stale skills need frontmatter remediation (~75 min total) —
+      parallel-safe with Phase B.
+- Cascade next: Phase B (B1 design commit-work CONTRACT.md, B2
+  implement pilot). Awaits user approval.
