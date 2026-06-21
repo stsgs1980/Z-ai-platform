@@ -4280,3 +4280,121 @@ Stage Summary:
       S02 fix + CI-AND-TESTING.md §9.2.2 update (commit 7dd54d1)
   (c) platform/: pre-commit Phase 3 -> --strict + verify-id-graph.yml
       CI step -> --strict + worklog entry + 2 submodule pointer bumps
+
+---
+Task ID: o017-phase-c-template-and-session-handoff-2026-06-21
+Agent: Super Z (main)
+Task: O-017 Phase C — generalise the 5-tuple execution contract shape from commit-work (Phase B pilot, git-hook domain) to session-handoff (Phase C2, agent-loop domain), and extract a reusable template (Phase C1).
+
+Work Log:
+- Read commit-work/CONTRACT.md (368 lines, Phase B1 deliverable) to
+  understand the 5-tuple shape as currently instantiated.
+- Read session-handoff/SKILL.md (190 lines) and inspected its 4
+  Python scripts (create_handoff.py, validate_handoff.py,
+  list_handoffs.py, check_staleness.py — total 1211 lines).
+- Read validate_handoff.py (316 lines) to understand SH1-SH5
+  invariant coverage (TODO placeholders, required sections, secret
+  detection, file references, quality score).
+- Read SESSION_NOTES.md §13.2 Row 1 — confirmed session-handoff is
+  the model to follow for Phase C2 because its 4 scripts already
+  implement create/validate/list/check-staleness; the contract
+  layer wraps these, not invents them.
+- Wrote skills/skills/session-handoff/CONTRACT.md (second 5-tuple
+  pilot contract):
+  - Frontmatter: 11 fields (skill, skill_id=ZAI-SESSION-002,
+    skill_version=1.0, contract_version=1.0, contract_status=pilot,
+    owning_standard=STD-SKILL-001 v1.1, trigger=session_handoff_requested,
+    hook=agent_loop, hook_path=scripts/, related=[STD-SKILL-001,
+    RULE-MONOLITH-002, ZAI-SESSION-001, ZAI-SESSION-003],
+    last_updated=2026-06-21).
+  - §1 Trigger: 4-row table (explicit request, context-window
+    threshold, session milestone, resume request) with detection
+    and source columns.
+  - §2 Hook: 4-row table mapping the 4 Python scripts to their
+    fire-when and purpose. Notes no `--no-verify` equivalent —
+    contract applies regardless of invocation path.
+  - §3 Guard checks: 6-row table (H1 worklog freshness WARN,
+    H2-H6 BLOCK for filesystem integrity). 3 subsections explain
+    WARN vs BLOCK rationale and why RULE-MONOLITH-001/003 are not
+    runtime-enforced (same pattern as commit-work §3.3).
+  - §4 Standard checks: 6-row table (SH1 TODO placeholders BLOCK,
+    SH2 required sections BLOCK, SH3 secrets BLOCK, SH4 referenced
+    files WARN, SH5 quality score >= 70 BLOCK, SH6 staleness WARN).
+    Maps each to validate_handoff.py and check_staleness.py.
+  - §5 Success criterion: split into CREATE mode (6 conditions)
+    and RESUME mode (6 conditions). Failure recovery describes
+    script exit, artifact NOT created, agent must fix.
+  - §6 Runtime: 3 modes (CREATE automatic, RESUME automatic,
+    explicit manual). Each lists script invocation order.
+  - §7 Contract versioning: standard 3-tier SemVer (major = check
+    set change, minor = WARN add, patch = doc fix).
+  - §8 Cross-references: cites O-017 Phase C1 (this closes it),
+    commit-work/CONTRACT.md (sibling pilot), SKILL.md (governance),
+    RULE-MONOLITH-002 (H1 maps to it), STD-SKILL-001 v1.1, the
+    handoff-template.md and resume-checklist.md references.
+  - §9 Honest uncertainties: 6 open questions including (1)
+    context-window threshold trigger not yet wired, (2) H1 is
+    agent-self-check not script-enforced, (3) quality score 70
+    threshold is a hypothesis, (4) staleness levels are
+    qualitative, (5) no chain integrity check, (6) 5-tuple shape
+    now validated on 2 skills — Phase D2 (qa-test-planner) is
+    next validation point.
+  - §10 Change history: initial creation entry citing O-017
+    Phase C1.
+- Wrote skills/docs/CONTRACT-TEMPLATE.md (reusable template):
+  - "What is an execution contract?" preamble explains the
+    governance + contract + runtime = callable capability shape.
+  - "The 5-tuple shape" section with table of the 5 elements +
+    rationale for why 5 (not 4, not 6).
+  - "How to use this template" — 12-step recipe for filling in
+    the skeleton.
+  - "Contract skeleton" — full markdown template with placeholders
+    for all 10 sections (§1-§10).
+  - "Validation checklist for new contracts" — 13-item checklist
+    to run before merging a new CONTRACT.md.
+  - "When NOT to use this template" — only skills with scripts/
+    need a contract; 32 of 36 skills are pure markdown.
+  - "Change history" — initial creation citing O-017 Phase C2.
+- Updated DECISIONS_LOG.md O-017 entry:
+  - Phase C marked COMPLETE (was unchecked).
+  - C1 and C2 marked [x] with concrete artifact paths.
+  - Phase D1 marked [x] (verify-skills.js shipped + remediated
+    earlier in this date); D2 (tiered hard caps) remains [ ].
+  - Change History appended with comprehensive Phase C+D1 closure
+    entry.
+- Final verifier sweep:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files, all
+    <=1000 lines).
+  - verify-id-graph.js: 13/13 HARD PASS, 3 W13 soft warnings
+    (unchanged — known cross-submodule limitation; new files in
+    skills/ are not scanned by W13).
+  - verify-skills.js --strict: 6/6 HARD PASS, 0 SOFT warnings
+    (CONTRACT.md is additive; does not break skills-side verifier).
+  - snapshot compare: OK — graph unchanged (CONTRACT.md related:
+    edges reference existing IDs).
+
+Stage Summary:
+- O-017 Phase C closed: 5-tuple execution contract shape now
+  validated across 2 hook surfaces (git-hook domain via commit-work,
+  agent-loop domain via session-handoff). Shape generalises.
+- 2 new artifacts:
+  1. skills/skills/session-handoff/CONTRACT.md (~330 lines, second
+     pilot contract, agent-loop hook domain)
+  2. skills/docs/CONTRACT-TEMPLATE.md (~350 lines, reusable
+     template + 12-step recipe + 13-item validation checklist)
+- Honest finding: 5-tuple shape held without modification on the
+  second pilot. The 6 honest uncertainties in session-handoff
+  CONTRACT.md §9 document what's still a hypothesis (quality
+  score threshold, staleness levels) vs what's not yet wired
+  (context-window threshold trigger). Phase D2 (qa-test-planner
+  contract) will be the 3rd validation point — if it reveals the
+  shape doesn't fit, the template will be revised.
+- Cascade O-017 status: A done, B done, C done, D1 done, D2
+  pending, E pending, F pending. v2.5.0 release tag cut earlier
+  in this date includes Phases A-B-C-D1.
+- Next: commit + push. Three commits needed:
+  (a) skills/ submodule: 2 new files (CONTRACT.md +
+      CONTRACT-TEMPLATE.md)
+  (b) platform/: DECISIONS_LOG O-017 update + worklog entry +
+      skills submodule pointer bump
+  (standards/ unchanged in this task — Phase C is skills-only)
