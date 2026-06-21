@@ -4557,3 +4557,64 @@ Stage Summary:
 - Honest finding: total code footprint grew slightly (verify-id-graph.js 829 + lib/ 1390 = 2219 lines vs previous 1354 + lib/ 500 = 1854 lines, +365 lines / +20%). This is because new lib/ files have comprehensive JSDoc docstrings (every function gets a block explaining semantics + edge cases + dependencies). The docstrings are the test plan for future unit tests. Pure line-count reduction was NOT the goal — modularization for testability and isolation was. The main file being under 1000 lines means a reader can scan it end-to-end in one sitting.
 - Honest finding #2: W13 root-cause fix was unanticipated scope creep. Original task was "modularize verify-id-graph.js". But while extracting health-warnings.js, I noticed the whitelist had grown to ~30 entries — a LESSON-001 anti-pattern. The fix (expand candidates list to include skills/skills/ tree + fix submodule paths) was small (~20 lines) and delivered 11→0 warning improvement. Worth the scope expansion.
 - Next: ALL tasks from "делать все по приоритетам" authorization are now COMPLETE. D2 (tiered hard caps) ✅, O-018 (modularization) ✅. Phase E (consumer integration) explicitly deferred per user. Phase F (dashboard) blocked by E1.
+
+---
+Task ID: S10c-readme-cap-2026-06-22
+Agent: Super Z (main)
+Task: Remediate 2 READMEs (gepetto 485, react-dev 404) that violated the §4.18.1 README.md ≤ 400 cap, then activate S10c (V12c) as a HARD check in verify-skills.js. Closes the deferred item from O-017 Phase D2.
+
+Work Log:
+- Checked v2.5.0 tag status: already exists (ef9c3d5, 2026-06-21 15:39 UTC), annotated, points to the §9.2.2 remediation commit. Reports this to user; asks whether to also cut v2.6.0 for post-v2.5.0 work (Phase C, Phase D2, O-018, S10c).
+- Read gepetto/README.md (485 lines) and identified compression targets:
+  - 27-line ASCII workflow diagram (lines 82-108) → replaced with 6-line text description of the 6 phases
+  - 15-line TOC (lines 35-49) → removed (README of this size doesn't need nav)
+  - 3 overlapping sections ("Implementing the Plan" lines 248-296, "Integration with ralph-loop" lines 299-377, "Integration with Ralphy" lines 380-453) → consolidated into one "Implementing the Plan" section with key differences in a comparison table. Preserved all 6 output-file examples, 5 best practices, 3 implementation options (A/B/C), full installation instructions, file structure, and Differences-from-Similar-Tools table.
+  - Result: 485 → 302 lines (-183, -38%). Well under the 400 cap.
+- Read react-dev/README.md (404 lines, only 4 over cap) and identified minimal cuts:
+  - "Reference File Organization" section (12 lines, 7-bullet list with file descriptions) → condensed to one paragraph preserving all 7 file names and their scope (3 lines saved)
+  - "Related Skills" section (3-bullet list) → condensed to one line (3 lines saved)
+  - Result: 404 → 392 lines (-12, -3%). Just barely under cap, but enough.
+- Implemented S10c in verify-skills.js v1.1.0 → v1.1.1:
+  - Added READMEMD_CAP = 400 constant, readmeMdOffenders collection, readmeMdChecked counter
+  - Added S10c loop block: scans skills/skills/{name}/README.md if present, counts lines, pushes offender if > 400
+  - Added S10c check() call with same pattern as S10a/S10b
+  - Updated header docstring: "runs 10 checks" → "runs 11 checks", added S10c line to S10 block
+  - Updated SCOPE block: added README.md row
+  - Updated S10 rationale comment block: added S10c context (cap existed 2026-06-21, deferred pending 2 violations, both remediated 2026-06-22, now HARD from day 1)
+  - Added (c) to FAILURE MODE block: "For README.md, move detailed integration examples to references/ — README is for onboarding/overview only"
+  - Updated help text: HARD block adds S10c row, S10 rationale block adds 2026-06-22 S10c activation context
+  - Bumped VERSION 1.1.0 → 1.1.1, EFFECTIVE_DATE 2026-06-21 → 2026-06-22
+- Updated META-001-standard-id-system.md:
+  - §4.18.1 README.md row pre-existing (400/250) — no change needed
+  - §4.18.4 exempt list: COMPRESSED from 4 multi-row markdown tables (one per file, ~85 lines) to 4 compact paragraphs (~36 lines). Top-10 references kept, rest summarised as "33 files range 46-450 lines, full list regenerable via scripts/audit_md_files.py". Saved ~50 lines. This compression was needed because §4.18.7 addition would have pushed META-001 over the V11 1000-line hard cap.
+  - §4.18.5: added cross-link "STD-SKILL-001 §8.2 → README.md hard ceiling: 400 lines, see META-001 §4.18.1 (README.md row); soft warn at 250" (added 2026-06-22, S10c activation — see §4.18.7)
+  - §4.18.7 (NEW): "README.md cap rationale (added 2026-06-22, S10c activation)" — documents (a) the 400-line ceiling existed in §4.18.1 since 2026-06-21 but was not enforced until S10c v1.1.1, (b) 2 pre-existing violations (gepetto 485, react-dev 404) blocked HARD enforcement from day 1, (c) both remediated on 2026-06-22 (gepetto 485→302, react-dev 404→392), (d) the 400-line ceiling reflects README's purpose as onboarding/overview doc, (e) failure-mode protocol (move detailed integration examples to references/), (f) remediation approach used for gepetto (consolidated 3 overlapping sections) and react-dev (condensed 1 multi-item bullet list).
+  - META-001 final size: 962 lines (was 994 before this patch, V11 PASS with 38-line headroom).
+- Updated STD-SKILL-001-skill-format.md:
+  - §8.2: added README.md ceiling line ("README.md hard ceiling: 400 lines (META-001 §4.18.1, README.md row); soft warn at 250 — added 2026-06-22 (S10c activation after gepetto 485→302 + react-dev 404→392 remediation). See META-001 §4.18.7 for rationale.")
+  - §10.1: added V12c row to per-skill checks table ("README.md ≤ 400 lines (META-001 §4.18.1, README.md row) | verify-skills.js | V12c | HARD (all skills with README.md) — added 2026-06-22 (S10c activation, gepetto+react-dev remediated)")
+  - Footer: appended V12c addition note to change history
+- Updated CI-AND-TESTING.md §9.3.3:
+  - Status badge: "IMPLEMENTED (2026-06-21, O-017 Phase D2)" → "IMPLEMENTED + EXTENDED (2026-06-21, O-017 Phase D2; S10c added 2026-06-22)"
+  - Version reference: v1.1.0 → v1.1.1
+  - Added S10c row to "What was added" table (Cap 400, Scope 10 skills with README.md)
+  - Added "Why S10c was activated on 2026-06-22 (not 2026-06-21 with S10a/S10b)" subsection explaining the deferred-from-day-1 pattern
+  - Replaced "What was NOT added (deferred)" section: removed README.md bullet (no longer deferred), kept References bullet (correctly NOT added because exempt per §4.18.1, not because of violations)
+  - Updated companion standard changes list: added §4.18.7 (new), README.md rows in §4.18.5/§8.2/§10.1, version bump v1.1.0 → v1.1.1
+  - Updated verification output: 8/8 → 9/9 HARD PASS, added S10c line (10 README.md files ≤ 400, max: 392 react-dev)
+  - Updated Status line: "COMPLETE 2026-06-21" → "COMPLETE 2026-06-22 (S10a+S10b on 2026-06-21, S10c on 2026-06-22)"
+- W13 warning root-cause fix (caught by verify-id-graph.js): initial draft of §4.18.7 mentioned "references/readme-supplement.md" as an example file path. verify-id-graph.js flagged this as W13 (referenced file does not exist in standards/ tree). Fixed by rephrasing to "a new file under references/ (topic-specific, e.g. references/integration-<tool>.md)" — same guidance, no false positive.
+- Final verifier sweep:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files, all ≤1000; META-001 = 962 lines)
+  - verify-skills.js --strict: 9/9 HARD PASS (S01-S05, S09, S10a, S10b, S10c), 0 SOFT warnings. S10c: all 10 README.md files ≤ 400 lines (max: 392, react-dev).
+  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings (W13 false positive fixed in-flight), snapshot compare OK (structure unchanged from previous baseline)
+- Commits: 3 commits across 3 repos (skills submodule: README remediation; standards submodule: S10c implementation + META/SKILL/CI docs; platform/: worklog entry + 2 submodule pointer bumps).
+
+Stage Summary:
+- S10c (V12c) FULLY SHIPPED. verify-skills.js v1.1.1 enforces all 3 tiered hard caps (SKILL.md ≤ 800, CONTRACT.md ≤ 500, README.md ≤ 400) as HARD from day 1.
+- O-017 Phase D2 fully closed — the deferred README.md ≤ 400 cap is now active. The "What was NOT added (deferred)" backlog item from D2 is now empty (only References remains as "not added", which is correct per §4.18.1 exemption, not a deferral).
+- Pre-existing tech debt: 2 README violations closed in one coordinated patch (skills/ submodule commit 9797e69).
+- LESSON-001 applied twice: (1) for CONTRACT.md cap (500 not 200, root-cause fix scales as O(1)), (2) for META-001 §4.18.4 compression (compressed exempt list to make room for §4.18.7 rather than raising V11 cap — symptom-fix would have raised the cap, root-cause fix compresses the content).
+- W13 root-cause fix from O-018 (expanded candidates list) proved its value again: caught a false-positive reference to "references/readme-supplement.md" in-flight, fixed in same patch instead of needing a separate baseline-update cycle.
+- v2.5.0 release tag (task D): ALREADY EXISTS from previous session (ef9c3d5, 2026-06-21). Reports this to user — asks whether to cut v2.6.0 for post-v2.5.0 work (Phase C + Phase D2 + O-018 + S10c).
+- Pending tasks remaining: E1 (P-MAS_init onboarding) explicitly DEFERRED per user. E2 (Consumer tutorial) blocked by E1. v2.6.0 release tag pending user decision.
