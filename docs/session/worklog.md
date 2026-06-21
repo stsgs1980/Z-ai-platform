@@ -4398,3 +4398,103 @@ Stage Summary:
   (b) platform/: DECISIONS_LOG O-017 update + worklog entry +
       skills submodule pointer bump
   (standards/ unchanged in this task — Phase C is skills-only)
+
+---
+Task ID: o018-verify-id-graph-modularization-2026-06-21
+Agent: Super Z (main)
+Task: O-018 — modularize verify-id-graph.js (1593 lines). Extract pure functions + constants into lib/ submodules for testability and reuse.
+
+Work Log:
+- Captured baseline output (md5 e969912edf230f655304b2d91663e037, 2416 bytes)
+  for regression check before refactor.
+- Mapped verify-id-graph.js structure (1593 lines):
+  - Lines 1-113: header, requires, constants
+  - Lines 115-160: results state + fail/warn helpers
+  - Lines 159-247: CLI parsing + help
+  - Lines 247-358: platform + repo discovery (impure — fs calls)
+  - Lines 358-437: file listing (impure — fs.readdir)
+  - Lines 437-677: parsers + extractDeclaration (parsers pure,
+    extractDeclaration impure — fs.readFileSync)
+  - Lines 677-727: extractReferences (pure) + parseMigrations (impure)
+  - Lines 727-787: tarjanSCC (pure — graph algorithm)
+  - Lines 787-1062: phase1-phase9 (impure — mutate global `results`)
+  - Lines 1062-1287: phase10 health warnings (impure)
+  - Lines 1287-1387: emitHumanReadable + emitJSON (impure — read `results`)
+  - Lines 1387-1478: compareSnapshot (1 fs call + pure logic)
+  - Lines 1478-end: main()
+- Created 4 lib/ submodules (only pure functions + data, no side effects):
+  1. standards/scripts/lib/constants.js (90 lines):
+     LAYER_MATRIX, COMPAT_MATRIX, FORBIDDEN_EDGES, REPO_GLOBS,
+     ID_REGEX, VALID_DOMAINS (skills-side: MEM/FS/SESSION/...).
+     Pure data module.
+  2. standards/scripts/lib/parsers.js (188 lines):
+     parseYAMLFrontmatter, parseBlockquoteHeader, parseHTMLComment,
+     extractReferences. Pure string in → object out. Could be reused
+     by verify-skills.js (which currently duplicates parseFrontmatter).
+  3. standards/scripts/lib/graph-algorithms.js (96 lines):
+     tarjanSCC. Pure (nodes, edges) in → SCCs out. O(V+E) Tarjan
+     algorithm with reference citation.
+  4. standards/scripts/lib/snapshot.js (126 lines):
+     compareSnapshot. Has 1 fs.readFileSync call (read baseline) but
+     otherwise pure. Takes currentVersion as explicit 3rd arg (vs
+     closure access in original) — more testable.
+- Edited verify-id-graph.js:
+  - Added require() block at top (lines 58-87) importing 4 lib modules.
+  - Replaced inline parseYAMLFrontmatter / parseBlockquoteHeader /
+    parseHTMLComment / extractReferences / tarjanSCC / compareSnapshot
+    definitions with comments pointing to lib/ source.
+  - Kept extractDeclaration and parseMigrations inline (they call
+    fs.readFileSync — impure, belongs in main file).
+  - Kept phase1-phase10 inline (they mutate global `results` state —
+    would require larger refactor to extract; deferred).
+  - Bumped VERSION 1.1.4 → 1.1.5, EFFECTIVE_DATE 2026-06-17 → 2026-06-21.
+  - compareSnapshot wrapped in 2-arg backward-compat shim that passes
+    VERSION to the 3-arg lib/snapshot.js function.
+- Hit one regression during smoke test: VALID_DOMAINS collision.
+  lib/constants.js exports the skills-side set (MEM/FS/SESSION/...),
+  but verify-id-graph.js has its own standards-side set (META/ARCH/
+  DOC/...) defined inline at line ~897 for phase10 W15 check. Both
+  are valid sets but for different domains. Fixed by NOT importing
+  VALID_DOMAINS from lib/constants (left a comment explaining why).
+- Smoke test post-fix: JSON output byte-identical to baseline except
+  for `version` (1.1.4 → 1.1.5) and `effective_date` (2026-06-17 →
+  2026-06-21) — expected version-bump changes. All structural fields
+  (summary, checks, warnings) byte-identical.
+- Updated snapshot baseline: --update-snapshot wrote new baseline
+  with script_version=1.1.5 (was 1.1.4). Graph structure unchanged
+  (61 IDs, 115 edges, 3 warnings — same as before).
+- Final verifier sweep:
+  - verify-standards.js: 8/8 PASS (unchanged, not touched by O-018)
+  - verify-id-graph.js: 13/13 HARD PASS, 3 W13 soft warnings
+    (unchanged behaviour)
+  - verify-skills.js --strict: 6/6 HARD PASS, 0 SOFT (unchanged)
+  - snapshot compare: OK (structure matches; version-bump WARNING
+    is non-fatal per lib/snapshot.js design)
+
+Stage Summary:
+- O-018 (verify-id-graph.js modularization) COMPLETE.
+- verify-id-graph.js: 1593 → 1354 lines (-239 lines, -15%).
+- 4 new lib/ submodules (500 lines total) with comprehensive
+  docstrings, ready for unit testing (none exist yet — Phase D2
+  or later could add a test harness that imports lib/*.js directly).
+- Architectural win: pure functions are now isolated from impure
+  ones. lib/parsers.js can be required by verify-skills.js to
+  eliminate the parseFrontmatter duplication (TODO — deferred to
+  avoid scope creep in this task).
+- Honest finding: total line count grew (1593 → 1854) because the
+  new lib/ files have detailed docstrings (every function gets a
+  JSDoc block explaining semantics + edge cases + reference for
+  tarjanSCC). This is intentional — the docstrings are the test
+  plan for future unit tests. If pure line-count reduction is
+  desired later, the docstrings can be trimmed.
+- Honest finding #2: the refactor is structurally correct but
+  behaviour-identical. No new bugs introduced (byte-identical
+  JSON output except version). But also no new tests added — the
+  safety net is "diff baseline output before/after", which caught
+  the VALID_DOMAINS collision. A real test harness (Phase D2 or
+  O-021 candidate) would import lib/*.js directly and exercise
+  edge cases.
+- Next: commit + push. Two commits:
+  (a) standards/ submodule: 4 new lib/ files + verify-id-graph.js
+      refactor + snapshot baseline update
+  (b) platform/: worklog entry + standards submodule pointer bump
