@@ -3767,3 +3767,171 @@ Stage Summary:
     duplicating logic? (DRY question for Phase C1)
   * commit-msg skips merge/revert/squash/fixup — acceptable?
     (revisit if merge hygiene becomes issue)
+
+---
+
+Task ID: honest-remediation-2026-06-21
+Agent: main
+Task: Three-item "honest remediation" batch — (1) LESSON-004 in
+SESSION_NOTES §12, (2) 5 stale skills frontmatter remediation,
+(3) CI/CD rewrite (merge 2 drafts + fix 12 bugs into one canonical
+CI-AND-TESTING.md). User authorized with «принимаю, делай» after I
+proposed pausing the O-017 cascade to do "boring" hygiene work first.
+
+Work Log:
+
+Item 1 — LESSON-004 (SESSION_NOTES §12.7):
+- Read SESSION_NOTES.md §12 structure: 3 existing LESSON entries
+  (LESSON-001 root-cause O(1)/O(N), LESSON-002 core.fileMode,
+  LESSON-003 W11→V11 promotion).
+- Added §12.7 LESSON-004: `git reset --hard` wipes uncommitted work
+  tree; stash before reset. Triggered twice in Phase B smoke testing.
+  Includes operational recipe (git stash push -u -m "pre-reset-safety"
+  → git reset --hard HEAD~1 → git stash pop).
+- Noted: distinct from LESSON-001 family (operational hygiene, not
+  O(1)/O(N) scaling). Candidate for promotion into commit-work
+  CONTRACT.md as guard check G0 in Phase C.
+- Added Change History entry for §12.7.
+
+Item 2 — Stale skills remediation (discovered to be false positive):
+
+  Started by reading all 5 "stale" SKILL.md frontmatters to plan the
+  remediation. Found that ALL 5 already had `description:` field in
+  YAML folded-scalar form (`description: >` with continuation lines).
+  This contradicted the CATALOG.md §2 classification of "stale =
+  missing frontmatter description".
+
+  Root cause investigation:
+  - Read /home/z/my-project/scripts/catalog_skills.py — found the bug.
+  - parse_frontmatter() used simple `line.partition(":")` parser.
+  - For `description: >` lines, it recorded value as ">" (literal).
+  - Classifier then saw `desc.startswith(">")` as true → flagged as
+    stale.
+  - False positive: 5 skills incorrectly classified as stale.
+
+  Also discovered in skill-id-system/SKILL.md §4: api-retry,
+  dev-watchdog, fallback, health-check, z-ai-web-dev-sdk are
+  explicitly listed as "Z.ai sandbox system skills that do NOT
+  receive ZAI- prefix IDs". So absence of `id:` was CORRECT, not a
+  defect.
+
+  Real gap: only `version:` field was missing from frontmatter.
+
+  Fix applied (2 parts):
+  a) catalog_skills.py: rewrote parse_frontmatter() to handle YAML
+     folded scalars (`key: >`) and literal scalars (`key: |`) by
+     collecting indented continuation lines. Updated classify() to
+     use `len(desc) < 20` length check instead of
+     `desc.startswith(">")`.
+  b) Added `version: 1.0` to frontmatter of all 5 skills
+     (api-retry, dev-watchdog, fallback, health-check,
+     z-ai-web-dev-sdk). No `id:` field added (correct per §4).
+
+  Re-ran catalog_skills.py:
+  - Classification counts: {'active': 35, 'duplicate-candidate': 1}
+  - Was: 30 active / 5 stale / 1 dup → now 35 active / 1 dup.
+  - All 5 previously-stale skills now show ver=1.0, class=active,
+    real descriptions 403-484 chars.
+
+  CATALOG.md updates:
+  - §2: reworded "stale=5" → "stale=0" with explanation of false
+    positive.
+  - §3: updated 5 rows (v? → 1.0, stale → active).
+  - §3: added Note on remaining v? entries (4 skills: gepetto,
+    phi-layout, reducing-entropy, session-handoff — legitimate
+    Phase C candidates).
+  - §4 "Skills without ZAI-ID": reworded to note sandbox system
+    skill status per §4 of skill-id-system, removed stale markers.
+  - §10: replaced "Stale skills remediation queue" with "False-
+    positive stale skills — bug postmortem" (10.1-10.6: bug
+    description, why these 5, fix, result, remaining gaps, lesson).
+  - §12: added Change History entry documenting the retraction.
+
+  This corroborates LESSON-001 (root-cause fix scales O(1)): fixing
+  the parser immediately reclassified all 5 false positives and
+  prevents future false positives for any skill using folded-scalar
+  description. A whitelist approach (manually marking each as "not
+  really stale") would have scaled O(N).
+
+Item 3 — CI/CD rewrite (merge 2 drafts + fix 12 bugs):
+
+  Reviewed two uploaded drafts:
+  - "Полный CI/CD Pipeline для Z-ai-platform.md" (583 lines)
+  - "Уровни тестирования Z-ai-platform.md" (158 lines)
+
+  Found 12 factual bugs in the drafts against actual repo state
+  (verified each via find/ls/grep on the live repo). Key bugs:
+  - L1 matrix listed nonexistent repos (rules, zai-standards,
+    zai-rules); actual submodules are standards/guard/skills
+  - verify-standards.js has no --timeout flag (drafts invented it)
+  - scripts/check-md.sh path was wrong (lives in standards/scripts/)
+  - quick_validate.py only exists on 1 of 36 skills (draft assumed
+    universal)
+  - Emoji regex used grep -E with \u{XXXX} (requires grep -P PCRE)
+  - rm -rf /home/z/my-project/Z-ai-platform in L6 bootstrap test
+    (would wipe live working tree — same trap as LESSON-004)
+  - No permissions: block (PR comment step would fail)
+  - L8 chat compliance checked nonexistent chat-logs/ dir
+  - Performance threshold 3.0s was arbitrary (no baseline)
+
+  Read existing .github/workflows/verify-id-graph.yml (250 lines,
+  already mature: concurrency control, puppeteer Chrome cache, apt
+  + conda fallback for graphviz, PR comments on failure).
+
+  Wrote canonical merged doc: standards/docs/CI-AND-TESTING.md
+  (483 lines, 12 sections):
+  - §1 Architecture overview (4-repo, 3 verifier layers, table)
+  - §2 L0 pre-commit hook (Phase 0/1/2, V01-V11, G01-G15,
+    installation, before/after-edit sanity check pattern, commit-msg
+    G4-G6 Conventional Commits)
+  - §3 L1 commit-work contract runtime (run-contract.sh --dry-run /
+    --commit / --help, 5-tuple mapping)
+  - §4 L2 GitHub Actions workflow (actual existing workflow —
+    triggers, 13 steps, concurrency, permissions)
+  - §5 L3 skill validation (only skill-creator has quick_validate.py
+    today; Phase D1 will add verify-skills.js)
+  - §6 L4 bootstrap on clean sandbox (timestamped /tmp path — NEVER
+    live working tree per LESSON-004)
+  - §7 L7 migration resilience test (manual monthly)
+  - §8 Test cadence cheat sheet (event → what to run)
+  - §9 Recommended additions (snapshot test, e2e test, symlink check,
+    registry.json, version-bump detection, verify-skills.js,
+    run-contract.sh in CI — mapped to Phase D/E)
+  - §10 Known limitations and gotchas (fileMode, worklog freshness,
+    --timeout myth, quick_validate.py scope, emoji regex PCRE,
+    perf threshold, adversarial test fixtures, LESSON-004)
+  - §11 Bug audit table (12 rows: bug / reality / where fixed)
+  - §12 Change history
+
+  Verifier status after all 3 items:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files including
+    new CI-AND-TESTING.md, all ≤1000 lines)
+  - verify-id-graph.js: 13/13 PASS, 1 soft warning (W01: references
+    "run-contract.sh" which lives in skills/ not standards/ —
+    benign cross-submodule reference, not a real issue)
+
+Stage Summary:
+- 3 artifacts produced:
+  1. SESSION_NOTES.md §12.7 LESSON-004 (operational recipe for safe
+     git reset --hard via stash)
+  2. catalog_skills.py bug fix + 5 SKILL.md version bumps + CATALOG.md
+     postmortem (35 active / 0 stale / 1 dup — was 30/5/1)
+  3. standards/docs/CI-AND-TESTING.md (483 lines, 12 sections,
+     supersedes both drafts, includes 12-bug audit table)
+- Verifier status: 8/8 + 13/13 PASS, 1 benign soft warning.
+- Honest finding: my original "5 stale skills" report was a false
+  positive caused by my own catalog_skills.py bug. Less work needed
+  than originally scoped (75 min → 30 min actual). User was
+  notified in chat before proceeding.
+- LESSON-001 corroborated a 4th time: root-cause fix (parser) beat
+  whitelist approach (manually marking each as not-stale).
+- Cascade O-017 still at Phase A+B COMPLETE; Phase C not started.
+  User has not authorized Phase C — these 3 items were the
+  "honest remediation" pause proposed as alternative to Phase C.
+- Next: commit + push (separate commits per logical block per
+  RULE-MONOLITH-004). Likely 3 commits:
+  (a) skills/ submodule: catalog_skills.py fix + 5 SKILL.md version
+      bumps + CATALOG.md postmortem
+  (b) standards/ submodule: new CI-AND-TESTING.md
+  (c) platform/: SESSION_NOTES §12.7 + worklog + DECISIONS_LOG
+      update + submodule pointer bumps for (a) and (b)

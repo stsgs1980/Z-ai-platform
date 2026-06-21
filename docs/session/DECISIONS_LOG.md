@@ -1001,6 +1001,23 @@ Phase A confirmed 3 unanticipated findings that affect Phase B:
    version=v?. Estimated 15 min/skill × 5 = 75 min. Can be done in
    parallel with Phase B (independent of contract shape).
 
+   **Update 2026-06-21 (post-Phase-B honest remediation):** the
+   "5 stale skills" finding was a **false positive** caused by a
+   bug in `catalog_skills.py` (it did not parse YAML folded-scalar
+   `description: >` syntax, so it saw the description as the literal
+   string ">"). All 5 skills (api-retry, dev-watchdog, fallback,
+   health-check, z-ai-web-dev-sdk) are documented in
+   `skill-id-system/SKILL.md` §4 as sandbox system skills that
+   intentionally do NOT receive ZAI- prefix IDs. Fix: rewrote
+   `parse_frontmatter()` to handle folded/literal scalars, added
+   `version: 1.0` to each of the 5 skills' frontmatter (the only
+   real gap). Result: classification changed from 30 active / 5 stale
+   / 1 dup → 35 active / 0 stale / 1 dup. Honest postmortem in
+   `skills/docs/CATALOG.md` §10. This item is now **CLOSED — false
+   positive retracted**. The 4 remaining `v?` skills (gepetto,
+   phi-layout, reducing-entropy, session-handoff) are legitimate
+   Phase C candidates (~5 min each).
+
 **Status of cascade phases (as of 2026-06-21):**
 
 - [x] **Phase A (discovery):** COMPLETE.
@@ -1289,3 +1306,4 @@ provides structure; iteration provides correction.
 | 2026-06-21 | Added O-017 (Skills execution contract — cascade plan). 6-phase cascade (A discovery, B pilot on commit-work, C generalize, D governance, E consumer integration, F dashboard) bridging governance (markdown rules) to execution (runtime enforcement). Governance/execution gap table documented as near-term goals context. Closes O-011 (formalizes 35-skill catalog as Phase A1), feeds O-015 (Phase D defines skills/ governance), enables O-016 (Phase E1 produces real consumer events). Cascade is iterative not waterfall — B2/D1/E1 may send corrections backward to B1 contract shape. Status: OPEN, awaits approval before Phase A execution. |
 | 2026-06-21 | Updated O-017 — Phase A COMPLETE. A1 produced `skills/docs/CATALOG.md` (36 skills, not 35 — INDEX.md was stale, missing `zai-skill-registry`; also corrected skill-creator ID from ZAI-META-002 to actual ZAI-STS-008). A2 produced SESSION_NOTES §13 (gap audit: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE; confirms cascade ordering). 3 unanticipated findings: (1) only 3/36 skills have callable scripts/, (2) session-handoff is the most execution-ready skill, (3) 5 stale skills need frontmatter remediation. Removed original "Action items" checklist (now replaced by "Status of cascade phases" with [x]/[ ] marks). Surfaces 2 new open question candidates: O-019 (guard/ execution contract), O-020 (feedback-loop mechanism) — not yet formalized. Verifier status unchanged: 8/8 + 13/13, 0 warnings. |
 | 2026-06-21 | Updated O-017 — Phase B COMPLETE. B1 produced `skills/skills/commit-work/CONTRACT.md` (368 lines, first concrete 5-tuple execution contract: trigger/hook/guard-check/standard-check/success-criterion). B2 produced 4 artifacts: `scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes), `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6 enforcement), `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN), `install-hooks.sh` updated. 4 smoke tests all pass: dry-run PASS, bad message BLOCK, real-git bad commit BLOCK, real-git good commit PASS. 5-tuple shape validated for commit-work. Phase C will test generalization to session-handoff. Gotcha discovered: `git reset --hard HEAD~1` wipes uncommitted edits (happened twice during smoke testing) — LESSON candidate for SESSION_NOTES §12. |
+| 2026-06-21 | Three-item "honest remediation" batch (user authorized with «принимаю, делай» after I proposed pausing O-017 cascade to do hygiene work). (1) Added LESSON-004 to SESSION_NOTES §12.7 — `git reset --hard` is two-axis destructive (moves branch pointer + overwrites working tree); stash before reset. Operational recipe: `git stash push -u -m "pre-reset-safety"` → `git reset --hard HEAD~1` → `git stash pop`. Triggered twice in Phase B smoke testing. (2) Discovered "5 stale skills" finding from Phase A1 was a **false positive** caused by my own `catalog_skills.py` bug (did not parse YAML folded-scalar `description: >` syntax). All 5 are correctly documented as sandbox system skills (no ZAI- prefix per skill-id-system §4). Real gap was only missing `version:` field. Fix: rewrote parse_frontmatter() to handle folded/literal scalars + added `version: 1.0` to all 5 skills. Catalog reclassified from 30 active/5 stale/1 dup → 35 active/0 stale/1 dup. Honest postmortem in CATALOG.md §10. Less work than originally scoped (75 min → 30 min). (3) Wrote `standards/docs/CI-AND-TESTING.md` (483 lines, 12 sections) — merges two uploaded drafts into one canonical doc, documents actual existing workflow (`.github/workflows/verify-id-graph.yml`, 250 lines), includes §11 bug audit table documenting 12 factual errors in the drafts against actual repo state. Verifier status: 8/8 + 13/13 PASS, 1 benign soft warning (W01 cross-submodule reference to run-contract.sh). |

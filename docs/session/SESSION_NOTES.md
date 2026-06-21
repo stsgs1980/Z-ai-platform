@@ -813,6 +813,64 @@ with LESSON-001 principle already encoded in §12.4.
 - **Promoted-to:** (empty; the principle is now self-documenting via V11
 itself — any future SOFT→HARD promotion follows the same recipe)
 
+### 12.7. LESSON-004: stash before reset — `git reset --hard` is destructive on uncommitted work
+
+- **ID:** LESSON-2026-06-21-004
+- **Status:** RECOGNIZED (operational hygiene lesson; distinct from but
+compatible with LESSON-001 family)
+- **Trigger:** During Phase B smoke testing, I created a test commit
+(`git commit -m 'test(contract): good message'`) to verify the new
+`commit-msg` hook end-to-end. The commit succeeded — but it had also
+captured unrelated uncommitted edits in the working tree (worklog
+drafts, DECISIONS_LOG fragments). To undo the test commit I ran
+`git reset --hard HEAD~1`. **This wiped both the commit AND all
+uncommitted working-tree changes.** The work had to be reconstructed
+from memory + worklog drafts. The same trap fired **twice** in the same
+Phase B session (second time during a smoke test of `run-contract.sh
+--commit`).
+- **Root cause:** `git reset --hard <ref>` is a **two-axis destructive
+operation**: it moves the branch pointer (committed state) AND
+overwrites the working tree + index (uncommitted state) to match the
+target ref. The "hard" qualifier is easy to overlook when the focus is
+on undoing a commit — operator mentally models reset as "undo commit"
+and forgets the working-tree axis.
+- **Fix principle:** Before ANY `git reset --hard`, run
+`git stash push -u -m "pre-reset-safety"` (with `-u` to include
+untracked files). After reset completes, run `git stash pop` to restore
+the working tree. This is **O(1) insurance** — costs ~3 seconds, saves
+hours of reconstruction if there were uncommitted edits.
+  - Beats `git reset --soft HEAD~1` (only undoes the commit, keeps
+    changes staged — but if you intended to wipe the commit content too,
+    you still need a second step, and the asymmetry is confusing).
+  - Beats `git revert HEAD` (creates a new commit that undoes the
+    previous one — wrong tool for smoke testing where you want the
+    commit to vanish from history, not be preserved as reverted).
+  - Beats "always commit everything first" (encourages dirty commits
+    that pollute history).
+- **Applies-to:** Any time `git reset --hard` is being considered. In
+  our workflow this happens in three known scenarios:
+  1. Undoing a smoke-test commit (Phase B pattern, will recur in Phase
+     C/D smoke tests).
+  2. Discarding a failed experiment branch.
+  3. Synchronizing a local branch to remote after a force-push from
+     another contributor.
+- **Operational recipe (memorize):**
+  ```bash
+  # SAFE undo-commit-and-keep-worktree
+  git stash push -u -m "pre-reset-safety"
+  git reset --hard HEAD~1
+  git stash pop
+  ```
+- **Source:** Worklog Task ID `phase-b-cascade-2026-06-21` (Phase B
+  smoke testing section). Triggered twice in the same session; second
+  occurrence was after I had already noted the first in the worklog
+  draft — confirming the lesson is non-obvious enough to warrant
+  formalization rather than rely on memory.
+- **Promoted-to:** (empty; candidate for inclusion in
+  `skills/skills/commit-work/CONTRACT.md` as a guard check G0:
+  "pre-reset stash safety". Phase C may add this when generalizing
+  the contract template.)
+
 ---
 
 ## 13. Phase A2 — Governance/execution gap audit
@@ -1078,3 +1136,4 @@ the cascade. They should be raised as new open questions:
 | 2026-06-21 | Added §12.5 LESSON-002 (core.fileMode=false beats repeated `git checkout .` for sandbox fs-mount mode-bit noise). Corroborates LESSON-001: same principle (root-cause fix O(1) beats symptom cleanup O(N)) in a different domain. Fix baked into bootstrap.sh Step 2 for durability across session restarts. |
 | 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file → FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
 | 2026-06-21 | Added §13 (Phase A2 governance/execution gap audit). O-017 Phase A2 deliverable. Audits the 6-row gap table from O-017 context against actual repo state. Result: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade ordering (Phase B→C→D→E→F). Surfaces 2 new open question candidates: O-019 (guard/ execution contract, parallel to skills contract) and O-020 (feedback-loop mechanism, long-term). Companion to `skills/docs/CATALOG.md` (Phase A1 deliverable). |
+| 2026-06-21 | Added §12.7 LESSON-004 (`git reset --hard` wipes uncommitted worktree; stash before reset). Triggered twice in Phase B smoke testing. Distinct from LESSON-001 family (operational hygiene, not O(1)/O(N) scaling). Operational recipe: `git stash push -u -m "pre-reset-safety"` → `git reset --hard HEAD~1` → `git stash pop`. Candidate for promotion into commit-work CONTRACT.md as guard check G0 in Phase C. |
