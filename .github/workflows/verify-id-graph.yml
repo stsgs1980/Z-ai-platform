@@ -105,6 +105,63 @@ jobs:
           exit $exit_code
 
       # -------------------------------------------------------------------
+      # Snapshot compare (§9.2.1 in standards/docs/CI-AND-TESTING.md).
+      # The graph produced by verify-id-graph.js is deterministic: same
+      # input must produce same JSON output. The baseline file lives at
+      # standards/_snapshots/id-graph-baseline.json (committed to the
+      # standards submodule). If the current graph differs from the
+      # baseline, this step FAILs and the PR author must either:
+      #   (a) revert the unintended graph change, OR
+      #   (b) run `node verify-id-graph.js --update-snapshot
+      #       --compare=standards/_snapshots/id-graph-baseline.json`
+      #       locally and commit the updated baseline (with PR review).
+      # -------------------------------------------------------------------
+      - name: Snapshot compare (verify-id-graph.js)
+        run: |
+          set +e
+          output=$(node standards/scripts/verify-id-graph.js \
+            --compare=standards/_snapshots/id-graph-baseline.json 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "## Snapshot compare output"
+            echo '```'
+            echo "$output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ $exit_code -ne 0 ]; then
+            echo ""
+            echo "::warning::Graph snapshot mismatch. If this change is intentional, run:"
+            echo "::warning::  node standards/scripts/verify-id-graph.js --update-snapshot --compare=standards/_snapshots/id-graph-baseline.json"
+            echo "::warning::Then commit the updated baseline to the standards submodule."
+          fi
+          exit $exit_code
+
+      # -------------------------------------------------------------------
+      # verify-skills.js (§9.2.2 in standards/docs/CI-AND-TESTING.md).
+      # Skills-side format verifier. Runs in soft-default mode at this
+      # stage: S01/S04/S09 are HARD (block CI on fail), S02/S03/S05 are
+      # SOFT (15 pre-existing violations tracked as Phase D1 remediation
+      # backlog). Once remediated, flip --strict on.
+      # -------------------------------------------------------------------
+      - name: Run verify-skills.js (skills-side format, soft-default)
+        run: |
+          set +e
+          output=$(node standards/scripts/verify-skills.js 2>&1)
+          exit_code=$?
+          echo "$output"
+          {
+            echo "## verify-skills.js output"
+            echo '```'
+            echo "$output"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # In soft-default mode, exit 0 means HARD checks (S01/S04/S09) passed.
+          # SOFT warnings (S02/S03/S05) do not fail CI yet — they are tracked
+          # in §9.2.2 remediation backlog.
+          exit $exit_code
+
+      # -------------------------------------------------------------------
       # Graph generation — runs ALWAYS (even if verifiers failed, so the
       # graph artifact is available for debugging the failure).
       # Output: id-graph.svg, id-graph.png, id-graph.dot (uploaded as

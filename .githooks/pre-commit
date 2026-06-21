@@ -116,6 +116,36 @@ fi
 echo "[pre-commit] OK: verify-id-graph.js PASS (HARD checks)"
 rm -f /tmp/zai-precommit-vgraph.log
 
+# --- Phase 3: verify-skills.js (skills-side format, SOFT default) ------------
+# Added 2026-06-21 per §9.2.2 of CI-AND-TESTING.md. Runs verify-skills.js
+# in soft-default mode (S01/S04/S09 are HARD; S02/S03/S05 are SOFT until
+# the existing 15 violations are remediated, then --strict can be flipped).
+# Phase 3 is WARN-only at this stage — it reports violations but does NOT
+# block commits. Once §9.2.2 remediation is complete, promote to BLOCK.
+VERIFY_SKILLS="standards/scripts/verify-skills.js"
+if [ -f "$VERIFY_SKILLS" ]; then
+  echo "[pre-commit] Phase 3: verify-skills.js (skills-side format, SOFT default)"
+  if ! node "$VERIFY_SKILLS" >/tmp/zai-precommit-vskills.log 2>&1; then
+    echo "[pre-commit] WARN: verify-skills.js reported HARD violations (S01/S04/S09)."
+    echo "[pre-commit] ---- output ----"
+    cat /tmp/zai-precommit-vskills.log | sed 's/^/  /'
+    echo "[pre-commit] ---- end output ----"
+    echo "[pre-commit] SOFT warnings (S02/S03/S05) are pre-existing tech debt;"
+    echo "[pre-commit] see standards/docs/CI-AND-TESTING.md §9.2.2 for remediation plan."
+    echo "[pre-commit] NOT blocking commit — fix in a follow-up if this is your change."
+  else
+    # Even on PASS, check if there were SOFT warnings to surface
+    if grep -q "WARN" /tmp/zai-precommit-vskills.log 2>/dev/null; then
+      echo "[pre-commit] OK: verify-skills.js HARD PASS (SOFT warnings present, see log)"
+    else
+      echo "[pre-commit] OK: verify-skills.js PASS"
+    fi
+  fi
+  rm -f /tmp/zai-precommit-vskills.log
+else
+  echo "[pre-commit] Phase 3: verify-skills.js NOT FOUND — skipping (Phase D1 in progress)"
+fi
+
 echo "[pre-commit] All checks PASS — proceeding with commit."
 echo "[pre-commit] (commit-msg hook will validate Conventional Commits format next)"
 exit 0

@@ -4044,3 +4044,159 @@ Stage Summary:
   (b) platform/: SESSION_NOTES.md LESSON-004a + ToC + Change
       History + worklog entry + standards submodule pointer bump
 
+---
+Task ID: p0-ci-cd-implementation-2026-06-21
+Agent: main (post-audit-rewrite session)
+Task: Implement all 3 P0 items from CI-AND-TESTING.md §9.2 (snapshot
+test, verify-skills.js, e2e test) — all blocked v2.5.0 release.
+
+Work Log:
+- Planned execution order: P0.1 (snapshot) → P0.2 (verify-skills) →
+  P0.3 (e2e). Rationale: snapshot test gives safety net for any
+  refactoring of verify-id-graph.js (needed for P0.2 shared path-
+  resolution code); verify-skills.js is the largest item, e2e is
+  capstone that uses both.
+
+P0.1 — Snapshot test for verify-id-graph.js:
+- Read existing verify-id-graph.js (1417 lines, v1.1.3). Confirmed
+  --json flag already exists and produces deterministic output
+  (version, summary, checks[], warnings[]). This is the snapshot
+  payload.
+- Bumped VERSION to 1.1.4.
+- Added 3 new flags to parseArgs(): --snapshot=<file>, --compare=<file>,
+  --update-snapshot. Updated showHelp() with full snapshot testing
+  workflow documentation.
+- Added snapshot_meta block to emitJSON() when snapshot is being
+  written (script_version + created_at + purpose).
+- Added compareSnapshot() function (90 lines): structural comparison
+  of summary (exact match on 6 keys), checks (by id, with status +
+  description + details-as-sorted-set), warnings (as sorted set of
+  code::message pairs). Version mismatch is WARNING, not FAIL.
+- Modified main() to: always compute jsonPayload (for compare);
+  suppress human output when in snapshot/compare mode; write baseline
+  file when --snapshot or --update-snapshot --compare; run compare
+  unless --update-snapshot; exit 1 on compare mismatch with helpful
+  "run --update-snapshot" hint.
+- Created standards/_snapshots/ directory + id-graph-baseline.json
+  (61 IDs, 115 edges, 2 warnings as of initial creation).
+- Smoke tested 4 scenarios: (1) self-compare PASS, (2) modified
+  baseline → FAIL with 4 diffs (hard_pass, hard_fail, G15.status,
+  G15.details), (3) --update-snapshot --compare → rewrites baseline,
+  (4) round-trip after update → PASS.
+- Backward compat verified: --json still works, plain run (no flags)
+  still works, --help shows new flags.
+- Added "Snapshot compare" step to .github/workflows/verify-id-graph.yml
+  after verify-id-graph.js run, with ::warning annotations on mismatch
+  and instructions to run --update-snapshot.
+
+P0.2 — verify-skills.js:
+- Read STD-SKILL-001 v1.1 §10.1 to get the check spec: V11a (SKILL.md
+  exists), V11b (name matches folder), V11c (STS skills have _sts
+  suffix), V13a (YAML parses), V13b (required fields), V05a (id format),
+  V13c (compatibility enum), V14a (id consistency), V14b (version
+  consistency).
+- Confirmed none of these checks exist in verify-standards.js (V11
+  there scans standards/+docs/sandbox/+templates/, NOT skills/).
+- Designed S01-S09 check IDs (S prefix = skills-side, mapping to V
+  source IDs from SKILL-001).
+- Wrote standards/scripts/verify-skills.js (692 lines, v1.0.0):
+  - discoverPlatformRoot() walks up from __dirname looking for
+    .gitmodules with Z-ai-standards + Z-ai-skills (same pattern as
+    verify-id-graph.js).
+  - parseFrontmatter() minimal YAML parser handling: flat key:value,
+    folded scalars (description: >), quoted strings, numeric, boolean.
+    No external deps.
+  - parseBlockquote() extracts ID:, Version:, Related:, Aligned_with:
+    from the blockquote following H1.
+  - 9 checks implemented as IIFE pattern (same as verify-standards.js).
+  - Both --json and human output modes.
+- First run revealed 15 real violations:
+  - S02: 8 name/folder mismatches (6 STS skills with name:foo_sts,
+    1 phi-layout with name=golden-grid, 1 phi-layout_sts).
+  - S03: 3 skills with author:STS but missing _sts folder suffix
+    (anti-monolith, session-experience, session-log).
+  - S05: 4 skills missing version field (gepetto, reducing-entropy,
+    session-handoff, skill-creator).
+- Decision: do NOT block CI on pre-existing violations. Added --strict
+  flag: S02/S03/S05 are SOFT by default (15 violations are pre-existing
+  tech debt), HARD with --strict. S01/S04/S09 are always HARD. S06/S07/
+  S08 are always SOFT (per the standard itself).
+- Added Phase 3 to .githooks/pre-commit (WARN-only, non-blocking).
+- Added verify-skills.js step to .github/workflows/verify-id-graph.yml
+  (soft-default mode; HARD failures S01/S04/S09 block CI, SOFT
+  warnings S02/S03/S05 do not).
+- Documented remediation backlog in CI-AND-TESTING.md §9.2.2 (15
+  violations, all listed by skill name + specific issue).
+
+P0.3 — End-to-end test:
+- Wrote .github/workflows/e2e-verifiers.yml (180 lines) with 5 tests:
+  - Test 1: V11 violation (1004-line _e2e_test_v11.md) → expects
+    verify-standards.js exit 1 with V11 in output.
+  - Test 2: cleanup → expects verify-standards.js PASS.
+  - Test 3: S02 violation (_e2e-test-skill/ with wrong name) → expects
+    verify-skills.js --strict exit 1 with S02 in output.
+  - Test 4: cleanup → expects verify-skills.js PASS.
+  - Test 5: snapshot compare mismatch (modify baseline in-memory) →
+    expects verify-id-graph.js --compare exit 1 with MISMATCH in
+    output. Restore + re-run → PASS.
+- Triggers: workflow_dispatch + pull_request (path-filtered to
+  standards/scripts/** + the workflow file itself, to avoid wasted
+  runner minutes on unrelated PRs).
+- All 5 tests smoke-tested locally — all PASS.
+
+Final §9.2 update:
+- Marked all 3 items as IMPLEMENTED with status badges.
+- Added per-item "Implementation (shipped)" sections with concrete
+  file paths, version numbers, smoke test results.
+- Updated Change History with comprehensive entry listing all 3
+  implementations + remediation backlog.
+- CI-AND-TESTING.md grew from 704 to 795 lines (well under V11 cap).
+- Updated snapshot baseline (warnings went from 2 to 3 because new
+  §9.2.3 narrative mentions _e2e_test_v11.md filename which W13
+  catches). This is intentional — ran --update-snapshot.
+
+Verifier status (final):
+- verify-standards.js: 8/8 PASS (V11 scanned 40 files, all ≤1000).
+- verify-id-graph.js: 13/13 HARD PASS, 3 W13 soft warnings (all
+  documented in §10.5.1 as known cross-submodule limitation).
+- verify-skills.js: 3/3 HARD PASS, 3 SOFT warnings (S02/S03/S05 —
+  pre-existing violations tracked in §9.2.2 remediation backlog).
+- snapshot compare: PASS (baseline updated to current state).
+- e2e workflow: 5/5 tests PASS locally.
+
+Stage Summary:
+- 3 P0 items implemented in one session, all blocking v2.5.0 release.
+- New artifacts:
+  1. standards/scripts/verify-skills.js (692 lines, v1.0.0)
+  2. standards/_snapshots/id-graph-baseline.json (snapshot baseline)
+  3. .github/workflows/e2e-verifiers.yml (180 lines, 5 tests)
+- Modified artifacts:
+  1. standards/scripts/verify-id-graph.js (v1.1.3 → v1.1.4, +147
+     lines for snapshot/compare)
+  2. .githooks/pre-commit (+33 lines for Phase 3 verify-skills.js)
+  3. .github/workflows/verify-id-graph.yml (+52 lines for snapshot
+     compare step + verify-skills.js step)
+  4. standards/docs/CI-AND-TESTING.md (704 → 795 lines, §9.2 marked
+     IMPLEMENTED with detailed status per item)
+- Honest finding: verify-skills.js found 15 real violations in the
+  existing skills corpus. Rather than block CI on pre-existing tech
+  debt, implemented --strict flag with soft-default mode. This follows
+  the LESSON-001/003 pattern: detect first (SOFT), enforce after
+  remediation (HARD). The 15 violations are now explicitly tracked
+  in §9.2.2 remediation backlog with skill names + specific issues.
+- Honest finding #2: snapshot test caught a real change in this very
+  session — adding _e2e_test_v11.md filename to §9.2.3 narrative
+  caused a new W13 warning, which changed the warnings[] array, which
+  failed snapshot compare. This validated the snapshot test's
+  effectiveness within 30 minutes of implementing it.
+- Cascade O-017 Phase D1 (verify-skills.js) is now partially complete
+  — the verifier exists and runs, but --strict mode (full enforcement)
+  awaits the 15-violation remediation PR.
+- Next: commit + push. Two commits needed:
+  (a) standards/ submodule: verify-id-graph.js v1.1.4 + verify-skills.js
+      v1.0.0 + _snapshots/ baseline + CI-AND-TESTING.md §9.2 update
+  (b) platform/: .githooks/pre-commit Phase 3 + .github/workflows/
+      verify-id-graph.yml updates + new e2e-verifiers.yml + worklog
+      entry + standards submodule pointer bump
+
+
