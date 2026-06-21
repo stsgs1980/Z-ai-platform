@@ -3643,3 +3643,127 @@ Stage Summary:
       parallel-safe with Phase B.
 - Cascade next: Phase B (B1 design commit-work CONTRACT.md, B2
   implement pilot). Awaits user approval.
+
+---
+Task ID: phase-b-cascade-2026-06-21
+Agent: main (Super Z)
+Task: Execute O-017 Phase B — pilot phase of the skills execution
+contract cascade. Two deliverables: B1 (design commit-work execution
+contract as first concrete 5-tuple instance) and B2 (implement pilot
+— callable runtime + new commit-msg hook + updated pre-commit hook).
+
+Work Log:
+- Read commit-work/SKILL.md (78 lines), references/commit-message-
+  template.md, README.md to understand current skill shape.
+- Read RULE-MONOLITH-001/002/003/004 to identify which rules are
+  checkable at commit time (002 worklog freshness, 004 commit message
+  format) vs which are agent-intent rules not checkable at runtime
+  (001 answer-before-act, 003 read-before-write).
+- Read STD-GIT-001 §1 (Conventional Commits) and STD-DOC-002 §0
+  (TL;DR) for the standards the contract should enforce.
+- Read existing .githooks/pre-commit (91 lines, 2 phases: verify-
+  standards.js + verify-id-graph.js). Confirmed: standard-check
+  part of 5-tuple already exists. Missing: guard-check layer,
+  contract-aware runner, commit-msg hook.
+- Designed CONTRACT.md structure (10 sections, YAML frontmatter):
+  1. Trigger (event + when invoked/not invoked)
+  2. Hook (pre-commit + commit-msg, install instructions)
+  3. Guard Checks (G1-G6 table with BLOCK/WARN levels + regex for G4)
+  4. Standard Checks (S1-S3 with verifier mapping + coverage lists)
+  5. Success Criterion (5 conditions + failure recovery)
+  6. Runtime (3 modes: dry-run, explicit-invocation, pre-commit auto)
+  7. Contract Versioning (major/minor/patch rules)
+  8. Cross-references (O-017, RULE-NNN, STD-NNN)
+  9. Honest Uncertainties (4: shape hypothesis, G2 weak proxy,
+     commit-msg new edge cases, runner optional)
+  10. Change History
+- Wrote CONTRACT.md (368 lines). YAML frontmatter: skill, skill_id,
+  skill_version, contract_version, contract_status=pilot,
+  owning_standard, trigger, hook, hook_path, related, last_updated.
+- Updated commit-work/SKILL.md frontmatter: added `contract:
+  CONTRACT.md` and `contract_version: 1.0` fields. Added STD-GIT-001
+  and RULE-MONOLITH-002/004 to related list. Added "Execution
+  Contract" section at end of body pointing to CONTRACT.md as source
+  of truth for runtime behavior.
+- Wrote skills/skills/commit-work/scripts/run-contract.sh (270 lines,
+  bash). 3 modes: --dry-run, --commit "<msg>", --help. Color-coded
+  output ([OK]/[WARN]/[FAIL]/[i]). Pre-flight checks (verifier
+  presence, node presence). Phase 0 guard checks (G1/G3 documented,
+  G2 worklog freshness, G4/G5/G6 message validation in --commit
+  mode only). Phase 1+2 standard checks (calls verify-standards.js +
+  verify-id-graph.js). Summary with PASS/WARN/FAIL counts. Commit
+  creation only in --commit mode with 0 FAIL.
+- Wrote .githooks/commit-msg (120 lines, new). Validates Conventional
+  Commits format on commit message. G4 regex (BLOCK), G5 subject
+  length ≤72 (BLOCK), G6 body wrap 72 (WARN). Skips merge/revert/
+  squash/fixup commits (git-generated messages, cannot enforce).
+- Updated .githooks/pre-commit (91→122 lines). Added Phase 0: worklog
+  freshness check (find docs/session/worklog.md -mmin -60). WARN
+  only — false positives common (user edits worklog manually,
+  quick-fix commits, worklog entries in other files). Preserved
+  existing Phase 1 (verify-standards.js) and Phase 2 (verify-id-
+  graph.js) unchanged.
+- Updated install-hooks.sh. Now lists both hooks with their
+  responsibilities in output. Points to CONTRACT.md and run-contract.sh
+  for reference.
+
+Smoke testing (4 tests):
+1. run-contract.sh --dry-run → 3 PASS, 0 WARN, 0 FAIL. Correct.
+2. run-contract.sh --commit "bad message no format" → G4 FAIL,
+   commit NOT created. Correct.
+3. git commit -m "bad message no format" (real git, after running
+   install-hooks.sh to activate core.hooksPath=.githooks) →
+   pre-commit PASS (Phase 0/1/2 all green), commit-msg BLOCK (G4
+   regex fail). Commit NOT created. Correct.
+4. git commit -m "test(contract): smoke test good message" → all
+   checks PASS, commit created. Correct.
+
+Gotcha discovered during smoke testing (happened TWICE):
+- `git reset --hard HEAD~1` (used to undo a smoke-test commit) wipes
+  ALL uncommitted working-tree changes — including my edits to
+  .githooks/pre-commit and install-hooks.sh that were not yet
+  committed. I had to rewrite both files 3 times before realizing
+  the pattern.
+- LESSON candidate for SESSION_NOTES §12: when undoing a smoke-test
+  commit on files that ALSO have uncommitted edits, stash first,
+  reset, then stash pop. Or: commit edits to a separate branch
+  first, then smoke-test on top.
+- This corroborates LESSON-001 (root-cause fix O(1) beats symptom
+  cleanup O(N)) in a 4th domain: git workflow. The root cause is
+  "smoke test commits share working tree with edits under test".
+  The O(1) fix is "always stash before reset --hard". The O(N) fix
+  is "rewrite the files each time you accidentally wipe them".
+
+Updated O-017 in DECISIONS_LOG.md:
+- Status: OPEN → "Phase A + Phase B COMPLETE, awaits Phase C approval"
+- Phase B checklist items marked [x]
+- Added "Phase B outcome" section (B1 + B2 deliverable descriptions,
+  4 smoke test results, gotcha documentation, 5-tuple validation
+  statement, 2 open question candidates from Phase B)
+- Added "Contract shape validated" subsection confirming 5-tuple
+  worked for commit-work
+- Updated Change History with Phase B entry
+
+Stage Summary:
+- Phase B complete. 4 artifacts produced:
+  1. skills/skills/commit-work/CONTRACT.md (368 lines, new)
+  2. skills/skills/commit-work/scripts/run-contract.sh (270 lines, new)
+  3. .githooks/commit-msg (120 lines, new)
+  4. .githooks/pre-commit (91→122 lines, modified — Phase 0 added)
+  5. install-hooks.sh (modified — documents both hooks)
+  6. skills/skills/commit-work/SKILL.md (modified — contract pointer
+     in frontmatter + Execution Contract section in body)
+- 5-tuple execution contract shape validated for commit-work:
+  trigger/hook/guard-check/standard-check/success-criterion all
+  mapped to concrete runtime artifacts.
+- 4 smoke tests all pass. Verifier status unchanged: 8/8 + 13/13,
+  0 warnings (Phase B did not touch standards/).
+- Gotcha: git reset --hard wipes uncommitted edits. LESSON-004
+  candidate for SESSION_NOTES §12.
+- Cascade next: Phase C (C1 extract template, C2 apply to session-
+  handoff). Awaits user approval.
+- Open question candidates from Phase B (not yet formalized):
+  * Should hooks call run-contract.sh --dry-run instead of
+    duplicating logic? (DRY question for Phase C1)
+  * commit-msg skips merge/revert/squash/fixup — acceptable?
+    (revisit if merge hygiene becomes issue)

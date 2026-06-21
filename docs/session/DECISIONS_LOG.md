@@ -956,7 +956,7 @@ Consumer-project state (P-MAS_init's own view of itself):
 ### O-017: Skills execution contract — cascade plan for governance-to-execution bridge
 
 **Date raised:** 2026-06-21
-**Status:** OPEN — Phase A COMPLETE (2026-06-21), awaits Phase B approval
+**Status:** OPEN — Phase A + Phase B COMPLETE (2026-06-21), awaits Phase C approval
 
 **Source:** User confirmation after V11 + O-015/O-016 work: «если эти 4
 модуля (как мозговой нейоро центр) будет работать как задумано, ничего не
@@ -1006,11 +1006,11 @@ Phase A confirmed 3 unanticipated findings that affect Phase B:
 - [x] **Phase A (discovery):** COMPLETE.
   - [x] A1: Catalog 36 skills → `skills/docs/CATALOG.md`
   - [x] A2: Audit governance/execution gap → SESSION_NOTES §13
-- [ ] **Phase B (pilot, awaits approval):**
-  - [ ] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md`
-  - [ ] B2: Implement pilot (pre-commit hook integration)
+- [x] **Phase B (pilot):** COMPLETE.
+  - [x] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md` (368 lines, 5-tuple shape: trigger/hook/guard-check/standard-check/success-criterion)
+  - [x] B2: Implement pilot — `skills/skills/commit-work/scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes) + `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6) + `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN). Smoke-tested: bad message → BLOCK, good message → PASS.
 - [ ] **Phase C (generalize, after B):**
-  - [ ] C1: Extract template from B2
+  - [ ] C1: Extract template from B2 → `skills/templates/CONTRACT_TEMPLATE.md`
   - [ ] C2: Apply to session-handoff (first generalization target, per Phase A finding)
 - [ ] **Phase D (governance, parallel after B1):**
   - [ ] D1: `skills/scripts/verify-skills.js`
@@ -1021,6 +1021,87 @@ Phase A confirmed 3 unanticipated findings that affect Phase B:
 - [ ] **Phase F (dashboard, after E1):**
   - [ ] F1: Decide A1/A2/A3 dashboard approach (O-016 Step 3)
   - [ ] F2: Implement dashboard adaptation
+
+**Phase B outcome (2026-06-21):**
+
+Phase B executed after user said «Оk» to the Phase A summary. Both
+deliverables produced and smoke-tested:
+
+- **B1 — Contract design:** `skills/skills/commit-work/CONTRACT.md`
+  (368 lines). First concrete instance of the 5-tuple execution
+  contract shape proposed in O-017. 10 sections: trigger, hook,
+  guard checks (G1-G6 with BLOCK/WARN levels), standard checks
+  (S1-S3 with verifier mapping), success criterion, runtime modes,
+  contract versioning, cross-references, honest uncertainties,
+  change history. YAML frontmatter makes it machine-readable.
+  `SKILL.md` frontmatter updated with `contract: CONTRACT.md` and
+  `contract_version: 1.0` fields. Body of SKILL.md gained an
+  "Execution Contract" section pointing to CONTRACT.md as source of
+  truth for runtime behavior.
+
+- **B2 — Pilot implementation:** 4 artifacts.
+  1. `skills/skills/commit-work/scripts/run-contract.sh` (270 lines,
+     bash). Callable runtime with 3 modes: `--dry-run` (preview
+     checks), `--commit "<msg>"` (validate + create commit), `--help`.
+     Color-coded output ([OK]/[WARN]/[FAIL]/[i]). Tracks PASS/WARN/
+     FAIL counts. Phase 0 guard checks → Phase 1+2 standard checks
+     → commit creation (only in --commit mode, only if 0 FAIL).
+  2. `.githooks/commit-msg` (new, 120 lines). Validates Conventional
+     Commits format on commit message. G4 (format regex) BLOCK, G5
+     (subject ≤72) BLOCK, G6 (body wrap 72) WARN. Skips merge/revert/
+     squash/fixup commits (git-generated messages).
+  3. `.githooks/pre-commit` updated (was 91 lines, now 122). Added
+     Phase 0: worklog freshness check (find -mmin -60). WARN only —
+     false positives are common. Existing Phase 1 (verify-standards)
+     and Phase 2 (verify-id-graph) preserved unchanged.
+  4. `install-hooks.sh` updated. Now lists both hooks with their
+     responsibilities. Points to CONTRACT.md and run-contract.sh.
+
+- **Smoke testing (4 tests, all pass):**
+  1. `run-contract.sh --dry-run` → 3 PASS, 0 WARN, 0 FAIL.
+  2. `run-contract.sh --commit "bad message"` → G4 FAIL, commit NOT
+     created. Correct behavior.
+  3. `git commit -m "bad message"` (real git) → pre-commit PASS,
+     commit-msg BLOCK. Commit NOT created. Correct behavior.
+  4. `git commit -m "test(contract): good message"` (real git) →
+     pre-commit PASS, commit-msg PASS. Commit created. Correct.
+
+- **Gotcha discovered during smoke testing:** `git reset --hard HEAD~1`
+  (used to undo a smoke-test commit) wipes uncommitted working-tree
+  changes — including edits to .githooks/pre-commit and install-hooks.sh.
+  This happened twice during Phase B. LESSON candidate: when undoing
+  a smoke-test commit on files that also have uncommitted edits, stash
+  first, reset, then stash pop. Or: commit edits to a separate branch
+  first, then smoke-test on top.
+
+**Phase B validated the 5-tuple contract shape.** The shape worked
+for commit-work. Phase C will test whether it generalizes:
+- C1 extracts the shape into a template.
+- C2 applies the template to session-handoff (the most execution-
+  ready skill per Phase A finding — has 4 Python scripts, evals/,
+  references/). If the shape fits session-handoff without
+  modification, the shape is validated. If session-handoff needs a
+  6th field (e.g., `cleanup` for resource teardown), the shape will
+  be revised.
+
+**Contract shape validated (B1 hypothesis confirmed for commit-work):**
+1. `trigger` — event that invokes the skill. Works: git commit event.
+2. `hook` — runtime hook that fires. Works: pre-commit + commit-msg.
+3. `guard-check` — pre-flight checks (RULE-NNN semantics). Works: G1-G6.
+4. `standard-check` — invariant checks (STD-NNN semantics). Works: S1-S3.
+5. `success-criterion` — definition of done. Works: 5 conditions.
+
+**Open question candidates from Phase B:**
+- The runner script (`run-contract.sh`) duplicates logic that also
+  lives in the hooks. Should the hooks call the runner? Currently
+  they're parallel implementations. DRY would suggest hooks invoke
+  `run-contract.sh --dry-run` mode. Deferred to Phase C1 — when
+  extracting the template, decide whether runner is the single source
+  of truth or hooks are.
+- commit-msg hook skips merge/revert/squash/fixup commits. This is
+  necessary (git generates those messages) but means those commit
+  types bypass Conventional Commits enforcement. Acceptable for now;
+  revisit if merge-commit hygiene becomes an issue.
 
 **New open question candidates surfaced by Phase A (not yet raised as
 O-019/O-020 — pending user approval to formalize):**
@@ -1207,3 +1288,4 @@ provides structure; iteration provides correction.
 | 2026-06-21 | Updated O-016 with sequencing decision after P-MAS_init inspection. P-MAS_init is "experimental init" Next.js dashboard (currently MAS visualization, 26 agents in 8 role groups). User clarified: skills integration comes first, dashboard adaptation after. Three approaches A1/A2/A3 deferred until P-MAS_init becomes a formal consumer (its `standards/` currently has custom files, not submodule pointers to Z-ai-standards). O-016 action items restructured into 3-step execution order: (1) skills integration, (2) P-MAS_init onboarding as first consumer, (3) dashboard adaptation. |
 | 2026-06-21 | Added O-017 (Skills execution contract — cascade plan). 6-phase cascade (A discovery, B pilot on commit-work, C generalize, D governance, E consumer integration, F dashboard) bridging governance (markdown rules) to execution (runtime enforcement). Governance/execution gap table documented as near-term goals context. Closes O-011 (formalizes 35-skill catalog as Phase A1), feeds O-015 (Phase D defines skills/ governance), enables O-016 (Phase E1 produces real consumer events). Cascade is iterative not waterfall — B2/D1/E1 may send corrections backward to B1 contract shape. Status: OPEN, awaits approval before Phase A execution. |
 | 2026-06-21 | Updated O-017 — Phase A COMPLETE. A1 produced `skills/docs/CATALOG.md` (36 skills, not 35 — INDEX.md was stale, missing `zai-skill-registry`; also corrected skill-creator ID from ZAI-META-002 to actual ZAI-STS-008). A2 produced SESSION_NOTES §13 (gap audit: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE; confirms cascade ordering). 3 unanticipated findings: (1) only 3/36 skills have callable scripts/, (2) session-handoff is the most execution-ready skill, (3) 5 stale skills need frontmatter remediation. Removed original "Action items" checklist (now replaced by "Status of cascade phases" with [x]/[ ] marks). Surfaces 2 new open question candidates: O-019 (guard/ execution contract), O-020 (feedback-loop mechanism) — not yet formalized. Verifier status unchanged: 8/8 + 13/13, 0 warnings. |
+| 2026-06-21 | Updated O-017 — Phase B COMPLETE. B1 produced `skills/skills/commit-work/CONTRACT.md` (368 lines, first concrete 5-tuple execution contract: trigger/hook/guard-check/standard-check/success-criterion). B2 produced 4 artifacts: `scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes), `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6 enforcement), `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN), `install-hooks.sh` updated. 4 smoke tests all pass: dry-run PASS, bad message BLOCK, real-git bad commit BLOCK, real-git good commit PASS. 5-tuple shape validated for commit-work. Phase C will test generalization to session-handoff. Gotcha discovered: `git reset --hard HEAD~1` wipes uncommitted edits (happened twice during smoke testing) — LESSON candidate for SESSION_NOTES §12. |

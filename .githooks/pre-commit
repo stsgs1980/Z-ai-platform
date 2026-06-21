@@ -5,23 +5,32 @@
 #
 # Purpose:
 #   Block commits that would break the standards tree or the cross-repo
-#   ID graph. Runs TWO verifiers:
+#   ID graph. Runs in 3 phases:
 #
-#     1. verify-standards.js  — content-level invariants (V04-V10)
-#        Lives in the standards submodule. Fast (<1s).
-#        Checks: no emoji/Unicode graphic chars in code spans, fence
-#        language tags, English-only, anti-monolith threshold values,
-#        design-system delegation, README template structure.
+#     Phase 0: Worklog freshness check (RULE-MONOLITH-002, WARN only)
+#       - Verifies that docs/session/worklog.md was modified in the last
+#         60 minutes (proxy for "did the agent document its work?")
+#       - WARN only — false positives are common. Logged, not blocking.
 #
-#     2. verify-id-graph.js   — structural / ID-graph invariants (G01-G15)
-#        Cross-repo: needs all 4 repos visible (parent + 3 submodules).
-#        Lives in standards submodule. Slower (~2-3s, scans 4 repos).
-#        Checks: no duplicate IDs, Related-edge resolution, layer matrix,
-#        cycle detection, deprecated-ID window, typo-IDs, ZAI DAG,
-#        Aligned_with symmetry.
+#     Phase 1: verify-standards.js  — content-level invariants (V01-V11)
+#       - Lives in the standards submodule. Fast (<1s).
+#       - Checks: no emoji/Unicode graphic chars in code spans, fence
+#         language tags, English-only, anti-monolith threshold values,
+#         design-system delegation, README template structure, 1000-line
+#         hard cap on standards/ + docs/sandbox/ + templates/ .md files.
+#       - BLOCK: any invariant failure aborts the commit.
 #
-#   Soft warnings (W01-W15) do NOT block the commit — they are advisory
-#   and surface in CI summaries.
+#     Phase 2: verify-id-graph.js   — structural / ID-graph invariants (G01-G15)
+#       - Cross-repo: needs all 4 repos visible (parent + 3 submodules).
+#       - Lives in standards submodule. Slower (~2-3s, scans 4 repos).
+#       - Checks: no duplicate IDs, Related-edge resolution, layer matrix,
+#         cycle detection, deprecated-ID window, typo-IDs, ZAI DAG,
+#         Aligned_with symmetry.
+#       - BLOCK: any HARD check failure aborts the commit.
+#       - Soft warnings (W11-W15) do NOT block — they are advisory.
+#
+#   commit-msg hook (separate file) handles Conventional Commits format
+#   validation on the commit MESSAGE (G4/G5/G6 of commit-work contract).
 #
 # Install (one-time, after cloning):
 #   bash install-hooks.sh
@@ -30,12 +39,32 @@
 # Bypass (NOT recommended — use only for emergencies like WIP snapshots):
 #   git commit --no-verify
 #
+# Contract reference: skills/skills/commit-work/CONTRACT.md
+# Runtime: skills/skills/commit-work/scripts/run-contract.sh
+#
 # ============================================================================
 
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
+
+# --- Phase 0: Worklog freshness check (RULE-MONOLITH-002, WARN) -------------
+echo "[pre-commit] Phase 0/2: worklog freshness (RULE-MONOLITH-002, WARN only)"
+WORKLOG="docs/session/worklog.md"
+if [ -f "$WORKLOG" ]; then
+  if [ "$(find "$WORKLOG" -mmin -60 2>/dev/null | wc -l)" -gt 0 ]; then
+    echo "[pre-commit] OK: worklog updated within last 60 min"
+  else
+    echo "[pre-commit] WARN: worklog NOT updated within last 60 min"
+    echo "[pre-commit]   Worklog: $WORKLOG"
+    echo "[pre-commit]   Per RULE-MONOLITH-002, every action should be logged."
+    echo "[pre-commit]   This is advisory — commit will proceed."
+  fi
+else
+  echo "[pre-commit] WARN: worklog not found at $WORKLOG"
+  echo "[pre-commit]   This is advisory — commit will proceed."
+fi
 
 # Locate Node.js. If absent, warn but allow commit (developer may be on
 # minimal env; CI will catch any regressions).
@@ -58,7 +87,7 @@ if [ ! -f "$VERIFY_STANDARDS" ] || [ ! -f "$VERIFY_ID_GRAPH" ]; then
 fi
 
 # --- Phase 1: verify-standards.js (fast, content-level) --------------------
-echo "[pre-commit] Phase 1/2: verify-standards.js (content-level invariants V04-V10)"
+echo "[pre-commit] Phase 1/2: verify-standards.js (content-level invariants V01-V11)"
 if ! node "$VERIFY_STANDARDS" >/tmp/zai-precommit-vstandards.log 2>&1; then
   echo "[pre-commit] FAIL: verify-standards.js reported invariant violations."
   echo "[pre-commit] ---- output ----"
@@ -88,4 +117,5 @@ echo "[pre-commit] OK: verify-id-graph.js PASS (HARD checks)"
 rm -f /tmp/zai-precommit-vgraph.log
 
 echo "[pre-commit] All checks PASS — proceeding with commit."
+echo "[pre-commit] (commit-msg hook will validate Conventional Commits format next)"
 exit 0
