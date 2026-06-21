@@ -3935,3 +3935,112 @@ Stage Summary:
   (b) standards/ submodule: new CI-AND-TESTING.md
   (c) platform/: SESSION_NOTES §12.7 + worklog + DECISIONS_LOG
       update + submodule pointer bumps for (a) and (b)
+
+---
+Task ID: ci-cd-audit-rewrite-2026-06-21
+Agent: main (post-context-resume session)
+Task: Apply the 5-point audit feedback on the merged CI-AND-TESTING.md
+document. The audit (received via chat) approved the document as
+canonical with conditions: add §9 priority matrix with owners, add
+LESSON-004a for bootstrap.sh protection, formalise verify-skills.js
+scope as P0, add run-contract.sh in CI, add --help flag for verifiers.
+
+Work Log:
+- Read existing SESSION_NOTES.md §12.7 LESSON-004 (already present
+  from earlier session, lines 816-872). Confirmed the manual
+  stash-then-reset recipe is fully documented.
+- Read existing CI-AND-TESTING.md (483 lines, 12 sections). Confirmed
+  the document already has §11 bug audit table (12 bugs documented)
+  and §10.8 LESSON-004 cross-reference. The audit feedback targets
+  §9 (recommendations) and adds a new §10.8.1 (LESSON-004a).
+- Read SKILL-001 v1.1.0 to confirm frontmatter requirements for the
+  5 stale skills (planned task 2). Discovered via CATALOG.md §10
+  that task 2 was already completed in Phase A1: the "5 stale
+  skills" report was a false positive caused by a parser bug in
+  catalog_skills.py (did not parse YAML folded-scalar
+  description: > syntax). All 5 SKILL.md files already have
+  version: 1.0, and id: is intentionally absent per skill-id-system
+  §4 (sandbox system skills). Marked task 2 as completed.
+- Verified run-contract.sh already has --dry-run flag (lines 11,
+  16-18 of script header). This means §9.3.2 recommendation can be
+  implemented as a one-step CI addition with no script-side
+  prerequisite.
+- Refined the audit's LESSON-004a proposal. The audit suggested a
+  $PWD-prefix check (if [[ "$PWD" == "/home/z/my-project/Z-
+  ai-platform"* ]]). I rejected this as fragile — clone paths vary
+  across machines and sandboxes, and any prefix that matches the
+  live tree also matches legitimately similar sandbox paths (e.g.
+  /home/z/sandbox/Z-ai-platform-test). Replaced with a two-layer
+  guard: Layer 1 (root cause) refuses if uncommitted changes exist
+  via `git diff --quiet || git diff --cached --quiet`; Layer 2
+  (defense in depth) requires explicit --force flag for destructive
+  ops. Both layers are path-independent.
+- Added §12.8 LESSON-004a to SESSION_NOTES.md (new entry, 89 lines):
+  ID LESSON-2026-06-21-004a, Status RECOGNIZED, full structured
+  fields per §12.2 format. Includes bash code for both layers,
+  applies-to list (bootstrap.sh:79, run-contract.sh, future CI
+  workflows, CONTRACT.md G0), and "What this is NOT" subsection
+  documenting the $PWD-prefix rejection. Updated §12.7 Promoted-to
+  field to cross-reference §12.8.
+- Updated SESSION_NOTES.md ToC to include §13 (was missing).
+- Updated SESSION_NOTES.md Change History with 2 new rows (LESSON-
+  004 from earlier session + new LESSON-004a entry).
+- Rewrote §9 of CI-AND-TESTING.md from flat 7-row table to
+  structured priority matrix (§9.1 Implementation priority matrix
+  with 8 items × Priority/Owner/Target/Dependencies, §9.2 P0 with
+  3 detailed items, §9.3 P1 with 2 items, §9.4 P2 with 3 items).
+  Each item has Why / Implementation (with bash code) / Owner /
+  Target fields per audit spec.
+- Added §10.8.1 LESSON-004a to CI-AND-TESTING.md (cross-reference
+  to SESSION_NOTES §12.8). Includes the two-layer bash guard code,
+  independence analysis (Layer 1 vs Layer 2), and explicit "What
+  this is NOT" subsection rejecting $PWD-prefix approach.
+- Updated §11 bug audit row #12 to cross-reference §10.8.1 (was
+  only §6.1 and §10.8).
+- Added §10.5.1 W13 false positive on cross-submodule references.
+  Documents that W13 warnings on `run-contract.sh` and
+  `CONTRACT.md` are architectural verifier limitation (W13 scans
+  only standards/ tree), not a bug in the document. Lists 3
+  workaround options in order of preference.
+- Updated §12 Change history with rewrite entry describing all
+  changes.
+- Ran verifiers after all edits:
+  - verify-standards.js: 8/8 PASS (V11 scanned 40 files, all ≤1000
+    lines; CI-AND-TESTING.md grew from 483 to 704 lines, well under
+    cap)
+  - verify-id-graph.js: 13/13 HARD PASS, 2 W13 warnings (now
+    documented as known limitation in §10.5.1, no longer a silent
+    surprise)
+
+Stage Summary:
+- 2 artifacts updated:
+  1. SESSION_NOTES.md §12.8 LESSON-004a (new, 89 lines) + ToC fix
+     + Change History row
+  2. CI-AND-TESTING.md §9 rewrite (flat table → P0/P1/P2 matrix
+     with owners) + §10.8.1 LESSON-004a + §10.5.1 W13 limitation
+     + §11 #12 cross-ref + Change History row. Document grew from
+     483 to 704 lines.
+- 1 planned task eliminated as already-completed: 5 stale skills
+  frontmatter remediation was a false positive from Phase A1
+  (catalog_skills.py parser bug, fixed). CATALOG.md §10 documents
+  this. No work needed.
+- Refined 1 audit proposal: LESSON-004a $PWD-prefix check replaced
+  with path-independent two-layer guard (uncommitted-state check +
+  --force flag). Documented rationale in both SESSION_NOTES §12.8
+  "What this is NOT" subsection and CI-AND-TESTING §10.8.1 "What
+  this is NOT" subsection.
+- Verifier status: 8/8 + 13/13 HARD PASS. 2 W13 soft warnings
+  documented as known limitation in §10.5.1.
+- Honest finding: the audit feedback was high-quality and aligned
+  with project standards (STD-DOC-002, STD-DOC-003). All 5 points
+  accepted; 4 as-written, 1 with technical refinement (LESSON-004a
+  approach). No pushback needed beyond the refinement note.
+- Cascade O-017 still at Phase A+B COMPLETE. The 3-item
+  honest-remediation pause is now complete (task 2 was already
+  done in Phase A1; tasks 1 and 3 done in this session). Phase C
+  remains the next cascade step, awaiting user authorization.
+- Next: commit + push. Two commits needed:
+  (a) standards/ submodule: CI-AND-TESTING.md rewrite
+  (b) platform/: SESSION_NOTES.md LESSON-004a + ToC + Change
+      History + worklog entry + standards submodule pointer bump
+

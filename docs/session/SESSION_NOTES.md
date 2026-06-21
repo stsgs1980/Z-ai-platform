@@ -25,6 +25,7 @@
 10. [Z.ai Sandbox Documentation — keep / drop decision](#10-zai-sandbox-documentation--keep--drop-decision)
 11. [Ready-to-use Unicode regex filters](#11-ready-to-use-unicode-regex-filters)
 12. [Structured lessons registry](#12-structured-lessons-registry)
+13. [Phase A2 — Governance/execution gap audit](#13-phase-a2--governanceexecution-gap-audit)
 
 ---
 
@@ -869,7 +870,99 @@ hours of reconstruction if there were uncommitted edits.
 - **Promoted-to:** (empty; candidate for inclusion in
   `skills/skills/commit-work/CONTRACT.md` as a guard check G0:
   "pre-reset stash safety". Phase C may add this when generalizing
-  the contract template.)
+  the contract template. Extended by LESSON-004a in §12.8, which
+  generalises the same principle to script-level destructive
+  operations and proposes an automated two-layer guard.)
+
+### 12.8. LESSON-004a: automated guard layer for script-level destructive ops
+
+- **ID:** LESSON-2026-06-21-004a
+- **Status:** RECOGNIZED (extends LESSON-004 from manual hygiene to
+  automated enforcement; same principle family)
+- **Trigger:** CI/CD audit of the merged standards document observed
+  that LESSON-004's manual recipe (`stash → reset → pop`) depends on
+  operator memory and discipline. The same audit raised a parallel
+  concern: any script in the repo (bootstrap.sh, run-contract.sh,
+  future CI workflows) that performs destructive filesystem or git
+  operations can wipe the live working tree if invoked in the wrong
+  context. Two near-misses during Phase B confirmed the pattern is
+  not hypothetical.
+- **Root cause:** Destructive operations (`rm -rf`, `git reset --hard`,
+  `git clean -fdx`) carry no built-in safety check. Their behaviour is
+  correct in a sandbox/test context and catastrophic in a live-working-
+  tree context, but the operation itself does not know which context it
+  is in. Relying on the operator to "be careful" is the same O(N)
+  trap as whitelisting in LESSON-001: every new script invocation is a
+  fresh opportunity for human error.
+- **Fix principle:** Encode a **two-layer automated guard** at the
+  entry of any script that performs destructive operations:
+
+  - **Layer 1 (root cause): refuse to proceed if uncommitted changes
+    exist.** This catches the actual destructive failure mode — losing
+    work the operator did not realise was uncommitted. Implementation:
+    ```bash
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+      echo "[ERROR] Uncommitted changes detected. Stash or commit first." >&2
+      exit 1
+    fi
+    ```
+  - **Layer 2 (defense in depth): require an explicit `--force` flag
+    for any `rm -rf` on tracked or top-level paths.** This converts
+    accidental invocation from "silent catastrophe" to "loud refusal".
+    Implementation:
+    ```bash
+    if [[ "$1" != "--force" ]]; then
+      echo "[ERROR] Destructive operations require --force flag." >&2
+      exit 1
+    fi
+    ```
+
+  This is the LESSON-001 pattern applied to script safety: an O(1)
+  encoded guard at the entry of the script beats O(N) post-mortem
+  reconstruction after each accident. The two layers are independent:
+  Layer 1 catches the common case (forgot to commit), Layer 2 catches
+  the rare case (wrong working directory or wrong script invoked).
+  Either one alone is insufficient — Layer 1 without Layer 2 still
+  allows `--force` workflows to wipe a clean tree; Layer 2 without
+  Layer 1 still allows a `--force` invocation to wipe uncommitted
+  work that the operator forgot about.
+- **Applies-to:** Any script in the repo that performs destructive
+  filesystem or git operations. Concretely:
+  1. `bootstrap.sh` — already has a safe `rm -rf "$target_link"` at
+     line 79 (only fires after backup), but the script as a whole
+     should gain Layer 1 guard at entry if it ever grows more
+     aggressive cleanup.
+  2. `skills/skills/commit-work/scripts/run-contract.sh` — Phase B
+     artefact, candidate for Layer 1 guard when `--commit` mode is
+     used.
+  3. Future CI workflows in `.github/workflows/` — any step that
+     runs `rm -rf` or `git reset --hard` against the checked-out
+     tree.
+  4. The `commit-work` CONTRACT.md guard check G0 (proposed in
+     LESSON-004 §12.7) — the `stash → reset → pop` recipe is the
+     manual version of Layer 1; an automated Layer 1 in the
+     contract script would enforce it without operator memory.
+- **What this is NOT:** This is not a `$PWD`-prefix check (the
+  initial audit proposal). `$PWD` matching is fragile — clone
+  paths vary across machines and sandboxes, and any prefix that
+  matches the live tree also matches legitimately similar sandbox
+  paths (e.g. `/home/z/sandbox/Z-ai-platform-test`). The
+  uncommitted-state check (Layer 1) is path-independent and
+  catches the root cause directly. The `--force` flag (Layer 2) is
+  also path-independent and converts silent failure to loud
+  refusal. Together they are more robust than any path-based
+  heuristic.
+- **Source:** CI/CD audit feedback (2026-06-21) on the merged
+  standards document. Audit proposed LESSON-004a as a `$PWD`
+  pattern-match guard; this entry refines that proposal to the
+  two-layer model after analysing failure modes. Near-miss evidence
+  from Phase B (LESSON-004 §12.7) confirms the failure mode is real
+  and recurring.
+- **Promoted-to:** (empty; candidate for inclusion in
+  `skills/skills/commit-work/CONTRACT.md` as guard check G0 when
+  Phase C generalises the contract template. Layer 1 of G0 would
+  subsume the manual `stash → reset → pop` recipe from LESSON-004,
+  making the safety automatic rather than discipline-dependent.)
 
 ---
 
@@ -1137,3 +1230,4 @@ the cascade. They should be raised as new open questions:
 | 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file → FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
 | 2026-06-21 | Added §13 (Phase A2 governance/execution gap audit). O-017 Phase A2 deliverable. Audits the 6-row gap table from O-017 context against actual repo state. Result: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade ordering (Phase B→C→D→E→F). Surfaces 2 new open question candidates: O-019 (guard/ execution contract, parallel to skills contract) and O-020 (feedback-loop mechanism, long-term). Companion to `skills/docs/CATALOG.md` (Phase A1 deliverable). |
 | 2026-06-21 | Added §12.7 LESSON-004 (`git reset --hard` wipes uncommitted worktree; stash before reset). Triggered twice in Phase B smoke testing. Distinct from LESSON-001 family (operational hygiene, not O(1)/O(N) scaling). Operational recipe: `git stash push -u -m "pre-reset-safety"` → `git reset --hard HEAD~1` → `git stash pop`. Candidate for promotion into commit-work CONTRACT.md as guard check G0 in Phase C. |
+| 2026-06-21 | Added §12.8 LESSON-004a (automated two-layer guard for script-level destructive ops). Extends LESSON-004 from manual hygiene to automated enforcement. Layer 1: refuse if uncommitted changes exist (root-cause guard, path-independent). Layer 2: require explicit `--force` flag (defense in depth). Refines the CI/CD audit's `$PWD`-prefix proposal, which is fragile across clone paths and sandbox configurations. Candidate for `commit-work` CONTRACT.md G0 when Phase C generalises the contract template. |
