@@ -146,4 +146,39 @@ fi
 
 echo "[pre-commit] All checks PASS — proceeding with commit."
 echo "[pre-commit] (commit-msg hook will validate Conventional Commits format next)"
+
+# --- Phase 4: PROC-COCHANGE-003 (RULE-MONOLITH-010, SOFT) -------------------
+# Added 2026-06-25 per M003 partial completion. Warns when a code change
+# is staged without a corresponding .md change. SOFT only — does not block.
+COCHANGE="guard/scripts/co-change-check.sh"
+if [ -f "$COCHANGE" ]; then
+  echo "[pre-commit] Phase 4: PROC-COCHANGE-003 (code+docs sync, RULE-MONOLITH-010, SOFT)"
+  if ! bash "$COCHANGE" >/tmp/zai-precommit-cochange.log 2>&1; then
+    echo "[pre-commit] WARN: co-change check reported advisory violations:"
+    sed 's/^/  /' /tmp/zai-precommit-cochange.log
+    echo "[pre-commit] Advisory only — commit will proceed. RULE-MONOLITH-010 still applies."
+  else
+    echo "[pre-commit] OK: PROC-COCHANGE-003 PASS"
+  fi
+  rm -f /tmp/zai-precommit-cochange.log
+fi
+
+# --- Phase 5: PROC-LINECOUNT-004 (RULE-MONOLITH-012, SOFT) ------------------
+# Added 2026-06-25 per M003 partial completion. Checks file-size caps from
+# STD-META-001 §4.18.1. SOFT only — pre-existing verify-standards.js V11
+# already enforces HARD 1000-line cap. This is the finer-grained per-category
+# advisory pass.
+LINECOUNT="guard/scripts/line-count-check.sh"
+if [ -f "$LINECOUNT" ]; then
+  echo "[pre-commit] Phase 5: PROC-LINECOUNT-004 (anti-monolith, RULE-MONOLITH-012, SOFT)"
+  if ! bash "$LINECOUNT" >/tmp/zai-precommit-linecount.log 2>&1; then
+    echo "[pre-commit] WARN: line-count check reported advisory violations:"
+    sed 's/^/  /' /tmp/zai-precommit-linecount.log
+    echo "[pre-commit] Advisory only — commit will proceed. RULE-MONOLITH-012 still applies."
+  else
+    echo "[pre-commit] OK: PROC-LINECOUNT-004 PASS"
+  fi
+  rm -f /tmp/zai-precommit-linecount.log
+fi
+
 exit 0

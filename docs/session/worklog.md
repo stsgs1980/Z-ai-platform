@@ -4807,3 +4807,78 @@ Stage Summary:
 - M004 (TOOL-VERIFY-001, TOOL-BUMP-005) NOT STARTED — needs architectural spec.
 - Known limitation discovered: TOOL-* IDs are not blockquote-declared, so they cannot be referenced from Related: lines without breaking G02. This is a structural issue — either (a) create TOOL-*.md spec files with blockquote headers, or (b) accept that TOOL-* IDs live only in tables and can't participate in the ID graph. Option (a) is the right answer long-term but out of scope here.
 - Lesson: bidirectional Related: edges create cycles. Always make dependencies directional (update depends on setup, not vice versa).
+
+---
+Task ID: M003-partial-push
+Agent: Super Z (continuation)
+Task: Push guard M003 partial + platform pointer to GitHub origin
+
+Work Log:
+- Verified guard/ worktree state: clean, 1 commit ahead of origin (10e3766 M003 partial)
+- Verified platform worktree state: clean, 2 commits ahead (AGENT_RULES.md f174f19, M003 pointer 1063f1f)
+- Validated registry.json: JSON parses, counts = {RULE:17, PROC:4, TOOL:6, total:27}
+- Validated scripts/co-change-check.sh: bash -n PASS, smoke-test PASS (no staged files)
+- Validated scripts/line-count-check.sh: bash -n PASS, smoke-test PASS (0 offenders, 0 warnings)
+- Validated 4 instructions/PROC-*.md: present, 82-118 lines each
+- Push attempt to github.com/stsgs1980/Z-ai-guard.git: FAILED — "Invalid username or token"
+- Push attempt to github.com/stsgs1980/Z-ai-platform.git: FAILED — same auth error
+
+Stage Summary:
+- All 3 user-confirmed tasks COMPLETE locally + committed:
+  1. guard/registry.json (auto-generated, 27 IDs, build-registry.py in scripts/)
+  2. guard/scripts/co-change-check.sh + line-count-check.sh (PROC-COCHANGE-003 + PROC-LINECOUNT-004)
+  3. guard/instructions/PROC-{SETUP-001,UPDATE-002,COCHANGE-003,LINECOUNT-004}.md (4 placeholder+spec files)
+- Submodule pointer in platform updated correctly (2e2579d -> 10e3766)
+- BLOCKED on push: GitHub token in remote URL is expired/invalid. User must refresh token.
+
+---
+Task ID: M003-partial-push-retry
+Agent: Super Z (continuation)
+Task: Retry push of guard M003 partial + platform pointer after token fix
+
+Work Log:
+- User uploaded Z-ai-platform.txt containing ghp_ token + SSH URL (2 lines)
+- First attempt failed: file had CR/LF line endings; `tr -d '\r\n' | head -1` accidentally merged both lines into one 82-char string
+- Diagnosis: token length 82 (should be ~40), last 5 chars = "m.git" — clearly contained URL tail
+- Fix: `grep '^ghp_' file | tr -d '\r\n'` — extracts ONLY the ghp_ line
+- Verified token via API: GET /user returned login "stsgs1980", status 200
+- Re-set remote URLs for both Z-ai-guard and Z-ai-platform with cleaned token
+- Push guard: "Everything up-to-date" — origin/main already at 10e3766 (somehow pushed earlier or token refresh was sufficient)
+- Push platform: "Everything up-to-date" — origin/main already at 1063f1f
+- Verified ls-remote matches local heads on both repos
+
+Stage Summary:
+- M003 partial is now PUBLIC on GitHub:
+  - https://github.com/stsgs1980/Z-ai-guard @ 10e3766
+  - https://github.com/stsgs1980/Z-ai-platform @ 1063f1f
+- All 3 user-confirmed tasks shipped to origin:
+  1. guard/registry.json (27 IDs: 17 RULE + 4 PROC + 6 TOOL)
+  2. guard/scripts/{co-change-check.sh, line-count-check.sh} (PROC-COCHANGE-003 + PROC-LINECOUNT-004)
+  3. guard/instructions/PROC-{SETUP-001,UPDATE-002,COCHANGE-003,LINECOUNT-004}.md
+- Token validated: scope works for both Z-ai-guard and Z-ai-platform push
+- M003 still PARTIAL: 2 of 4 PROC ACTIVE. Remaining: PROC-SETUP-001 + PROC-UPDATE-002 (placeholders only).
+
+---
+Task ID: M003+M004-final
+Agent: Super Z (continuation)
+Task: Complete M003 (PROC-SETUP/UPDATE) + M004 (TOOL-VERIFY-001, TOOL-BUMP-005) + wire Phases 4+5 into pre-commit
+
+Work Log:
+- Created guard/scripts/setup-001.sh (PROC-SETUP-001) — 6-step workspace installer with --check mode
+- Created guard/scripts/update-002.sh (PROC-UPDATE-002) — 6-step updater with id-diff + verify-id-graph call
+- Created guard/tools/verify-docs.sh (TOOL-VERIFY-001) — 4-check guard-side docs integrity (registry census, rule files, PROC cross-refs, AGENT_RULES priority chain) + composes verify-standards.js + verify-id-graph.js
+- Created guard/tools/bump.sh (TOOL-BUMP-005) — semver-aware bumper (patch/minor/major), updates AGENT_RULES.md §9 + registry.json + git tag, supports --dry-run and --check
+- Fixed build-registry.py: added --output flag (was hardcoded to OUTPUT path, broke --check mode)
+- Fixed volatile-field drift in setup-001.sh/update-002.sh --check modes: strip generated_at + *_sha via sed before diff
+- Updated instructions/PROC-SETUP-001.md + PROC-UPDATE-002.md: status ACTIVE (planned -> ACTIVE), updated script paths
+- Wired PROC-COCHANGE-003 + PROC-LINECOUNT-004 into .githooks/pre-commit as Phase 4 (SOFT) + Phase 5 (SOFT)
+- Updated install-hooks.sh: documented 5-phase pre-commit structure
+- Updated guard/README.md: M003+M004 COMPLETE, 4/4 PROC, 2/2 TOOL, all 27 IDs executable
+- Smoke-tested all 4 new scripts: setup-001 --check PASS, update-002 --check PASS, verify-docs PASS (all 6 checks green), bump --dry-run PASS
+
+Stage Summary:
+- guard/ @ f8745f0: feat(M003+M004): 9 files changed, 741 insertions, 42 deletions
+- Pre-commit now runs 6 phases total (0 worklog, 1 V01-V11, 2 G01-G15, 3 skills-strict, 4 COCHANGE-003, 5 LINECOUNT-004)
+- All 27 enforcement IDs (17 RULE + 4 PROC + 6 TOOL) now have executable implementations
+- M003 + M004 migrations fully closed
+- Platform version unchanged at v2.6.0 (no rules changed, only PROC/TOOL implementation)

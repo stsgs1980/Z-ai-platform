@@ -16,8 +16,14 @@
 #   - Our hooks are pure bash + node, no npm dependency needed
 #   - Keeps the toolchain minimal (no package.json required to enable hooks)
 #
-# Active hooks (as of 2026-06-21):
-#   - pre-commit  : 3-phase content/structural/worklog-freshness checks.
+# Active hooks (as of 2026-06-25):
+#   - pre-commit  : 5-phase checks:
+#                   Phase 0: worklog freshness (RULE-MONOLITH-002, WARN)
+#                   Phase 1: verify-standards.js V01-V11 (HARD BLOCK)
+#                   Phase 2: verify-id-graph.js G01-G15 (HARD BLOCK)
+#                   Phase 3: verify-skills.js --strict (HARD BLOCK)
+#                   Phase 4: PROC-COCHANGE-003 (RULE-MONOLITH-010, SOFT WARN)
+#                   Phase 5: PROC-LINECOUNT-004 (RULE-MONOLITH-012, SOFT WARN)
 #                   See skills/skills/commit-work/CONTRACT.md §3-4.
 #   - commit-msg  : Conventional Commits format validation on commit
 #                   message (RULE-MONOLITH-004). Added in O-017 Phase B2.
@@ -51,8 +57,13 @@ echo "[install-hooks] Done. Hooks now active:"
 ls -1 .githooks/ 2>/dev/null | sed 's/^/  - /'
 echo ""
 echo "[install-hooks] Hook responsibilities:"
-echo "  - pre-commit  : Phase 0 worklog freshness (WARN) + Phase 1 V01-V11"
-echo "                  invariants (BLOCK) + Phase 2 G01-G15 ID-graph (BLOCK)"
+echo "  - pre-commit  : 5 phases —"
+echo "                  Phase 0: worklog freshness (RULE-MONOLITH-002, WARN)"
+echo "                  Phase 1: verify-standards.js V01-V11 (HARD BLOCK)"
+echo "                  Phase 2: verify-id-graph.js G01-G15 (HARD BLOCK)"
+echo "                  Phase 3: verify-skills.js --strict (HARD BLOCK)"
+echo "                  Phase 4: PROC-COCHANGE-003 code+docs sync (SOFT WARN)"
+echo "                  Phase 5: PROC-LINECOUNT-004 anti-monolith (SOFT WARN)"
 echo "  - commit-msg  : Conventional Commits format on message (G4/G5 BLOCK,"
 echo "                  G6 WARN). Per RULE-MONOLITH-004 + STD-GIT-001 §1."
 echo ""
