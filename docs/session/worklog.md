@@ -4648,3 +4648,94 @@ Stage Summary:
 - READMEs remediation (S10c) was ALREADY DONE in the previous session (skills/ submodule 9797e69, standards/ a259a6b). No further remediation needed.
 - Remaining pending items (intentional, not blockers): O-017 Phase E (dashboard) + Phase F (feedback loop) PENDING; E1 (P-MAS_init onboarding) DEFERRED per user; E2 (Consumer tutorial) blocked by E1.
 - AWAITING USER INSTRUCTIONS for next step. No further autonomous work scheduled.
+
+---
+Task ID: dense-graph-repo-2026-06-22
+Agent: Super Z (main)
+Task: User asked to collect all ID-graph visualization work into a new external GitHub repo `stsgs1980/Dense-graph` for fork discussion. Then iteratively: rename viewer/→examples/, add 6 P-MAS wireframes user uploaded, analyze them, propose 4-layer architecture, decide to defer CLI to Phase 2, build hierarchy-live.html with 3 layout modes (Flat/Clustered/Radial) using P-MAS wireframe design system + live Z-ai ID-graph data.
+
+Work Log:
+- Staged repo at /home/z/my-project/Dense-graph/ with structure: examples/ data/ renders/ scripts/ + README + .gitignore
+- Init git, first commit (35421b4): 14 files, 60 IDs / 113 edges data + 2 viewers + 2 extractors + Graphviz renders
+- Pushed to https://github.com/stsgs1980/Dense-graph.git (used GH token from upload/Zai push.txt, then stripped from remote URL for security)
+- Renamed viewer/ → examples/ (commit 70db96a), updated README paths, added Repository layout section explaining convention `examples/wireframe-*.html` for new wireframes
+- Analyzed 6 P-MAS wireframes user uploaded to upload/:
+  - 01-dashboard.html (47 KB): KPI strip, status donut, top performers, network chart, system health
+  - 02-hierarchy.html (52 KB): tree + force canvas + detail panel
+  - 03-workflows.html (63 KB): pipeline builder with decision diamond + feedback loops
+  - 06-task-management.html (84 KB): Board/List/Timeline/Calendar, 4 views + 2 modals
+  - 07-formula-explorer.html (61 KB): Graph/Matrix/Catalog tabs, tier color-coded
+  - pmas-architector-extension.html (89 KB, RU): agent+skill editor, 5 roles (Orchestrator/Planner/Evaluator/Executor/Monitor)
+  - Found: unified design system across all 6 (pure black + cyan #06B6D4 accent, 3-tier surfaces/text/borders, 56px header, system-ui font, ZERO external deps except 01 Google Fonts)
+  - Found gaps: no Login/Auth, no Settings, no Audit Log, no User Mgmt, no error pages, no onboarding
+  - Found overlaps: 07-formula-explorer DUPLICATES existing id-graph-dense-viewer (recommend drop or merge)
+- Committed wireframes (8fc1132) with examples/wireframes/README.md documenting each file + shared design system + open questions
+- Proposed 4-layer architecture to user:
+  - L1 UI (dashboard 6 pages) / L2 Control (CLI, deferred) / L3 Orchestration (backend rewrite from scratch) / L4 Knowledge (Z-ai submodules — already exist, provide API contracts + runtime policies + agent capabilities)
+- User decided: fork repo name = `Z.ai-Dense-graph`; CLI DEFERRED to Phase 2; current focus = prove module links are visible via Hierarchy view (P-MAS style); no point building CLI if "Мозговой центр" fails
+- Built /home/z/my-project/Dense-graph/examples/hierarchy-live.html (49 KB, single-file):
+  - P-MAS wireframe design system (pure black + cyan, 56px header, 240px left sidebar, 340px right panel, 44px KPI strip)
+  - 3 layout modes: Flat (pure force), Clustered (4 repo clusters with gravity), Radial (concentric by in-degree, top hub at center)
+  - Left sidebar: expandable tree of 4 modules → individual IDs (60 total)
+  - Center canvas: D3 v7 force simulation, zoom/pan, drag nodes, edge-type filters
+  - Right panel: per-ID detail (title, file, repo badge, in/out/total deg) + clickable in/out edges + BFS shortest-path search
+  - KPI strip: 60 IDs / 113 edges / 4 repos / isolated count / top hub (STD-SKILL-001, 23 in-edges)
+  - Search box: highlight matching nodes/edges, dim rest
+  - Inline data (14 KB JSON, 60 nodes + 113 links + summary) — no server needed, opens from file://
+- Built /home/z/my-project/Dense-graph/scripts/build_hierarchy_inline.py to regenerate inline JSON from data/id-graph-full.json when submodules update
+- Committed hierarchy-live.html (cf672d8) + build script
+- Added _hierarchy-inline.json to .gitignore (regenerable intermediate), committed (281c338)
+- Pushed everything to origin/main (5 commits total)
+- Explained to user: dynamic INSIDE browser (drag/zoom/search/BFS/3 layouts/click-reaction), NOT dynamic vs external world (data inlined at build time, no WebSocket, no auto-refresh). Proposed 3 levels of dynamism (Level 1 regenerate-on-demand = current, Level 2 fetch JSON at runtime = +10 lines, Level 3 WebSocket = needs Phase 2 backend). Recommended staying at Level 1 for now since standards change weekly not hourly.
+
+Stage Summary:
+- External repo https://github.com/stsgs1980/Dense-graph fully populated and pushed (5 commits, ~440 KB total, 14+ files).
+- examples/hierarchy-live.html is the main Phase 1 deliverable: P-MAS-styled Hierarchy view with real Z-ai ID-graph data, 3 layout modes, BFS path search, all clickable.
+- Phase 2 (CLI Terminal + coding + autonomous agents) explicitly DEFERRED until user verifies all module links visible and working in hierarchy-live.html.
+- 4-layer architecture documented: UI → Control (deferred) → Orchestration (rewrite) → Knowledge (existing Z-ai submodules).
+- Fork name decided: `Z.ai-Dense-graph` (not yet created — waiting for Phase 2 green light).
+- Token from upload/Zai push.txt was used for push, then stripped from remote URL. User advised to revoke the token in GitHub settings as safety net.
+- Next when user returns: open examples/hierarchy-live.html locally, test 3 layout modes + BFS path search, report any visual/UX issues. If satisfied → green light Phase 2. If issues → iterate on hierarchy-live.html.
+
+---
+Task ID: agent-rules-md-2026-06-22
+Agent: Super Z (main)
+Task: Close Gap 1 (no single entry point) + Gap 3 (no arbitration layer) from external reviewer feedback. Create AGENT_RULES.md as single orchestration entry point for agents. Extend bootstrap.sh to print it + run sanity verifiers at session start (warning-only).
+
+Work Log:
+- Verified all 4 gaps from reviewer feedback against actual repo state:
+  - Gap 1 (5 entry points): confirmed, but platform/ root IS the platform (not separate dir)
+  - Gap 2 (rules not enforced in runtime): confirmed, guard/README.md self-documents this (PROC 0/4, TOOL 0/2, instructions 0, registry.json 0)
+  - Gap 3 (no arbitration layer): confirmed, no priority order documented anywhere
+  - Gap 4 (Superpowers orphan): COULD NOT VERIFY — no .superpowers-zai/ dir, no sp-* skills in skills/skills/. Reviewer describes component that does not exist in our project.
+- User clarified: Superpowers = external Zcode plugin adapted for Z.ai. Policy: treat as Priority 4, never overrides Z-ai standards. One-line policy in AGENT_RULES.md §6.
+- Created /home/z/my-project/Z-ai-platform/AGENT_RULES.md (207 lines, 8 KB) at platform ROOT (not in guard/ — entry point can't live inside what it points to):
+  - §1 Onboarding Protocol (6 sequential steps)
+  - §2 Priority Order: STD-* > RULE-MONOLITH-* > AGENT_RULES.md > ZAI-* skills (with worked example)
+  - §3 Rule Registry reference (guard/rules/INDEX.md, top 5 most-bitten rules listed)
+  - §4 Skill Catalog reference (skills/skills/INDEX.md, 36 skills, 25 with ZAI-* ID)
+  - §5 Standards Install Order reference (ARCH-002, tier 1/2/3 listed)
+  - §6 Superpowers Policy (external plugin, Priority 4, untrusted)
+  - §7 Sanity Verifiers (warning-only at session start)
+  - §8 Forbidden Actions (7 hard stops, all reference specific RULE-MONOLITH-* or STD-* IDs)
+  - §9 Version Lock (v2.6.0, submodule SHAs)
+  - §10 Change Protocol (owned by platform maintainer, not editable from subagent context)
+- Extended bootstrap.sh with Step 5 + Step 6:
+  - Step 5: cat AGENT_RULES.md to stdout (so agent sees it at session start)
+  - Step 6: run verify-standards.js + verify-id-graph.js (warning-only, non-blocking, tail -10)
+  - Used [WARN] prefix (ASCII) not unicode warning symbol (RULE-MONOLITH-015 compliance)
+  - bash -n syntax check: PASS
+- Verified no regressions:
+  - verify-standards.js: 8/8 PASS (AGENT_RULES.md is not in standards/ tree, so V11 1000-line cap doesn't apply, but file is 207 lines anyway)
+  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings
+  - verify-skills.js --strict: 9/9 HARD PASS, 0 SOFT warnings
+  - Unicode check on AGENT_RULES.md: clean (only em-dashes, no forbidden chars)
+- Commits: 1 commit on platform repo (AGENT_RULES.md new + bootstrap.sh extended + worklog entry). No submodule changes needed.
+
+Stage Summary:
+- Gap 1 CLOSED: single entry point (AGENT_RULES.md at platform root) + bootstrap.sh prints it at session start
+- Gap 3 CLOSED: priority order documented (STD > RULE > AGENT_RULES.md > ZAI), with worked example
+- Gap 2 PARTIALLY CLOSED: bootstrap.sh now runs verifiers at session start (warning-only). Full runtime enforcement still pending PROC/TOOL migration (M003, M004) — out of scope for this task.
+- Gap 4 DEFERRED: Superpowers is external plugin, policy documented in AGENT_RULES.md §6. We do not maintain, verify, or ID-graph validate Superpowers.
+- AGENT_RULES.md ownership: platform maintainer (user). Change protocol in §10 forbids subagent edits.
+- Reviewer's "40% readiness" estimate confirmed roughly accurate. With Gap 1 + Gap 3 closed, readiness now ~50-55% (single entry point + arbitration layer are foundational, runtime enforcement is still the big remaining gap).

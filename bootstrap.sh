@@ -108,4 +108,32 @@ for skill_dir in "$TOOLKIT_SKILLS_DIR"/*/; do
 done
 
 echo ""
+echo "=== Step 5: Print AGENT_RULES.md (single entry point) ==="
+if [ -f "$PLATFORM_DIR/AGENT_RULES.md" ]; then
+    echo "----------------------------------------  AGENT_RULES.md  ----------------------------------------"
+    cat "$PLATFORM_DIR/AGENT_RULES.md"
+    echo "----------------------------------------------------------------------------------------------------"
+else
+    echo "  WARNING: AGENT_RULES.md not found at $PLATFORM_DIR/AGENT_RULES.md"
+    echo "           Agent onboarding protocol is missing. Clone integrity may be compromised."
+fi
+
+echo ""
+echo "=== Step 6: Run sanity verifiers (warning-only, non-blocking) ==="
+if [ -f "$PLATFORM_DIR/standards/scripts/verify-standards.js" ]; then
+    echo "  Running verify-standards.js..."
+    (cd "$PLATFORM_DIR/standards" && node scripts/verify-standards.js 2>&1 | tail -10) || echo "  [WARN] verify-standards.js failed (non-blocking)"
+else
+    echo "  SKIP: verify-standards.js not found"
+fi
+if [ -f "$PLATFORM_DIR/standards/scripts/verify-id-graph.js" ]; then
+    echo ""
+    echo "  Running verify-id-graph.js..."
+    (cd "$PLATFORM_DIR/standards" && node scripts/verify-id-graph.js 2>&1 | tail -10) || echo "  [WARN] verify-id-graph.js failed (non-blocking)"
+else
+    echo "  SKIP: verify-id-graph.js not found"
+fi
+
+echo ""
 echo "Done. To verify: Skill(command=\"skill-creator\") should now load your refactored version."
+echo "Onboarding: see AGENT_RULES.md above (single entry point for agents)."
