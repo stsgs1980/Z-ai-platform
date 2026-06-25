@@ -4739,3 +4739,71 @@ Stage Summary:
 - Gap 4 DEFERRED: Superpowers is external plugin, policy documented in AGENT_RULES.md §6. We do not maintain, verify, or ID-graph validate Superpowers.
 - AGENT_RULES.md ownership: platform maintainer (user). Change protocol in §10 forbids subagent edits.
 - Reviewer's "40% readiness" estimate confirmed roughly accurate. With Gap 1 + Gap 3 closed, readiness now ~50-55% (single entry point + arbitration layer are foundational, runtime enforcement is still the big remaining gap).
+
+---
+Task ID: m003-partial-2026-06-22
+Agent: Super Z (main)
+Task: User authorized "what can you do without me" — closed 3 of 4 deliverables from my own list: (1) guard/registry.json auto-generated, (2) PROC-LINECOUNT-004 + PROC-COCHANGE-003 shell scripts, (3) guard/instructions/ placeholder .md for 4 PROC-*. Remaining (TOOL-VERIFY-001, PROC-SETUP/UPDATE, runtime blocking enforcement) explicitly deferred — needs user decisions.
+
+Work Log:
+- Read RULE-MONOLITH-012 (anti-monolith) + RULE-MONOLITH-010 (docs sync) to understand exact semantics the PROC scripts must enforce. Key constraint from v1.3: "the procedure MUST read the canonical matrix from META-001 §4.18, NOT from this rule's mirror" — means no matrix duplication.
+- Created guard/scripts/build-registry.py (Python, 175 lines):
+  - Parses guard/rules/INDEX.md table for 17 RULE-MONOLITH-* entries (regex on markdown table rows)
+  - Parses standards/standards/META-001-id-registry.md §4.14 (PROC) + §4.15 (TOOL) tables
+  - Outputs guard/registry.json with 27 IDs (17 RULE + 4 PROC + 6 TOOL), each with id/title/version/level/status/file/source/implements/calls/owning_standard
+  - Top-level metadata: generated_at, platform_version (v2.6.0), standards_sha (a259a6b), guard_sha (2e2579d), counts
+  - Hardcoded PID→RULE mapping for implements field (PROC-COCHANGE-003 → RULE-010, PROC-LINECOUNT-004 → RULE-012)
+- Ran build-registry.py: produced guard/registry.json (27 IDs, 4.2 KB). Spot-check confirmed correct structure.
+- Created guard/scripts/line-count-check.sh (PROC-LINECOUNT-004, 105 lines):
+  - Implements RULE-MONOLITH-012 via delegation (no matrix duplication per v1.3)
+  - Calls verify-standards.js (V11 1000-line cap on standards/ + docs/ + templates/) + verify-skills.js --strict (S10a SKILL.md ≤ 800, S10b CONTRACT.md ≤ 500, S10c README.md ≤ 400)
+  - --hard flag for blocking (exit 1 on offender), default = warn-only (exit 0)
+  - bash -n syntax check: PASS. Soft + hard mode both tested: PASS
+- Created guard/scripts/co-change-check.sh (PROC-COCHANGE-003, 130 lines):
+  - Implements RULE-MONOLITH-010 (docs sync, no code without docs)
+  - Classifies staged files (git diff --cached --name-only) into code/docs/tests/config/lockfile/other via regex
+  - Decision: no code staged → PASS; code + ≥1 .md → PASS; code without .md → VIOLATION
+  - Exemptions: lockfiles (auto-gen), tests (self-documenting), config (naturally flat), pure-docs commits
+  - --hard flag for blocking, default = warn-only
+  - bash -n syntax check: PASS. Tested with no staged files: PASS
+- Created 4 instruction .md files in guard/instructions/:
+  - PROC-SETUP-001.md (planned, spec only — scope, inputs, outputs, calls, open questions)
+  - PROC-UPDATE-002.md (planned, spec only)
+  - PROC-COCHANGE-003.md (ACTIVE, full spec — when fires, what does, exemptions, integration with install-hooks.sh, 3 known limitations)
+  - PROC-LINECOUNT-004.md (ACTIVE, full spec — delegation rationale, integration, 3 known limitations)
+  - Each has YAML frontmatter + blockquote header with ID/Version/Level/Last Updated/Related
+- Initial verify-id-graph.js run: PASS 13/13 but 4 W05 warnings (PROC files had empty Related: edges — "orphan procedure")
+- Added Related: blockquote edges to all 4 PROC files:
+  - PROC-SETUP-001 → STD-META-001, RULE-MONOLITH-008
+  - PROC-UPDATE-002 → STD-META-001, RULE-MONOLITH-009, PROC-SETUP-001
+  - PROC-COCHANGE-003 → RULE-MONOLITH-010, STD-META-001, STD-DOC-002
+  - PROC-LINECOUNT-004 → RULE-MONOLITH-012, STD-META-001
+- Re-ran verify-id-graph.js: FAIL 11/13 (G02 + G03 broke)
+  - G02 fail: PROC-LINECOUNT-004 → TOOL-VERIFY-002/004 unresolved; PROC-UPDATE-002 → TOOL-VERIFY-004 unresolved. Root cause: TOOL-* IDs are declared only as markdown table rows in META-001-id-registry.md (which is "NOT a separate standard, does not participate in the ID graph"), so the verifier doesn't recognize them as declared IDs. Fix: removed TOOL-* from Related: lines.
+  - G03 fail: cycle PROC-UPDATE-002 → PROC-SETUP-001 → PROC-UPDATE-002 (I made setup and update bidirectionally Related). Fix: removed PROC-SETUP-001 → PROC-UPDATE-002 edge, kept only PROC-UPDATE-002 → PROC-SETUP-001 (update depends on setup, not vice versa).
+- Re-ran verify-id-graph.js: PASS 13/13 HARD, 0 warnings.
+- Updated META-001-id-registry.md §4.14:
+  - PROC-COCHANGE-003 row: "ACTIVE (planned) — file not yet created" → "ACTIVE — file created 2026-06-22 (implements RULE-MONOLITH-010)"
+  - PROC-LINECOUNT-004 row: same pattern, mentions RULE-MONOLITH-012 + delegation to TOOL-VERIFY-002/004
+  - Phantom-ID fix note: replaced "4 procedures pending M003" with "M003 partial completion 2026-06-22: 2 of 4 PROC ACTIVE; remaining 2 stay ACTIVE (planned)"
+- Updated guard/README.md:
+  - Status table: PROC 0/4 → 2/4 PARTIAL, instructions 0 → 4 CREATED, scripts 0 → 3 CREATED, registry.json 0 → 1 CREATED
+  - Net enforcement coverage paragraph rewritten: rules declared + 2 of 4 procedures now exist with working scripts; full runtime enforcement still pending M003 completion + M004
+  - Repository layout tree expanded: added registry.json, instructions/ (4 files), scripts/ (3 files)
+- Final verifier sweep:
+  - verify-standards.js: 8/8 PASS
+  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings
+  - verify-skills.js --strict: 9/9 HARD PASS, 0 SOFT warnings
+- Commits (3 repos):
+  - guard submodule (10e3766): +9 files (registry.json, 3 scripts, 4 instructions, README update)
+  - standards submodule (1967ca4): META-001-id-registry.md status flips
+  - platform: pending — will include 2 submodule pointer bumps + this worklog entry
+
+Stage Summary:
+- 3 of 4 deliverables shipped: registry.json + 2 PROC scripts + 4 instruction .md files.
+- Gap 2 (rules not enforceable in runtime) IMPROVED: 2 of 4 PROC now have working scripts. Pre-commit wiring via install-hooks.sh is the next step (not done — would require extending install-hooks.sh, which is platform-side and outside M003 scope).
+- Gap 4 (Superpowers) still deferred — external plugin, no change.
+- M003 status: PARTIAL. 2 of 4 PROC active. PROC-SETUP-001 + PROC-UPDATE-002 remain ACTIVE (planned) — they need scope decisions (do they duplicate bootstrap.sh? are they guard-only? what do they do that bootstrap.sh doesn't?).
+- M004 (TOOL-VERIFY-001, TOOL-BUMP-005) NOT STARTED — needs architectural spec.
+- Known limitation discovered: TOOL-* IDs are not blockquote-declared, so they cannot be referenced from Related: lines without breaking G02. This is a structural issue — either (a) create TOOL-*.md spec files with blockquote headers, or (b) accept that TOOL-* IDs live only in tables and can't participate in the ID graph. Option (a) is the right answer long-term but out of scope here.
+- Lesson: bidirectional Related: edges create cycles. Always make dependencies directional (update depends on setup, not vice versa).
