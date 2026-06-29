@@ -1,225 +1,128 @@
 # Z-ai-platform
 
-> Layer: L0 — Orchestrator
-> Last Updated: 2026-06-17
-> Status: **LIVE — 4-repo architecture deployed on GitHub**
-
-This repository is the **orchestrator** for the Z-ai ecosystem. It pins
-the other three repositories (Z-ai-standards, Z-ai-guard, Z-ai-skills)
-as git submodules and runs the cross-repo ID-graph verifier in CI.
-
+Orchestrator for the Z-ai ecosystem, pinning Z-ai-standards, Z-ai-guard, and Z-ai-skills as git submodules and running the cross-repo ID-graph verifier in CI.
 
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-
-## Table of Contents
-
-- [Repository layout](#repository-layout)
-- [ID graph state (2026-06-17)](#id-graph-state-2026-06-17)
-- [Quick start](#quick-start)
-- [Clone with submodules (one command)](#clone-with-submodules-one-command)
-- [Verify the ID graph](#verify-the-id-graph)
-- [Install pre-commit hooks (optional, runs verifier on .md/.js changes)](#install-pre-commit-hooks-optional,-runs-verifier-on-mdjs-changes)
-- [Updating a submodule](#updating-a-submodule)
-- [Pull latest changes inside the submodule](#pull-latest-changes-inside-the-submodule)
-- [Bump the pointer in Z-ai-platform](#bump-the-pointer-in-z-ai-platform)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Architecture: 4 repositories](#architecture:-4-repositories)
-- [Cross-repo ID graph](#cross-repo-id-graph)
-- [CI behavior](#ci-behavior)
-- [Pre-commit hook](#pre-commit-hook)
-- [License](#license)
-
-## Repository layout
-
-```bash
-Z-ai-platform/                  (this repo, L0)
-├── .gitmodules                 # Pins 3 submodules (clean HTTPS URLs, no PATs)
-├── README.md                   # This file
-├── CONTRIBUTING.md             # How to make changes without breaking the ID graph
-├── install-hooks.sh            # Bootstrap pre-commit hooks
-├── .github/
-│   └── workflows/
-│       └── verify-id-graph.yml # CI: nightly + push + PR verification
-├── standards/                  # → Z-ai-standards (submodule, L1)
-│   ├── standards/              #   6 STD-* files (4 stubs + 2 v1.0+)
-│   ├── docs/
-│   ├── scripts/
-│   │   ├── verify-standards.js #   Per-repo invariants (V01-V10)
-│   │   └── verify-id-graph.js  #   Cross-repo ID graph (13/13 HARD PASS)
-│   └── MIGRATIONS.md           #   M001 (ZAI-META-001 SUPERSEDED), M002 (RULE-MONOLITH)
-├── guard/                      # → Z-ai-guard (submodule, L2)
-│   ├── rules/
-│   │   ├── RULE-MONOLITH-001.md  .. RULE-MONOLITH-017.md   (17 rules)
-│   │   └── INDEX.md            #   Rule catalog
-│   ├── instructions/
-│   ├── scripts/
-│   └── tools/
-└── skills/                     # → Z-ai-skills (submodule, L3)
-    ├── skills/                 #   35 skill dirs (24 with ZAI-* IDs, 11 without)
-    │   ├── INDEX.md            #   Skill catalog by domain
-    │   ├── skill-id-system/    #   ZAI-META-001
-    │   ├── skill-creator/      #   ZAI-META-002
-    │   └── ...                 #   32 more skills
-    └── README.md
-```
-
-## ID graph state (2026-06-17)
-
-```bash
-IDs extracted:    47  (6 STD + 17 RULE + 24 ZAI)
-Related edges:    30
-Aligned_with:     2   (STD-SKILL-001 ↔ ZAI-META-001, ↔ ZAI-META-002)
-Hard checks:      13/13 PASS
-Soft warnings:    23  (W03 stub dead standard + W04 rogue-skill-with-ID x22, non-blocking)
-```
-
-The 13/13 HARD PASS is enforced by:
-- **Locally**: `node standards/scripts/verify-id-graph.js`
-- **On CI**: `.github/workflows/verify-id-graph.yml` runs on every push, PR, and nightly at 03:00 UTC.
-
-## Quick start
-
-### In a fresh Z.ai sandbox session (your daily workflow)
-
-When you start a new sandbox session and want your custom skills back, run **one command**:
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
-```
-
-This will:
-1. Clone `Z-ai-platform` (with all submodules) into `/home/z/my-project/Z-ai-platform/` if not already there.
-2. `git pull --recurse-submodules` if it is already there (gets latest skills).
-3. Symlink every skill from `Z-ai-platform/skills/skills/*` into `/home/z/my-project/skills/` so the sandbox can find them.
-4. Back up any sandbox-installed skill with the same name to `<name>.sandbox-backup/` (so your toolkit version always wins).
-5. Print a list of available custom skills at the end.
-
-After that, `Skill(command="skill-creator")` (and all 35+ of your toolkit skills) will load from your GitHub repo.
-
-> **If `curl` is unavailable in the sandbox**, run it manually in two steps:
-> ```bash
-> git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git /home/z/my-project/Z-ai-platform
-> bash /home/z/my-project/Z-ai-platform/bootstrap.sh
-> ```
-
-### First-time clone (for development / inspection)
-
-```bash
-## Clone with submodules (one command)
-git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
-cd Z-ai-platform
-
-## Verify the ID graph
-node standards/scripts/verify-id-graph.js
-
-## Install pre-commit hooks (optional, runs verifier on .md/.js changes)
-./install-hooks.sh
-```
-
-## Updating a submodule
-
-```bash
-## Pull latest changes inside the submodule
-cd standards
-git checkout main
-git pull
-cd ..
-
-## Bump the pointer in Z-ai-platform
-git add standards
-git commit -m "Bump standards: <reason>"
-git push
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
-
 ## Features
 
-- Feature 1 - description
-- Feature 2 - description
+- 4-repo git submodule architecture (standards L1, guard L2, skills L3, platform L0)
+- Cross-repo ID-graph verifier enforcing G01-G15 invariants (13/13 HARD PASS)
+- CI pipeline with push, PR, nightly (03:00 UTC), and manual dispatch triggers
+- Pre-commit hook running verify-standards.js on .md and .js changes
+- One-command bootstrap script for Z.ai sandbox session setup with skill symlinks
+- Graphviz-powered ID graph rendering with SVG/PNG/DOT artifact uploads
+- CONTRIBUTING.md guide for safe cross-repo changes without breaking the ID graph
 
 ## Tech Stack
 
-- **Tools** - Node.js
+- **Runtime** - Node.js
+- **Verification** - Shell (pre-commit hooks)
+- **CI** - GitHub Actions
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 20+ or Bun
+- Git
+- Node.js 20+
+- curl (optional, for bootstrap script)
 
 ### Installation
 
+For a fresh Z.ai sandbox session, run one command:
+
 ```bash
-git clone https://github.com/stsgs1980/Z-ai-platform.git
+bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
+```
+
+This clones Z-ai-platform with all submodules, symlinks skills into the sandbox, and prints available skills. If curl is unavailable:
+
+```bash
+git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
 cd Z-ai-platform
-bun install
+bash bootstrap.sh
 ```
 
 ### Run
 
 ```bash
-bun run dev
+# Verify the cross-repo ID graph
+node standards/scripts/verify-id-graph.js
+
+# Install pre-commit hooks (optional)
+./install-hooks.sh
 ```
 
-## Architecture: 4 repositories
+## Architecture
 
 | Repo | Layer | Purpose | Contents |
 |------|-------|---------|----------|
-| **Z-ai-platform** | L0 | Orchestrator | `.gitmodules`, CI, hooks |
-| **Z-ai-standards** | L1 | Standards | 6 STD-* files (4 stubs + 2 v1.0+), verifier scripts |
-| **Z-ai-guard** | L2 | Rules | 17 RULE-MONOLITH-* rules + INDEX |
-| **Z-ai-skills** | L3 | Skills | 35 skill dirs (24 with ZAI-* IDs) |
+| Z-ai-platform | L0 | Orchestrator | .gitmodules, CI, hooks |
+| Z-ai-standards | L1 | Standards | 6 STD-* files (4 stubs + 2 v1.0+), verifier scripts |
+| Z-ai-guard | L2 | Rules | 17 RULE-MONOLITH-* rules + INDEX |
+| Z-ai-skills | L3 | Skills | 35 skill dirs (24 with ZAI-* IDs) |
 
-The 4-repo split exists so each layer can evolve independently:
-- Standards can be amended without forcing rule/skill updates.
-- Guard can ship rule changes on its own cadence.
-- Skills can be consumed standalone by the sandbox runtime.
+The 4-repo split allows each layer to evolve independently: standards can be amended without forcing rule/skill updates, guard can ship rule changes on its own cadence, and skills can be consumed standalone by the sandbox runtime.
 
-## Cross-repo ID graph
+## Project Structure
 
-The ID graph (G01-G15) enforces that changes in one layer do not silently
-break references in another. See `standards/standards/STD-META-001-v2.0.md`
-§10.2 for the full G-check catalogue.
+- `.gitmodules` - Pins 3 submodules (standards, guard, skills)
+- `.github/workflows/verify-id-graph.yml` - CI verification workflow
+- `CONTRIBUTING.md` - Cross-repo change guide
+- `install-hooks.sh` - Pre-commit hook bootstrap
+- `bootstrap.sh` - One-command sandbox setup
+- `standards/` - Z-ai-standards submodule (L1): 6 STD-* files, scripts/, docs/
+- `guard/` - Z-ai-guard submodule (L2): 17 rules, instructions/, scripts/, tools/
+- `skills/` - Z-ai-skills submodule (L3): 35 skill directories with INDEX.md
+
+## Cross-repo ID Graph
+
+The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/STD-META-001-v2.0.md` s10.2 for the full G-check catalogue.
 
 | Prefix | Layer | Lives in | Example |
 |--------|-------|----------|---------|
 | STD | L1 | standards/ | STD-META-001 |
 | RULE | L2 | guard/ | RULE-MONOLITH-002 |
-| PROC | L2 | guard/ | PROC-MONOLITH-SETUP |
-| TOOL | L2 | guard/ | TOOL-MONOLITH-VERIFY |
+| PROC | L2 | guard/ | PROC-SETUP-001 |
+| TOOL | L2 | guard/ | TOOL-VERIFY-001 |
 | ZAI | L3 | skills/ | ZAI-META-001 |
 
-**Related:** directed edges, must respect the layer matrix. Cross-layer STD→RULE is FORBIDDEN (use the reverse direction).
+Related: directed edges, must respect the layer matrix. Cross-layer STD to RULE is FORBIDDEN (use the reverse direction).
 
-**Aligned_with:** undirected edges, can cross layers (e.g. STD ↔ ZAI). Must be reciprocated.
+Aligned_with: undirected edges, can cross layers (e.g. STD to ZAI). Must be reciprocated.
 
-## CI behavior
+Current state (2026-06-17): 47 IDs extracted (6 STD + 17 RULE + 24 ZAI), 30 Related edges, 2 Aligned_with edges, 13/13 HARD PASS, 23 soft warnings (non-blocking).
 
-`.github/workflows/verify-id-graph.yml` triggers on:
-- Push to `main` in Z-ai-platform (covers submodule pointer bumps)
-- Pull request to `main`
-- Nightly at 03:00 UTC (= 06:00 Europe/Moscow)
-- Manual dispatch via GitHub Actions UI
+## CI Behavior
+
+`.github/workflows/verify-id-graph.yml` triggers on push to main, PRs, nightly at 03:00 UTC, and manual dispatch.
 
 The workflow:
 1. Checks out Z-ai-platform with `--recurse-submodules`
 2. Sets up Node.js 20
-3. Runs `node standards/scripts/verify-standards.js`
-4. Runs `node standards/scripts/verify-id-graph.js`
-5. Installs graphviz and runs `bash standards/scripts/graph-deps.sh`
-6. Uploads the rendered `id-graph.svg` + `id-graph.png` + `id-graph.dot` as a 30-day-retention artifact named **`id-graph`** (always — even on green builds, so the graph is available for review)
-7. On failure: uploads the verifier output as an artifact (7-day retention), posts a comment on the PR (if PR).
-
-The latest rendered graph can always be downloaded from the most recent successful workflow run on the Actions tab.
-
-## Pre-commit hook
+3. Runs `verify-standards.js` (per-repo invariants)
+4. Runs `verify-id-graph.js` (cross-repo graph)
+5. Installs graphviz and renders the ID graph
+6. Uploads id-graph.svg, id-graph.png, id-graph.dot as 30-day artifacts (even on green builds)
+7. On failure: uploads verifier output as artifact, posts PR comment
 
 `install-hooks.sh` configures `core.hooksPath = .githooks` so that pre-commit runs `verify-standards.js` automatically on any commit touching `.md` or `verify-*.js` files.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide on making changes without breaking the ID graph. When updating a submodule:
+
+```bash
+cd standards
+git checkout main
+git pull
+cd ..
+git add standards
+git commit -m "Bump standards: <reason>"
+git push
+```
 
 ## License
 
