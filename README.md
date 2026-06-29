@@ -8,9 +8,34 @@ This repository is the **orchestrator** for the Z-ai ecosystem. It pins
 the other three repositories (Z-ai-standards, Z-ai-guard, Z-ai-skills)
 as git submodules and runs the cross-repo ID-graph verifier in CI.
 
+
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square)](https://nodejs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+
+## Table of Contents
+
+- [Repository layout](#repository-layout)
+- [ID graph state (2026-06-17)](#id-graph-state-2026-06-17)
+- [Quick start](#quick-start)
+- [Clone with submodules (one command)](#clone-with-submodules-one-command)
+- [Verify the ID graph](#verify-the-id-graph)
+- [Install pre-commit hooks (optional, runs verifier on .md/.js changes)](#install-pre-commit-hooks-optional,-runs-verifier-on-mdjs-changes)
+- [Updating a submodule](#updating-a-submodule)
+- [Pull latest changes inside the submodule](#pull-latest-changes-inside-the-submodule)
+- [Bump the pointer in Z-ai-platform](#bump-the-pointer-in-z-ai-platform)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Architecture: 4 repositories](#architecture:-4-repositories)
+- [Cross-repo ID graph](#cross-repo-id-graph)
+- [CI behavior](#ci-behavior)
+- [Pre-commit hook](#pre-commit-hook)
+- [License](#license)
+
 ## Repository layout
 
-```
+```bash
 Z-ai-platform/                  (this repo, L0)
 ├── .gitmodules                 # Pins 3 submodules (clean HTTPS URLs, no PATs)
 ├── README.md                   # This file
@@ -44,7 +69,7 @@ Z-ai-platform/                  (this repo, L0)
 
 ## ID graph state (2026-06-17)
 
-```
+```bash
 IDs extracted:    47  (6 STD + 17 RULE + 24 ZAI)
 Related edges:    30
 Aligned_with:     2   (STD-SKILL-001 ↔ ZAI-META-001, ↔ ZAI-META-002)
@@ -84,33 +109,62 @@ After that, `Skill(command="skill-creator")` (and all 35+ of your toolkit skills
 ### First-time clone (for development / inspection)
 
 ```bash
-# Clone with submodules (one command)
+## Clone with submodules (one command)
 git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
 cd Z-ai-platform
 
-# Verify the ID graph
+## Verify the ID graph
 node standards/scripts/verify-id-graph.js
 
-# Install pre-commit hooks (optional, runs verifier on .md/.js changes)
+## Install pre-commit hooks (optional, runs verifier on .md/.js changes)
 ./install-hooks.sh
 ```
 
 ## Updating a submodule
 
 ```bash
-# Pull latest changes inside the submodule
+## Pull latest changes inside the submodule
 cd standards
 git checkout main
 git pull
 cd ..
 
-# Bump the pointer in Z-ai-platform
+## Bump the pointer in Z-ai-platform
 git add standards
 git commit -m "Bump standards: <reason>"
 git push
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+
+## Features
+
+- Feature 1 - description
+- Feature 2 - description
+
+## Tech Stack
+
+- **Tools** - Node.js
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+ or Bun
+
+### Installation
+
+```bash
+git clone https://github.com/stsgs1980/Z-ai-platform.git
+cd Z-ai-platform
+bun install
+```
+
+### Run
+
+```bash
+bun run dev
+```
 
 ## Architecture: 4 repositories
 
