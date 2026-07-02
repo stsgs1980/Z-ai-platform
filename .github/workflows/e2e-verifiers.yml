@@ -55,6 +55,7 @@ jobs:
         with:
           fetch-depth: 1
           submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v5

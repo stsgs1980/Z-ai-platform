@@ -4696,3 +4696,47 @@ Stage Summary:
 - Fork name decided: `Z.ai-Dense-graph` (not yet created — waiting for Phase 2 green light).
 - Token from upload/Zai push.txt was used for push, then stripped from remote URL. User advised to revoke the token in GitHub settings as safety net.
 - Next when user returns: open examples/hierarchy-live.html locally, test 3 layout modes + BFS path search, report any visual/UX issues. If satisfied -> green light Phase 2. If issues -> iterate on hierarchy-live.html.
+
+---
+Task ID: 1
+Agent: main
+Task: Fix Verify ID Graph CI workflow + align README to v3.0 template + update README_TEMPLATE.md
+
+Work Log:
+- Diagnosed CI root cause: `git submodule update --init --recursive` fails because GITHUB_TOKEN cannot access private submodule repos (Z-ai-standards, Z-ai-guard, Z-ai-skills)
+- Fixed both workflow files (verify-id-graph.yml, e2e-verifiers.yml) to use `actions/checkout@v4` with `submodules: recursive` and `ssh-key: ${{ secrets.DEPLOY_KEY }}` + `token: ${{ secrets.PAT_TOKEN }}` fallback
+- Removed manual submodule init steps (no longer needed with checkout's built-in submodule support)
+- Rewrote README.md to match STD-DOC-004 v3.0 template structure (Badges, TOC, Features, Tech Stack, Getting Started, Architecture, Project Structure, Scripts, CI Behavior, Agent Rules, License) — no Stack Signature per governance exclusion
+- Updated standards/templates/README_TEMPLATE.md from v2.3 to v3.0 (uploaded by user)
+- Fixed V10 check in verify-standards.js: section numbers changed in v3.0 (Section Map moved to §3, Template to §5, Checklist to §6)
+- Deleted leftover fix scripts: fix-code-block-langs.py, fix-std-violations.py, save-work.sh
+- Pushed standards submodule changes (V10 fix + template update)
+- Pushed main repo commit 80c27bb
+
+Stage Summary:
+- All 3 verifiers PASS locally: verify-standards.js (8/8), verify-id-graph.js (13/13), verify-skills.js (9/9)
+- ESLint: 0 errors
+- Snapshot compare: OK
+- CI requires user to add DEPLOY_KEY or PAT_TOKEN secret (manual step)
+- Commits pushed: b0a8202 (standards), 9534f25 + 80c27bb (platform)
+
+---
+Task ID: anti-monolith-audit
+Agent: main
+Task: Audit anti-monolith mechanism + fix violations in platform repo
+
+Work Log:
+- Read all 17 RULE-MONOLITH-* rules from guard/rules/INDEX.md
+- Read AGENT_RULES.md §1-§10 (onboarding, priority, forbidden actions)
+- Ran line-count audit: found fix-std-violations.py at 302 lines (hard limit 250) — DELETED
+- Identified 30+ violations in standards/ and skills/ submodules — NOT fixable from platform repo (RULE-MONOLITH-017: upstream write protection)
+- Identified gap: line-count-check.sh only checked .md files via verifiers, NOT source code (.js/.py/.sh) — added direct source code check (§4.18.1: 250 hard cap)
+- Verified: platform repo now has 0 source code violations after fix
+- All 3 verifiers still PASS: verify-standards.js, verify-id-graph.js, verify-skills.js
+- pre-commit hook PASS with all 5 phases
+
+Stage Summary:
+- Platform repo: 0 anti-monolith violations (was 1: fix-std-violations.py)
+- line-count-check.sh now covers source code files (fills PROC-LINECOUNT-004 Limitation #1)
+- Submodule violations (standards/ guard/ skills/) remain — require upstream owner action
+- CI workflows do NOT yet run line-count-check.sh — needs CI integration (separate task)

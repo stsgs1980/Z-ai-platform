@@ -60,6 +60,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Submodule status
         run: git submodule status
@@ -154,6 +155,16 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           exit $exit_code
+
+      # -------------------------------------------------------------------
+      # Anti-monolith enforcement (RULE-MONOLITH-012, PROC-LINECOUNT-004).
+      # Runs line-count-check.sh in --hard mode: fails CI if any platform
+      # source code file exceeds §4.18.1 hard cap (250 for .js/.py/.sh/.ts).
+      # Submodule files (standards/, guard/, skills/) are excluded per
+      # RULE-MONOLITH-017 (upstream write protection).
+      # -------------------------------------------------------------------
+      - name: Anti-monolith check (PROC-LINECOUNT-004, --hard)
+        run: bash guard/scripts/line-count-check.sh --hard
 
       # -------------------------------------------------------------------
       # Graph generation — runs ALWAYS (even if verifiers failed, so the
