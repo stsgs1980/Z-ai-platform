@@ -1,0 +1,64 @@
+# Release Please -- auto-generate CHANGELOG.md from Conventional Commits
+#
+# How it works:
+#   1. Every push to main with feat:/fix:/perf:/refactor: commits triggers this workflow
+#   2. Release-please opens (or updates) a "release PR" that accumulates changelog entries
+#   3. When you merge the release PR, release-please:
+#      - Creates a git tag (e.g. v1.2.0)
+#      - Creates a GitHub Release with auto-generated release notes
+#      - Updates CHANGELOG.md from commit messages
+#
+# Commit types -> changelog sections:
+#   feat:     -> "### Features"
+#   fix:      -> "### Bug Fixes"
+#   perf:     -> "### Performance Improvements"
+#   refactor: -> "### Code Refactoring" (no version bump)
+#   docs:     -> not included in changelog
+#   chore:    -> not included in changelog
+#   test:     -> not included in changelog
+#
+# Breaking changes:
+#   feat!: or fix!: with "!" triggers a MAJOR version bump
+#   "BREAKING CHANGE:" in commit body also triggers major bump
+
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Create release PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: node
+          package-name: z-ai-platform
+          # Include only conventional commit types that matter for changelog
+          # docs:/chore:/test: are excluded by default
+          changelog-types: |
+            [
+              { "type": "feat",     "section": "Features",              "hidden": false },
+              { "type": "fix",      "section": "Bug Fixes",             "hidden": false },
+              { "type": "perf",     "section": "Performance",           "hidden": false },
+              { "type": "refactor", "section": "Refactoring",           "hidden": false },
+              { "type": "revert",   "section": "Reverts",               "hidden": false },
+              { "type": "docs",     "section": "Documentation",         "hidden": true },
+              { "type": "chore",    "section": "Miscellaneous",         "hidden": true },
+              { "type": "test",     "section": "Tests",                 "hidden": true },
+              { "type": "build",    "section": "Build System",          "hidden": true },
+              { "type": "ci",       "section": "CI",                    "hidden": true }
+            ]
