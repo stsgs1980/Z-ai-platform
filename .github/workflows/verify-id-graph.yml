@@ -240,7 +240,14 @@ jobs:
         id: graph
         run: |
           mkdir -p docs/_graph
-          bash standards/scripts/graph-deps.sh --out=docs/_graph
+          bash -x standards/scripts/graph-deps.sh --out=docs/_graph 2>&1 || {
+            echo "graph-deps.sh FAILED, exit code $?"
+            echo "--- debugging ---"
+            which dot 2>&1 || echo "dot not found"
+            which node 2>&1 || echo "node not found"
+            ls -la docs/_graph/ 2>&1 || echo "docs/_graph/ does not exist"
+            exit 1
+          }
           ls -la docs/_graph/
 
       - name: Generate Mermaid process diagrams
