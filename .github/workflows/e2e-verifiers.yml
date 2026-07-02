@@ -50,12 +50,11 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: Checkout Z-ai-platform (with submodules via SSH)
+      - name: Checkout Z-ai-platform (with submodules)
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           submodules: recursive
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
