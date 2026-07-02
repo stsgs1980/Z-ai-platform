@@ -1,171 +1,99 @@
 # Z-ai-platform
 
-> Layer: L0 — Orchestrator
-> Last Updated: 2026-06-17
-> Status: **LIVE — 4-repo architecture deployed on GitHub**
+Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard, skills) and enforces cross-repo ID-graph integrity in CI.
 
-This repository is the **orchestrator** for the Z-ai ecosystem. It pins
-the other three repositories (Z-ai-standards, Z-ai-guard, Z-ai-skills)
-as git submodules and runs the cross-repo ID-graph verifier in CI.
+[![Status: LIVE](https://img.shields.io/badge/Status-LIVE-brightgreen.svg?style=flat-square)]()
+[![License: Private](https://img.shields.io/badge/License-Private-red.svg?style=flat-square)]()
+[![CI: Verify ID Graph](https://img.shields.io/github/actions/workflow/status/stsgs1980/Z-ai-platform/verify-id-graph.yml?style=flat-square&label=CI)](https://github.com/stsgs1980/Z-ai-platform/actions)
 
-## Repository layout
+## Table of Contents
 
-```text
-Z-ai-platform/                  (this repo, L0)
---- .gitmodules                 # Pins 3 submodules (clean HTTPS URLs, no PATs)
---- README.md                   # This file
---- CONTRIBUTING.md             # How to make changes without breaking the ID graph
---- install-hooks.sh            # Bootstrap pre-commit hooks
---- .github/
--   --- workflows/
--       --- verify-id-graph.yml # CI: nightly + push + PR verification
---- standards/                  # -> Z-ai-standards (submodule, L1)
--   --- standards/              #   6 STD-* files (4 stubs + 2 v1.0+)
--   --- docs/
--   --- scripts/
--   -   --- verify-standards.js #   Per-repo invariants (V01-V10)
--   -   --- verify-id-graph.js  #   Cross-repo ID graph (13/13 HARD PASS)
--   --- MIGRATIONS.md           #   M001 (ZAI-META-001 SUPERSEDED), M002 (RULE-MONOLITH)
---- guard/                      # -> Z-ai-guard (submodule, L2)
--   --- rules/
--   -   --- RULE-MONOLITH-001.md  .. RULE-MONOLITH-017.md   (17 rules)
--   -   --- INDEX.md            #   Rule catalog
--   --- instructions/
--   --- scripts/
--   --- tools/
---- skills/                     # -> Z-ai-skills (submodule, L3)
-    --- skills/                 #   35 skill dirs (24 with ZAI-* IDs, 11 without)
-    -   --- INDEX.md            #   Skill catalog by domain
-    -   --- skill-id-system/    #   ZAI-META-001
-    -   --- skill-creator/      #   ZAI-META-002
-    -   --- ...                 #   32 more skills
-    --- README.md
-```
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Scripts](#scripts)
+- [CI Behavior](#ci-behavior)
+- [Agent Rules](#agent-rules)
+- [License](#license)
 
-## ID graph state (2026-06-17)
+## Features
 
-```text
-IDs extracted:    47  (6 STD + 17 RULE + 24 ZAI)
-Related edges:    30
-Aligned_with:     2   (STD-SKILL-001 ↔ ZAI-META-001, ↔ ZAI-META-002)
-Hard checks:      13/13 PASS
-Soft warnings:    23  (W03 stub dead standard + W04 rogue-skill-with-ID x22, non-blocking)
-```
+- **4-repo architecture** — platform (L0), standards (L1), guard (L2), skills (L3) evolve independently
+- **Cross-repo ID graph** — 65 IDs with 125 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
+- **Nightly + push CI** — `verify-standards.js`, `verify-id-graph.js`, `verify-skills.js`, and snapshot compare run automatically
+- **Pre-commit hooks** — local verification on `.md` and `verify-*.js` changes via `install-hooks.sh`
+- **Bootstrap script** — one command restores all 35+ custom skills into any fresh Z.ai sandbox session
 
-The 13/13 HARD PASS is enforced by:
-- **Locally**: `node standards/scripts/verify-id-graph.js`
-- **On CI**: `.github/workflows/verify-id-graph.yml` runs on every push, PR, and nightly at 03:00 UTC.
+## Tech Stack
 
-## Quick start
+- **Language** - JavaScript (Node.js 20, ESLint 9 flat config)
+- **CI** - GitHub Actions (verify-id-graph.yml, e2e-verifiers.yml)
+- **Submodules** - git submodules for standards, guard, skills
+- **Verification** - Custom Node.js scripts (verify-standards.js, verify-id-graph.js, verify-skills.js)
 
-### In a fresh Z.ai sandbox session (your daily workflow)
+## Getting Started
 
-When you start a new sandbox session and want your custom skills back, run **one command**:
+### Prerequisites
+
+- Node.js 20+
+- Git with submodule support
+- (For CI) SSH deploy key with read access to all three submodule repos
+
+### Installation
 
 ```bash
+git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
+cd Z-ai-platform
+```
+
+### Run
+
+```bash
+# Verify the ID graph locally
+node standards/scripts/verify-standards.js
+node standards/scripts/verify-id-graph.js
+
+# Install pre-commit hooks (optional)
+./install-hooks.sh
+
+# Bootstrap skills into a Z.ai sandbox
 bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
 ```
 
-This will:
-1. Clone `Z-ai-platform` (with all submodules) into `/home/z/my-project/Z-ai-platform/` if not already there.
-2. `git pull --recurse-submodules` if it is already there (gets latest skills).
-3. Symlink every skill from `Z-ai-platform/skills/skills/*` into `/home/z/my-project/skills/` so the sandbox can find them.
-4. Back up any sandbox-installed skill with the same name to `<name>.sandbox-backup/` (so your toolkit version always wins).
-5. Print a list of available custom skills at the end.
+## Architecture
 
-After that, `Skill(command="skill-creator")` (and all 35+ of your toolkit skills) will load from your GitHub repo.
+The platform uses a 4-layer repository architecture where each layer can evolve independently. Standards can be amended without forcing rule or skill updates; guard rules ship on their own cadence; skills are consumed standalone by the sandbox runtime. The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/META-001-id-registry.md` for the full ID catalogue and layer matrix.
 
-> **If `curl` is unavailable in the sandbox**, run it manually in two steps:
-> ```bash
-> git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git /home/z/my-project/Z-ai-platform
-> bash /home/z/my-project/Z-ai-platform/bootstrap.sh
-> ```
+## Project Structure
 
-### First-time clone (for development / inspection)
+- `standards/` - Z-ai-standards submodule (L1): STD-* files, verifier scripts, snapshots
+- `guard/` - Z-ai-guard submodule (L2): RULE-MONOLITH-* rules, procedures, tools
+- `skills/` - Z-ai-skills submodule (L3): 35 skill directories with ZAI-* IDs
+- `.github/workflows/` - CI workflows (verify-id-graph.yml, e2e-verifiers.yml)
+- `eslint-rules/` - Custom ESLint rules for STD-DOC-003 compliance
+- `eslint-processors/` - Custom markdown processor for code-snippet linting
+- `docs/` - Generated ID-graph diagrams and session documentation
 
-```bash
-# Clone with submodules (one command)
-git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
-cd Z-ai-platform
+## Scripts
 
-# Verify the ID graph
-node standards/scripts/verify-id-graph.js
+| Script | Description |
+|--------|-------------|
+| `node standards/scripts/verify-standards.js` | Content-level invariants (V04-V11) |
+| `node standards/scripts/verify-id-graph.js` | Cross-repo ID-graph invariants (G01-G15) |
+| `node standards/scripts/verify-skills.js --strict` | Skills-side format verifier (S01-S09) |
+| `bash standards/scripts/graph-deps.sh` | Render ID dependency graph (dot/svg/png) |
+| `./install-hooks.sh` | Bootstrap pre-commit hooks for local verification |
+| `./bootstrap.sh` | One-command skill restore for fresh sandbox sessions |
 
-# Install pre-commit hooks (optional, runs verifier on .md/.js changes)
-./install-hooks.sh
-```
+## CI Behavior
 
-## Updating a submodule
+The `verify-id-graph.yml` workflow triggers on push to `main`, pull requests, nightly at 03:00 UTC, and manual dispatch. It runs four verification steps in sequence: `verify-standards.js`, `verify-id-graph.js`, snapshot compare against the committed baseline, and `verify-skills.js --strict`. All must pass for the workflow to succeed. On failure, verifier output is uploaded as an artifact (7-day retention) and a comment is posted on the PR. The ID graph (dot/svg/png) is always uploaded as a 30-day artifact for review.
 
-```bash
-# Pull latest changes inside the submodule
-cd standards
-git checkout main
-git pull
-cd ..
+## Agent Rules
 
-# Bump the pointer in Z-ai-platform
-git add standards
-git commit -m "Bump standards: <reason>"
-git push
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
-
-## Architecture: 4 repositories
-
-| Repo | Layer | Purpose | Contents |
-|------|-------|---------|----------|
-| **Z-ai-platform** | L0 | Orchestrator | `.gitmodules`, CI, hooks |
-| **Z-ai-standards** | L1 | Standards | 6 STD-* files (4 stubs + 2 v1.0+), verifier scripts |
-| **Z-ai-guard** | L2 | Rules | 17 RULE-MONOLITH-* rules + INDEX |
-| **Z-ai-skills** | L3 | Skills | 35 skill dirs (24 with ZAI-* IDs) |
-
-The 4-repo split exists so each layer can evolve independently:
-- Standards can be amended without forcing rule/skill updates.
-- Guard can ship rule changes on its own cadence.
-- Skills can be consumed standalone by the sandbox runtime.
-
-## Cross-repo ID graph
-
-The ID graph (G01-G15) enforces that changes in one layer do not silently
-break references in another. See `standards/standards/STD-META-001-v2.0.md`
-§10.2 for the full G-check catalogue.
-
-| Prefix | Layer | Lives in | Example |
-|--------|-------|----------|---------|
-| STD | L1 | standards/ | STD-META-001 |
-| RULE | L2 | guard/ | RULE-MONOLITH-002 |
-| PROC | L2 | guard/ | PROC-MONOLITH-SETUP |
-| TOOL | L2 | guard/ | TOOL-MONOLITH-VERIFY |
-| ZAI | L3 | skills/ | ZAI-META-001 |
-
-**Related:** directed edges, must respect the layer matrix. Cross-layer STD->RULE is FORBIDDEN (use the reverse direction).
-
-**Aligned_with:** undirected edges, can cross layers (e.g. STD ↔ ZAI). Must be reciprocated.
-
-## CI behavior
-
-`.github/workflows/verify-id-graph.yml` triggers on:
-- Push to `main` in Z-ai-platform (covers submodule pointer bumps)
-- Pull request to `main`
-- Nightly at 03:00 UTC (= 06:00 Europe/Moscow)
-- Manual dispatch via GitHub Actions UI
-
-The workflow:
-1. Checks out Z-ai-platform with `--recurse-submodules`
-2. Sets up Node.js 20
-3. Runs `node standards/scripts/verify-standards.js`
-4. Runs `node standards/scripts/verify-id-graph.js`
-5. Installs graphviz and runs `bash standards/scripts/graph-deps.sh`
-6. Uploads the rendered `id-graph.svg` + `id-graph.png` + `id-graph.dot` as a 30-day-retention artifact named **`id-graph`** (always — even on green builds, so the graph is available for review)
-7. On failure: uploads the verifier output as an artifact (7-day retention), posts a comment on the PR (if PR).
-
-The latest rendered graph can always be downloaded from the most recent successful workflow run on the Actions tab.
-
-## Pre-commit hook
-
-`install-hooks.sh` configures `core.hooksPath = .githooks` so that pre-commit runs `verify-standards.js` automatically on any commit touching `.md` or `verify-*.js` files.
+Any AI agent working on this project MUST read and follow `AGENT_RULES.md` before performing any operations.
 
 ## License
 
