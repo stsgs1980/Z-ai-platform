@@ -4,4 +4,7 @@
 # PROC-COCHANGE-003: code + docs sync (RULE-MONOLITH-010)
 bash guard/scripts/co-change-check.sh --hard
 
+# PROC-WORKLOG-005: worklog entry required for code changes (RULE-MONOLITH-002)
+bash guard/scripts/worklog-check.sh --hard
+
 npx lint-staged
