@@ -75,7 +75,7 @@ push commits that include changes to `.github/workflows/*`. GitHub
 requires a separate `Workflows: Read and write` permission.
 
 **Symptom:** `git push` returns HTTP 403 with a message like:
-```
+```text
 refusing to allow an OAuth App to create or update workflow
 `.github/workflows/verify-id-graph.yml` without `workflows` scope
 ```
@@ -99,7 +99,7 @@ workflow cannot be triggered, but its registration persists.
 
 **Symptom:** A `_permission-test.yml` workflow (created during PAT
 debugging) was deleted in commit `53b52b7`. The Actions UI continued
-to list it under "All workflows" → "_permission-test.yml" with
+to list it under "All workflows" -> "_permission-test.yml" with
 `state=active` per the API.
 
 **Workaround:** None needed. The cached registration is harmless. New
@@ -235,7 +235,7 @@ The skills submodule is registered at path `skills/` (matching the
 submodule name). Inside the submodule, the skill catalog root is also
 named `skills/`. So the full path from the orchestrator root to a
 SKILL.md file is:
-```
+```text
 skills/skills/<skill-name>/SKILL.md
 ```
 
@@ -276,7 +276,7 @@ including cross-layer STD↔ZAI pairs. The fix (commit 447725b) made G15
 check Related only for same-layer Aligned_with pairs. Cross-layer
 Aligned_with is allowed standalone per STD-META-001 §6.2.
 
-### 4.4. STD→RULE is forbidden, RULE→STD is allowed
+### 4.4. STD->RULE is forbidden, RULE->STD is allowed
 
 **Discovered:** 2026-06-17, during G04/G07 fix
 
@@ -445,7 +445,7 @@ decisions. See `DECISIONS_LOG.md` for the formal version.
 | Path filters miss submodule bumps | D-009: Push trigger without path filter |
 | Two submodule bumps in one commit breaks bisect | D-002: Atomic per-submodule bumps |
 | Workflow file push needs separate scope | D-010: Workflow lives in orchestrator; PAT needs Workflows scope |
-| STD→RULE edges create cycles in the dependency graph | D-005: STD→STD only; RULE→STD allowed |
+| STD->RULE edges create cycles in the dependency graph | D-005: STD->STD only; RULE->STD allowed |
 | Aligned_with without Related creates "alignment without dependency" | D-006: G15 enforces Related backing |
 | Compatibility mismatches between skills break runtime | D-007: G14 enforces compatibility DAG |
 | Hard checks block CI, soft warnings indicate debt | D-008: Two-tier strictness |
@@ -643,7 +643,7 @@ It sits between two existing layers:
 - **§1-5** = topic-organized operational gotchas (GitHub Actions, PAT,
   submodules, ID graph, Unicode). Each entry is a self-contained surprise
   tied to a specific tool or subsystem.
-- **§8** = bridge table "Lesson → Decision". Each row is a one-line
+- **§8** = bridge table "Lesson -> Decision". Each row is a one-line
   summary of a lesson that has already been promoted to a formal D-NNN
   entry in `DECISIONS_LOG.md`.
 
@@ -656,12 +656,12 @@ comparable, and ready to promote when the pattern crystallises.
 
 The promote path is:
 
-```
+```text
 §1-5 (topic gotcha)
-  → §12 (structured registry entry, status DRAFT or RECOGNIZED)
-    → §8 (bridge row, when promoted)
-      → D-NNN in DECISIONS_LOG.md (formal ADR)
-        → optional: RULE-NNN in guard/ (normative enforcer)
+  -> §12 (structured registry entry, status DRAFT or RECOGNIZED)
+    -> §8 (bridge row, when promoted)
+      -> D-NNN in DECISIONS_LOG.md (formal ADR)
+        -> optional: RULE-NNN in guard/ (normative enforcer)
 ```
 
 ### 12.2. Entry format
@@ -765,7 +765,7 @@ LESSON-001: investigate before fixing, root-cause over symptom.
 application, no separate RULE-NNN needed unless the principle
 generalises beyond fs-mount scenarios)
 
-### 12.6. LESSON-003: promote soft warning to hard invariant (W11 → V11)
+### 12.6. LESSON-003: promote soft warning to hard invariant (W11 -> V11)
 
 - **ID:** LESSON-2026-06-21-003
 - **Status:** RECOGNIZED (corroborates LESSON-001 — same O(1)/O(N) principle
@@ -794,7 +794,7 @@ file could appear without resistance.
 - **Applies-to:** Any SOFT warning that has fired ≥2 times in project
 history and whose threshold has a clear "right answer" (split the file,
 extract a sub-module, etc.). Candidate future promotions: W12 (§XA Known
-Issues missing) → V12 if pattern recurs; W14 (excessive OPEN issues) → V14
+Issues missing) -> V12 if pattern recurs; W14 (excessive OPEN issues) -> V14
 if the open-issue backlog ever crosses the threshold twice in a quarter.
 W13 was NOT promoted because it was already root-cause-fixed (LESSON-001)
 — it cannot recur structurally, so a V13 hard check would add no value.
@@ -805,14 +805,14 @@ DECISIONS_LOG are append-only journals that grow by design); `scripts/*.js`
 (project landing page, not a standard). Threshold = 1000 lines (matches
 W11 soft cap exactly — no threshold inflation).
 - **Smoke test:** Created `templates/_v11_smoketest.md` with 1004 lines,
-ran `verify-standards.js` → V11 FAIL (7/8). Removed file → 8/8 PASS.
+ran `verify-standards.js` -> V11 FAIL (7/8). Removed file -> 8/8 PASS.
 Negative path verified.
 - **Source:** Worklog Task ID `v11-hard-cap-promotion-2026-06-21`. User
 chose option B over option A after I framed both: «A = O(N) cosmetic
 split of 2 skills files; B = O(1) encoded prevention». Decision aligned
 with LESSON-001 principle already encoded in §12.4.
 - **Promoted-to:** (empty; the principle is now self-documenting via V11
-itself — any future SOFT→HARD promotion follows the same recipe)
+itself — any future SOFT->HARD promotion follows the same recipe)
 
 ### 12.7. LESSON-004: stash before reset — `git reset --hard` is destructive on uncommitted work
 
@@ -880,7 +880,7 @@ hours of reconstruction if there were uncommitted edits.
 - **Status:** RECOGNIZED (extends LESSON-004 from manual hygiene to
   automated enforcement; same principle family)
 - **Trigger:** CI/CD audit of the merged standards document observed
-  that LESSON-004's manual recipe (`stash → reset → pop`) depends on
+  that LESSON-004's manual recipe (`stash -> reset -> pop`) depends on
   operator memory and discipline. The same audit raised a parallel
   concern: any script in the repo (bootstrap.sh, run-contract.sh,
   future CI workflows) that performs destructive filesystem or git
@@ -939,7 +939,7 @@ hours of reconstruction if there were uncommitted edits.
      runs `rm -rf` or `git reset --hard` against the checked-out
      tree.
   4. The `commit-work` CONTRACT.md guard check G0 (proposed in
-     LESSON-004 §12.7) — the `stash → reset → pop` recipe is the
+     LESSON-004 §12.7) — the `stash -> reset -> pop` recipe is the
      manual version of Layer 1; an automated Layer 1 in the
      contract script would enforce it without operator memory.
 - **What this is NOT:** This is not a `$PWD`-prefix check (the
@@ -961,7 +961,7 @@ hours of reconstruction if there were uncommitted edits.
 - **Promoted-to:** (empty; candidate for inclusion in
   `skills/skills/commit-work/CONTRACT.md` as guard check G0 when
   Phase C generalises the contract template. Layer 1 of G0 would
-  subsume the manual `stash → reset → pop` recipe from LESSON-004,
+  subsume the manual `stash -> reset -> pop` recipe from LESSON-004,
   making the safety automatic rather than discipline-dependent.)
 
 ---
@@ -990,7 +990,7 @@ The audit uses Phase A1's catalog findings (see CATALOG.md §5 — only
 | 3 | standards/ as STD-NNN | **Partial** — pre-commit hook runs `verify-standards.js` + `verify-id-graph.js` at commit boundary. This IS runtime (vs only-on-CI). No real-time linter (no eslint integration despite STD-DOC-002 existing). | **ACCEPTABLE FOR NOW** (pre-commit is strong; real-time linter is Phase D work) |
 | 4 | worklog.md as append-only log | **None** — 3554-line append-only markdown. No ChromaDB instance. `memory-store`/`session-log`/`session-experience` skills describe the target architecture but no runtime wires it up. | **BLOCKING** for autonomous agents |
 | 5 | DECISIONS_LOG D-NNN | **None** — 1157-line append-only markdown. No retrieval-by-context mechanism. No "trigger condition" on open questions (O-NNN). | **ACCEPTABLE FOR NOW** at current scale (~30 items); becomes blocking at 100+ decisions |
-| 6 | SESSION_NOTES §12 LESSON | **None** — 3 LESSON entries in markdown. LESSON-003 → V11 promotion was done MANUALLY by user+agent. No automatic "pattern fired N times, promote to invariant". No reverse feedback (V11 blocking doesn't generate a new lesson). | **BLOCKING** for autonomous agents (the most sophisticated gap to close) |
+| 6 | SESSION_NOTES §12 LESSON | **None** — 3 LESSON entries in markdown. LESSON-003 -> V11 promotion was done MANUALLY by user+agent. No automatic "pattern fired N times, promote to invariant". No reverse feedback (V11 blocking doesn't generate a new lesson). | **BLOCKING** for autonomous agents (the most sophisticated gap to close) |
 
 **Score: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE.**
 
@@ -1135,8 +1135,8 @@ concretely.
 #### Row 6 — SESSION_NOTES §12 feedback loop
 
 **Evidence from §12 of this file:** 3 LESSON entries (LESSON-001/002/
-003). Each follows the pattern: Problem → Wrong fix → Root-cause fix
-→ Pattern → Cross-references → Promoted-to. The pattern across all 3
+003). Each follows the pattern: Problem -> Wrong fix -> Root-cause fix
+-> Pattern -> Cross-references -> Promoted-to. The pattern across all 3
 is "root-cause fix scales as O(1), symptom/whitelist fix scales as
 O(N)" — three corroborations in three domains (W13 stripCh,
 core.fileMode, V11 promotion).
@@ -1147,7 +1147,7 @@ sophisticated gap. Three missing pieces:
    N times" automatically. LESSON-001/002/003 were all recognized by
    the human+agent pair, not by a runtime.
 2. **Promotion.** No mechanism that promotes a lesson into a runtime
-   rule. LESSON-003 → V11 was done manually (user asked "is the system
+   rule. LESSON-003 -> V11 was done manually (user asked "is the system
    really working?", agent diagnosed W11=0 as fragile, agent proposed
    V11, user approved, agent implemented, agent ran smoke test).
 3. **Reverse feedback.** V11 blocking a commit doesn't generate a new
@@ -1227,7 +1227,7 @@ the cascade. They should be raised as new open questions:
 | 2026-06-18 | Added §9 (sandbox persistence model from "Про скилы" package), §10 (final keep/drop decision for Z.ai Sandbox Documentation), §11 (ready-to-use Unicode regex filters with implementation pointer). Closes O-006, O-007; introduces O-008..O-014 in DECISIONS_LOG.md. |
 | 2026-06-21 | Added §12 (Structured lessons registry) with LESSON-001 (W13 stripCh root-cause fix vs whitelist). Fills the layer between §1-5 topic gotchas and §8 bridge table to D-NNN. T3 = ChromaDB-via-toolkit plan explicitly deprecated per user guidance (toolkit may be killed/reworked); §12 stays portable markdown. |
 | 2026-06-21 | Added §12.5 LESSON-002 (core.fileMode=false beats repeated `git checkout .` for sandbox fs-mount mode-bit noise). Corroborates LESSON-001: same principle (root-cause fix O(1) beats symptom cleanup O(N)) in a different domain. Fix baked into bootstrap.sh Step 2 for durability across session restarts. |
-| 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file → FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
-| 2026-06-21 | Added §13 (Phase A2 governance/execution gap audit). O-017 Phase A2 deliverable. Audits the 6-row gap table from O-017 context against actual repo state. Result: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade ordering (Phase B→C→D→E→F). Surfaces 2 new open question candidates: O-019 (guard/ execution contract, parallel to skills contract) and O-020 (feedback-loop mechanism, long-term). Companion to `skills/docs/CATALOG.md` (Phase A1 deliverable). |
-| 2026-06-21 | Added §12.7 LESSON-004 (`git reset --hard` wipes uncommitted worktree; stash before reset). Triggered twice in Phase B smoke testing. Distinct from LESSON-001 family (operational hygiene, not O(1)/O(N) scaling). Operational recipe: `git stash push -u -m "pre-reset-safety"` → `git reset --hard HEAD~1` → `git stash pop`. Candidate for promotion into commit-work CONTRACT.md as guard check G0 in Phase C. |
+| 2026-06-21 | Added §12.6 LESSON-003 (promote W11 soft warning to V11 hard invariant). Corroborates LESSON-001 in a third domain (verifier design): O(1) encoded check beats O(N) manual review. V11 implemented in `verify-standards.js` (8/8 PASS, smoke-tested with 1004-line file -> FAIL as expected). Closes the "W11=0 fragile" gap diagnosed when user asked «это система работает?» after the pilot split reached 13/13 PASS, 0 warnings. |
+| 2026-06-21 | Added §13 (Phase A2 governance/execution gap audit). O-017 Phase A2 deliverable. Audits the 6-row gap table from O-017 context against actual repo state. Result: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE. Confirms cascade ordering (Phase B->C->D->E->F). Surfaces 2 new open question candidates: O-019 (guard/ execution contract, parallel to skills contract) and O-020 (feedback-loop mechanism, long-term). Companion to `skills/docs/CATALOG.md` (Phase A1 deliverable). |
+| 2026-06-21 | Added §12.7 LESSON-004 (`git reset --hard` wipes uncommitted worktree; stash before reset). Triggered twice in Phase B smoke testing. Distinct from LESSON-001 family (operational hygiene, not O(1)/O(N) scaling). Operational recipe: `git stash push -u -m "pre-reset-safety"` -> `git reset --hard HEAD~1` -> `git stash pop`. Candidate for promotion into commit-work CONTRACT.md as guard check G0 in Phase C. |
 | 2026-06-21 | Added §12.8 LESSON-004a (automated two-layer guard for script-level destructive ops). Extends LESSON-004 from manual hygiene to automated enforcement. Layer 1: refuse if uncommitted changes exist (root-cause guard, path-independent). Layer 2: require explicit `--force` flag (defense in depth). Refines the CI/CD audit's `$PWD`-prefix proposal, which is fragile across clone paths and sandbox configurations. Candidate for `commit-work` CONTRACT.md G0 when Phase C generalises the contract template. |

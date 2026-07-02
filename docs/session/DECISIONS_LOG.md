@@ -16,7 +16,7 @@
 - [D-002] Atomic per-submodule pointer bumps — DECIDED
 - [D-003] Clean HTTPS URLs in .gitmodules (no embedded PATs) — DECIDED
 - [D-004] ID graph verifier as the cross-repo enforcement mechanism — DECIDED
-- [D-005] `Related:` DAG direction rules (STD→STD only, RULE→anything) — DECIDED
+- [D-005] `Related:` DAG direction rules (STD->STD only, RULE->anything) — DECIDED
 - [D-006] `Aligned_with:` as undirected peer edge (may cross layers) — DECIDED
 - [D-007] Compatibility DAG for ZAI skills (both/sandbox/ade) — DECIDED
 - [D-008] Soft vs hard warnings (W-checks do not block CI) — DECIDED
@@ -88,18 +88,18 @@ same commit, but two submodule pointers in one commit is forbidden.
 **Formalized in:** `Z-ai-standards/standards/STD-ARCH-001-v1.0.md` §8.3.
 
 **Violation example (forbidden):**
-```
+```text
 commit abc1234
     Bump standards and guard (combined release)
 ```
 
 **Compliant example:**
-```
+```text
 commit abc1234
-    Bump standards: 447725b → 85df73b (add STD-ARCH-001 v1.0)
+    Bump standards: 447725b -> 85df73b (add STD-ARCH-001 v1.0)
 
 commit def5678
-    Bump guard: 676bdbe → 97d2911 (add Related: STD-ARCH-001)
+    Bump guard: 676bdbe -> 97d2911 (add Related: STD-ARCH-001)
 ```
 
 ---
@@ -169,7 +169,7 @@ are governed by a layer matrix:
 | TOOL | yes | yes | no | yes | no |
 | ZAI | yes | yes | no | yes | yes |
 
-**Key invariant:** STD → STD only. Standards are self-contained; they
+**Key invariant:** STD -> STD only. Standards are self-contained; they
 describe what is true but do not prescribe behavior, invoke procedures,
 or call tools/skills.
 
@@ -281,7 +281,7 @@ any push that includes workflow file changes.
 
 The original `IMPLEMENTATION_ORDER.md` (in
 `upload/standards-v2/standards/`, 14.2 KB) declares:
-```
+```text
 ID: STD-ARCH-001
 Version: 2.2
 Title: Implementation Order
@@ -290,7 +290,7 @@ Scope: Implementation sequence for all project documents (6-step Path A
 ```
 
 In this session, I authored a new standard with the same ID:
-```
+```text
 ID: STD-ARCH-001
 Version: 1.0.0
 Title: Architecture & Repo Layout
@@ -307,8 +307,8 @@ topology**. They are complementary, not duplicates.
 | Option | Action | Pros | Cons |
 |---|---|---|---|
 | (a) | Rename my v1.0 to `STD-ARCH-002` (Repo Topology); give `STD-ARCH-001` back to IMPLEMENTATION_ORDER | Preserves upstream ID assignment; minimal disruption to upload/ sources | My v1.0 was already pushed and referenced by RULE-MONOLITH-016/017 — those `Related:` edges need updating |
-| (b) | Make IMPLEMENTATION_ORDER → `STD-META-002` (it is meta-level: deployment sequence for standards themselves) | Cleanly separates topology (ARCH) from deployment (META) | Diverges from upstream ID; future imports of upload/ docs need a mapping table |
-| (c) | Make IMPLEMENTATION_ORDER → `STD-PROC-001` (new domain for deployment procedures) | Most semantically accurate (it is a procedure, not a standard) | Requires adding `PROC` domain to STD- prefix (currently PROC- is L2 only, in Z-ai-guard) |
+| (b) | Make IMPLEMENTATION_ORDER -> `STD-META-002` (it is meta-level: deployment sequence for standards themselves) | Cleanly separates topology (ARCH) from deployment (META) | Diverges from upstream ID; future imports of upload/ docs need a mapping table |
+| (c) | Make IMPLEMENTATION_ORDER -> `STD-PROC-001` (new domain for deployment procedures) | Most semantically accurate (it is a procedure, not a standard) | Requires adding `PROC` domain to STD- prefix (currently PROC- is L2 only, in Z-ai-guard) |
 | (d) | Keep my v1.0 as `STD-ARCH-001`; import IMPLEMENTATION_ORDER as an appendix to it | No ID changes | Mixes two concerns in one file; loses the 6-step sequence as a first-class artifact |
 
 **Recommendation:** Option (a). Renaming my v1.0 to `STD-ARCH-002` is
@@ -351,26 +351,26 @@ required:
    PR as the import, or in a follow-up?
 
 4. **New IDs needed:** Some upload/ files have no current ID assignment:
-   - `CODE_EXAMPLES_GUIDE.md` → `STD-DOC-005`
-   - `DESIGN_SYSTEM_STANDARD.md` → `STD-DESIGN-001`
-   - `FRONTEND_STANDARD.md` → `STD-FE-001`
-   - `GITHUB_SANDBOX_STANDARD.md` → `STD-GIT-002`
-   - `GITHUB_STANDARD.md` → `STD-GIT-001`
-   - `ORCHESTRATION_STANDARD.md` → `STD-AGENT-002`
-   - `README_TEMPLATE.md` → `STD-DOC-004`
-   - `SECURITY_EXTENDED_STANDARD.md` → `STD-SEC-002`
-   - `SECURITY_STANDARD.md` → `STD-SEC-001`
-   - `SUBAGENT_STANDARD.md` → `STD-AGENT-001`
-   - `TESTING_STANDARD.md` → `STD-TEST-001`
-   - `WCAG_2.1_AA_STANDARD.md` → `STD-A11Y-001`
-   - `ZAI_INTEGRATION_STANDARD.md` → `STD-ENV-002` (already a stub)
-   - `ERROR_HANDLING_STANDARD.md` → `STD-ERR-001`
-   - `ERROR_RECOVERY_STANDARD.md` → `STD-ERR-002`
-   - `REPRODUCIBILITY-STANDARD.md` → `STD-ENV-001` (already a stub)
-   - `STANDARD_ID_SYSTEM.md` → already imported as `STD-META-001 v2.0`
-   - `MARKDOWN_STANDARD.md` → `STD-DOC-002` (already a stub)
-   - `UNICODE_POLICY.md` → `STD-DOC-003` (new ID, not in our registry)
-   - `IMPLEMENTATION_ORDER.md` → see O-001
+   - `CODE_EXAMPLES_GUIDE.md` -> `STD-DOC-005`
+   - `DESIGN_SYSTEM_STANDARD.md` -> `STD-DESIGN-001`
+   - `FRONTEND_STANDARD.md` -> `STD-FE-001`
+   - `GITHUB_SANDBOX_STANDARD.md` -> `STD-GIT-002`
+   - `GITHUB_STANDARD.md` -> `STD-GIT-001`
+   - `ORCHESTRATION_STANDARD.md` -> `STD-AGENT-002`
+   - `README_TEMPLATE.md` -> `STD-DOC-004`
+   - `SECURITY_EXTENDED_STANDARD.md` -> `STD-SEC-002`
+   - `SECURITY_STANDARD.md` -> `STD-SEC-001`
+   - `SUBAGENT_STANDARD.md` -> `STD-AGENT-001`
+   - `TESTING_STANDARD.md` -> `STD-TEST-001`
+   - `WCAG_2.1_AA_STANDARD.md` -> `STD-A11Y-001`
+   - `ZAI_INTEGRATION_STANDARD.md` -> `STD-ENV-002` (already a stub)
+   - `ERROR_HANDLING_STANDARD.md` -> `STD-ERR-001`
+   - `ERROR_RECOVERY_STANDARD.md` -> `STD-ERR-002`
+   - `REPRODUCIBILITY-STANDARD.md` -> `STD-ENV-001` (already a stub)
+   - `STANDARD_ID_SYSTEM.md` -> already imported as `STD-META-001 v2.0`
+   - `MARKDOWN_STANDARD.md` -> `STD-DOC-002` (already a stub)
+   - `UNICODE_POLICY.md` -> `STD-DOC-003` (new ID, not in our registry)
+   - `IMPLEMENTATION_ORDER.md` -> see O-001
 
 5. **Registry update:** `STD-META-001-v2.0.md` §4 has a partial
    registry. After import, it must list all 20+ standards.
@@ -421,9 +421,9 @@ Promoting to hard immediately would block all CI until cleanup is done.
 
 **Strategy options:**
 1. Write `scripts/fix-unicode-compliance.js` to auto-fix:
-   - Replace `—` (em dash, U+2014) → `--` in headings/tables/code
+   - Replace `—` (em dash, U+2014) -> `--` in headings/tables/code
      (preserve in prose per STD-DOC-002 §4.1)
-   - Replace `–` (en dash, U+2013) → `-`
+   - Replace `–` (en dash, U+2013) -> `-`
    - Delete emoji
    - Replace smart quotes with straight quotes
 2. Manual review for box-drawing tree diagrams (see O-005)
@@ -443,7 +443,7 @@ waivers.
 **Date raised:** 2026-06-17
 **Status:** OPEN
 
-`README.md` uses 123 box-drawing characters (`├`, `└`, `│`, `─`) for
+`README.md` uses 123 box-drawing characters (`-`, `-`, `-`, `-`) for
 the repository layout tree. This violates UNICODE_POLICY §4.2 (table
 pseudographics, [W] Warning level).
 
@@ -459,13 +459,13 @@ pseudographics, [W] Warning level).
 fully Unicode-compliant, and require no policy waiver.
 
 **Example transformation:**
-```
+```text
 Before:                  After:
 Z-ai-platform/           Z-ai-platform/
-├── .gitmodules          +-- .gitmodules
-├── README.md            +-- README.md
-└── standards/           \-- standards/
-    └── STD-META-001.md      \-- STD-META-001.md
+--- .gitmodules          +-- .gitmodules
+--- README.md            +-- README.md
+--- standards/           \-- standards/
+    --- STD-META-001.md      \-- STD-META-001.md
 ```
 
 ---
@@ -1012,7 +1012,7 @@ Phase A confirmed 3 unanticipated findings that affect Phase B:
    `parse_frontmatter()` to handle folded/literal scalars, added
    `version: 1.0` to each of the 5 skills' frontmatter (the only
    real gap). Result: classification changed from 30 active / 5 stale
-   / 1 dup → 35 active / 0 stale / 1 dup. Honest postmortem in
+   / 1 dup -> 35 active / 0 stale / 1 dup. Honest postmortem in
    `skills/docs/CATALOG.md` §10. This item is now **CLOSED — false
    positive retracted**. The 4 remaining `v?` skills (gepetto,
    phi-layout, reducing-entropy, session-handoff) are legitimate
@@ -1021,14 +1021,14 @@ Phase A confirmed 3 unanticipated findings that affect Phase B:
 **Status of cascade phases (as of 2026-06-21):**
 
 - [x] **Phase A (discovery):** COMPLETE.
-  - [x] A1: Catalog 36 skills → `skills/docs/CATALOG.md`
-  - [x] A2: Audit governance/execution gap → SESSION_NOTES §13
+  - [x] A1: Catalog 36 skills -> `skills/docs/CATALOG.md`
+  - [x] A2: Audit governance/execution gap -> SESSION_NOTES §13
 - [x] **Phase B (pilot):** COMPLETE.
-  - [x] B1: Design commit-work execution contract → `skills/skills/commit-work/CONTRACT.md` (368 lines, 5-tuple shape: trigger/hook/guard-check/standard-check/success-criterion)
-  - [x] B2: Implement pilot — `skills/skills/commit-work/scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes) + `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6) + `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN). Smoke-tested: bad message → BLOCK, good message → PASS.
+  - [x] B1: Design commit-work execution contract -> `skills/skills/commit-work/CONTRACT.md` (368 lines, 5-tuple shape: trigger/hook/guard-check/standard-check/success-criterion)
+  - [x] B2: Implement pilot — `skills/skills/commit-work/scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes) + `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6) + `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN). Smoke-tested: bad message -> BLOCK, good message -> PASS.
 - [x] **Phase C (generalize, after B):** COMPLETE (2026-06-21).
-  - [x] C1: Extract template from B2 + C2 → `skills/docs/CONTRACT-TEMPLATE.md` (template + validation checklist + when-NOT-to-use guidance)
-  - [x] C2: Apply to session-handoff → `skills/skills/session-handoff/CONTRACT.md` (second pilot, agent-loop hook domain — vs commit-work's git-hook domain; 5-tuple shape validated to generalise across hook surfaces)
+  - [x] C1: Extract template from B2 + C2 -> `skills/docs/CONTRACT-TEMPLATE.md` (template + validation checklist + when-NOT-to-use guidance)
+  - [x] C2: Apply to session-handoff -> `skills/skills/session-handoff/CONTRACT.md` (second pilot, agent-loop hook domain — vs commit-work's git-hook domain; 5-tuple shape validated to generalise across hook surfaces)
 - [x] **Phase D (governance, parallel after B1):** COMPLETE (2026-06-21).
   - [x] D1: `standards/scripts/verify-skills.js` v1.0.0 (9 checks S01-S09, --strict default after §9.2.2 remediation closed all 15 pre-existing violations 2026-06-21)
   - [x] D2: Tiered hard caps (V12) — COMPLETE 2026-06-21. `verify-skills.js` v1.1.0 added S10a (SKILL.md ≤ 800) + S10b (CONTRACT.md ≤ 500). Cap values validated against 2 pilot contracts (commit-work 368 lines, session-handoff 466 lines) — original O-017 proposal of 200 was invalidated by measured reality; per LESSON-001, cap adjusted to 500 not by compressing the structural 10-section shape. META-001 §4.18.1 gained CONTRACT.md row; §4.18.6 documents the rationale. STD-SKILL-001 §10.1 replaced deferred `PROC-LINECOUNT-004` with active `verify-skills.js S10a/S10b` enforcement. README.md ≤ 400 cap deferred (2 existing violations need remediation first: gepetto 485, react-dev 404). References cap rejected (O-017's "≤2000" was wrong — references exempt per §4.18.1).
@@ -1061,8 +1061,8 @@ deliverables produced and smoke-tested:
      bash). Callable runtime with 3 modes: `--dry-run` (preview
      checks), `--commit "<msg>"` (validate + create commit), `--help`.
      Color-coded output ([OK]/[WARN]/[FAIL]/[i]). Tracks PASS/WARN/
-     FAIL counts. Phase 0 guard checks → Phase 1+2 standard checks
-     → commit creation (only in --commit mode, only if 0 FAIL).
+     FAIL counts. Phase 0 guard checks -> Phase 1+2 standard checks
+     -> commit creation (only in --commit mode, only if 0 FAIL).
   2. `.githooks/commit-msg` (new, 120 lines). Validates Conventional
      Commits format on commit message. G4 (format regex) BLOCK, G5
      (subject ≤72) BLOCK, G6 (body wrap 72) WARN. Skips merge/revert/
@@ -1075,12 +1075,12 @@ deliverables produced and smoke-tested:
      responsibilities. Points to CONTRACT.md and run-contract.sh.
 
 - **Smoke testing (4 tests, all pass):**
-  1. `run-contract.sh --dry-run` → 3 PASS, 0 WARN, 0 FAIL.
-  2. `run-contract.sh --commit "bad message"` → G4 FAIL, commit NOT
+  1. `run-contract.sh --dry-run` -> 3 PASS, 0 WARN, 0 FAIL.
+  2. `run-contract.sh --commit "bad message"` -> G4 FAIL, commit NOT
      created. Correct behavior.
-  3. `git commit -m "bad message"` (real git) → pre-commit PASS,
+  3. `git commit -m "bad message"` (real git) -> pre-commit PASS,
      commit-msg BLOCK. Commit NOT created. Correct behavior.
-  4. `git commit -m "test(contract): good message"` (real git) →
+  4. `git commit -m "test(contract): good message"` (real git) ->
      pre-commit PASS, commit-msg PASS. Commit created. Correct.
 
 - **Gotcha discovered during smoke testing:** `git reset --hard HEAD~1`
@@ -1157,7 +1157,7 @@ contract shape IS the gateway to building execution layer for the other
 
 **Cascade — 6 phases, ~12 tasks, iterative (not strictly linear):**
 
-```
+```text
 Phase A (discovery, parallel)         Phase B (pilot, sequential)
   A1 catalog 35 skills                  B1 design contract (commit-work)
   A2 audit gap table                    B2 implement pilot
@@ -1306,7 +1306,7 @@ provides structure; iteration provides correction.
 | 2026-06-21 | Added O-017 (Skills execution contract — cascade plan). 6-phase cascade (A discovery, B pilot on commit-work, C generalize, D governance, E consumer integration, F dashboard) bridging governance (markdown rules) to execution (runtime enforcement). Governance/execution gap table documented as near-term goals context. Closes O-011 (formalizes 35-skill catalog as Phase A1), feeds O-015 (Phase D defines skills/ governance), enables O-016 (Phase E1 produces real consumer events). Cascade is iterative not waterfall — B2/D1/E1 may send corrections backward to B1 contract shape. Status: OPEN, awaits approval before Phase A execution. |
 | 2026-06-21 | Updated O-017 — Phase A COMPLETE. A1 produced `skills/docs/CATALOG.md` (36 skills, not 35 — INDEX.md was stale, missing `zai-skill-registry`; also corrected skill-creator ID from ZAI-META-002 to actual ZAI-STS-008). A2 produced SESSION_NOTES §13 (gap audit: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1 ACCEPTABLE; confirms cascade ordering). 3 unanticipated findings: (1) only 3/36 skills have callable scripts/, (2) session-handoff is the most execution-ready skill, (3) 5 stale skills need frontmatter remediation. Removed original "Action items" checklist (now replaced by "Status of cascade phases" with [x]/[ ] marks). Surfaces 2 new open question candidates: O-019 (guard/ execution contract), O-020 (feedback-loop mechanism) — not yet formalized. Verifier status unchanged: 8/8 + 13/13, 0 warnings. |
 | 2026-06-21 | Updated O-017 — Phase B COMPLETE. B1 produced `skills/skills/commit-work/CONTRACT.md` (368 lines, first concrete 5-tuple execution contract: trigger/hook/guard-check/standard-check/success-criterion). B2 produced 4 artifacts: `scripts/run-contract.sh` (callable runtime, --dry-run + --commit modes), `.githooks/commit-msg` (new, Conventional Commits G4/G5/G6 enforcement), `.githooks/pre-commit` updated (Phase 0 worklog freshness WARN), `install-hooks.sh` updated. 4 smoke tests all pass: dry-run PASS, bad message BLOCK, real-git bad commit BLOCK, real-git good commit PASS. 5-tuple shape validated for commit-work. Phase C will test generalization to session-handoff. Gotcha discovered: `git reset --hard HEAD~1` wipes uncommitted edits (happened twice during smoke testing) — LESSON candidate for SESSION_NOTES §12. |
-| 2026-06-21 | Three-item "honest remediation" batch (user authorized with «принимаю, делай» after I proposed pausing O-017 cascade to do hygiene work). (1) Added LESSON-004 to SESSION_NOTES §12.7 — `git reset --hard` is two-axis destructive (moves branch pointer + overwrites working tree); stash before reset. Operational recipe: `git stash push -u -m "pre-reset-safety"` → `git reset --hard HEAD~1` → `git stash pop`. Triggered twice in Phase B smoke testing. (2) Discovered "5 stale skills" finding from Phase A1 was a **false positive** caused by my own `catalog_skills.py` bug (did not parse YAML folded-scalar `description: >` syntax). All 5 are correctly documented as sandbox system skills (no ZAI- prefix per skill-id-system §4). Real gap was only missing `version:` field. Fix: rewrote parse_frontmatter() to handle folded/literal scalars + added `version: 1.0` to all 5 skills. Catalog reclassified from 30 active/5 stale/1 dup → 35 active/0 stale/1 dup. Honest postmortem in CATALOG.md §10. Less work than originally scoped (75 min → 30 min). (3) Wrote `standards/docs/CI-AND-TESTING.md` (483 lines, 12 sections) — merges two uploaded drafts into one canonical doc, documents actual existing workflow (`.github/workflows/verify-id-graph.yml`, 250 lines), includes §11 bug audit table documenting 12 factual errors in the drafts against actual repo state. Verifier status: 8/8 + 13/13 PASS, 1 benign soft warning (W01 cross-submodule reference to run-contract.sh). |
+| 2026-06-21 | Three-item "honest remediation" batch (user authorized with «принимаю, делай» after I proposed pausing O-017 cascade to do hygiene work). (1) Added LESSON-004 to SESSION_NOTES §12.7 — `git reset --hard` is two-axis destructive (moves branch pointer + overwrites working tree); stash before reset. Operational recipe: `git stash push -u -m "pre-reset-safety"` -> `git reset --hard HEAD~1` -> `git stash pop`. Triggered twice in Phase B smoke testing. (2) Discovered "5 stale skills" finding from Phase A1 was a **false positive** caused by my own `catalog_skills.py` bug (did not parse YAML folded-scalar `description: >` syntax). All 5 are correctly documented as sandbox system skills (no ZAI- prefix per skill-id-system §4). Real gap was only missing `version:` field. Fix: rewrote parse_frontmatter() to handle folded/literal scalars + added `version: 1.0` to all 5 skills. Catalog reclassified from 30 active/5 stale/1 dup -> 35 active/0 stale/1 dup. Honest postmortem in CATALOG.md §10. Less work than originally scoped (75 min -> 30 min). (3) Wrote `standards/docs/CI-AND-TESTING.md` (483 lines, 12 sections) — merges two uploaded drafts into one canonical doc, documents actual existing workflow (`.github/workflows/verify-id-graph.yml`, 250 lines), includes §11 bug audit table documenting 12 factual errors in the drafts against actual repo state. Verifier status: 8/8 + 13/13 PASS, 1 benign soft warning (W01 cross-submodule reference to run-contract.sh). |
 | 2026-06-21 | Updated O-017 — Phase C COMPLETE + Phase D1 COMPLETE. **Phase C:** C1 produced `skills/docs/CONTRACT-TEMPLATE.md` (template + validation checklist + when-NOT-to-use guidance, derived from 2 pilot contracts). C2 produced `skills/skills/session-handoff/CONTRACT.md` (second 5-tuple pilot, agent-loop hook domain — vs commit-work's git-hook domain). 5-tuple shape now validated across 2 hook surfaces; shape generalises. **Phase D1:** `standards/scripts/verify-skills.js` v1.0.0 (9 checks S01-S09 mapping to V11a-V14b) shipped earlier in this date with §9.2.1 snapshot test + §9.2.3 e2e workflow; **§9.2.2 remediation closed all 15 pre-existing violations** (8× S02 + 3× S03 + 4× S05) in same session. Root cause of 7 false-positive S02 violations was an internal contradiction in STD-SKILL-001 §3.3 vs §9.1; same patch clarifies the standard AND fixes the verifier (LESSON-001/003 pattern: fix root cause, auto-close N symptoms). Pre-commit Phase 3 + CI workflow promoted to `--strict` default. v2.5.0 release tag cut. Verifier status: 8/8 + 13/13 HARD + 6/6 HARD (--strict), 0 SOFT warnings. **Open:** Phase D2 (tiered hard caps), Phase E (consumer integration), Phase F (dashboard), O-018 (verify-id-graph.js modularization — 1417 lines). |
-| 2026-06-21 | Updated O-017 — Phase D2 COMPLETE → **Phase D fully COMPLETE**. `verify-skills.js` v1.0.0 → v1.1.0 added S10 check (V12: tiered hard caps): S10a SKILL.md ≤ 800 (existing §4.18.1 row, NEW runtime enforcement — replaces deferred PROC-LINECOUNT-004), S10b CONTRACT.md ≤ 500 (NEW §4.18.1 row, validated against 2 pilot contracts commit-work 368 + session-handoff 466). Original O-017 proposal of 200 for CONTRACT.md was invalidated by measured reality — both pilots would violate by 1.8×–2.3×; per LESSON-001 cap adjusted to 500 not by compressing the structural 10-section shape. META-001 gained §4.18.6 (rationale) + CONTRACT.md row in §4.18.1 + cross-link in §4.18.5. STD-SKILL-001 §8.2/§10.1 updated. CI-AND-TESTING.md §9.3.3 added (IMPLEMENTED). Snapshot baseline updated (61 IDs, 115 edges, 11 warnings — 8 new W13 false positives from prose mentions of `CONTRACT.md`, `commit-work/CONTRACT.md`, `session-handoff/CONTRACT.md`, `gepetto/README.md`, `react-dev/README.md` in standards/ docs; W13 root-cause fix deferred to O-018). README.md ≤ 400 cap deferred (2 violations: gepetto 485, react-dev 404 — need remediation first). References cap rejected (O-017's "≤2000" was wrong per §4.18.1). Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict, incl. S10a + S10b), 0 SOFT warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1), O-018 (verify-id-graph.js modularization — 1355 lines, NEXT). |
-| 2026-06-21 | **O-018 COMPLETE** — verify-id-graph.js modularization (continuation). Previous O-018 attempt extracted 4 lib/ files (constants, graph-algorithms, parsers, snapshot — 500 lines total), reducing main file from 1593 → 1354 lines. This continuation extracted 4 more blocks: `lib/health-warnings.js` (Phase 10 W11-W15, 349 lines — includes W13 root-cause fix), `lib/output.js` (emitHumanReadable + emitJSON, 152 lines), `lib/file-scanner.js` (listFiles + globFiles + matchesPattern, 138 lines), `lib/declarations.js` (extractDeclaration + parseMigrations, 251 lines). Main file: 1355 → 829 lines (-526 lines, -39%). Total lib/ footprint: 7 files, 1390 lines. **W13 root-cause fix** (LESSON-001 applied): expanded candidates list to include `skills/skills/` tree (resolves path-like refs like `commit-work/CONTRACT.md`, `gepetto/README.md` to actual files), AND fixed submodule path resolution (submodules are mounted inside `Z-ai-platform/` per .gitmodules, NOT as siblings at `../Z-ai-skills/`). W13 false-positive count dropped from 11 → 0. Whitelist kept for genuinely planned/historical/generic refs (planned scripts, historical extraction sources, generic file-type names). verify-id-graph.js v1.1.5 → v1.1.6. Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict), **0 warnings** (was 11). Snapshot baseline: 61 IDs, 115 edges, 0 warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1). |
+| 2026-06-21 | Updated O-017 — Phase D2 COMPLETE -> **Phase D fully COMPLETE**. `verify-skills.js` v1.0.0 -> v1.1.0 added S10 check (V12: tiered hard caps): S10a SKILL.md ≤ 800 (existing §4.18.1 row, NEW runtime enforcement — replaces deferred PROC-LINECOUNT-004), S10b CONTRACT.md ≤ 500 (NEW §4.18.1 row, validated against 2 pilot contracts commit-work 368 + session-handoff 466). Original O-017 proposal of 200 for CONTRACT.md was invalidated by measured reality — both pilots would violate by 1.8×–2.3×; per LESSON-001 cap adjusted to 500 not by compressing the structural 10-section shape. META-001 gained §4.18.6 (rationale) + CONTRACT.md row in §4.18.1 + cross-link in §4.18.5. STD-SKILL-001 §8.2/§10.1 updated. CI-AND-TESTING.md §9.3.3 added (IMPLEMENTED). Snapshot baseline updated (61 IDs, 115 edges, 11 warnings — 8 new W13 false positives from prose mentions of `CONTRACT.md`, `commit-work/CONTRACT.md`, `session-handoff/CONTRACT.md`, `gepetto/README.md`, `react-dev/README.md` in standards/ docs; W13 root-cause fix deferred to O-018). README.md ≤ 400 cap deferred (2 violations: gepetto 485, react-dev 404 — need remediation first). References cap rejected (O-017's "≤2000" was wrong per §4.18.1). Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict, incl. S10a + S10b), 0 SOFT warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1), O-018 (verify-id-graph.js modularization — 1355 lines, NEXT). |
+| 2026-06-21 | **O-018 COMPLETE** — verify-id-graph.js modularization (continuation). Previous O-018 attempt extracted 4 lib/ files (constants, graph-algorithms, parsers, snapshot — 500 lines total), reducing main file from 1593 -> 1354 lines. This continuation extracted 4 more blocks: `lib/health-warnings.js` (Phase 10 W11-W15, 349 lines — includes W13 root-cause fix), `lib/output.js` (emitHumanReadable + emitJSON, 152 lines), `lib/file-scanner.js` (listFiles + globFiles + matchesPattern, 138 lines), `lib/declarations.js` (extractDeclaration + parseMigrations, 251 lines). Main file: 1355 -> 829 lines (-526 lines, -39%). Total lib/ footprint: 7 files, 1390 lines. **W13 root-cause fix** (LESSON-001 applied): expanded candidates list to include `skills/skills/` tree (resolves path-like refs like `commit-work/CONTRACT.md`, `gepetto/README.md` to actual files), AND fixed submodule path resolution (submodules are mounted inside `Z-ai-platform/` per .gitmodules, NOT as siblings at `../Z-ai-skills/`). W13 false-positive count dropped from 11 -> 0. Whitelist kept for genuinely planned/historical/generic refs (planned scripts, historical extraction sources, generic file-type names). verify-id-graph.js v1.1.5 -> v1.1.6. Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict), **0 warnings** (was 11). Snapshot baseline: 61 IDs, 115 edges, 0 warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1). |

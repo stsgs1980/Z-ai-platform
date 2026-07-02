@@ -5,15 +5,15 @@ architecture without breaking the ID graph.
 
 ## 1. Repository layout
 
-```
+```text
 Z-ai-platform/      (orchestrator, L0 — this repo)
-├── standards/      (submodule → Z-ai-standards, L1)
-├── guard/          (submodule → Z-ai-guard, L2)
-├── skills/         (submodule → Z-ai-skills, L3)
-├── .gitmodules     (clean HTTPS URLs, no PAT)
-├── .github/workflows/verify-id-graph.yml   (CI for the ID graph)
-├── README.md
-└── install-hooks.sh
+--- standards/      (submodule -> Z-ai-standards, L1)
+--- guard/          (submodule -> Z-ai-guard, L2)
+--- skills/         (submodule -> Z-ai-skills, L3)
+--- .gitmodules     (clean HTTPS URLs, no PAT)
+--- .github/workflows/verify-id-graph.yml   (CI for the ID graph)
+--- README.md
+--- install-hooks.sh
 ```
 
 The 4-repo split exists so that:
@@ -110,7 +110,7 @@ some indicate real cleanup opportunities.
 | ZAI    | L3    | skills/      | ZAI-META-001         |
 
 **Related:** directed edges, must respect the layer matrix (see
-`standards/standards/STD-META-001-v2.0.md` §6.1). Cross-layer STD→RULE
+`standards/standards/STD-META-001-v2.0.md` §6.1). Cross-layer STD->RULE
 is FORBIDDEN (use the reverse direction).
 
 **Aligned_with:** undirected edges, can cross layers (e.g. STD ↔ ZAI).

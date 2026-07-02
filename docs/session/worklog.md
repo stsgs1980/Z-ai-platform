@@ -65,8 +65,8 @@ Work Log:
   and RULE-MONOLITH-017 (upstream write protection) — both rules already
   enforce the architecture that STD-ARCH-001 v1.0 now formalizes
 - Verified locally: 13/13 HARD PASS, 0 warnings (W03 closed)
-- Pushed Z-ai-standards: 447725b → 85df73b
-- Pushed Z-ai-guard: 676bdbe → 97d2911
+- Pushed Z-ai-standards: 447725b -> 85df73b
+- Pushed Z-ai-guard: 676bdbe -> 97d2911
 - Pushed Z-ai-platform (3 atomic submodule bumps per §8.3):
   - af0a73f: bump standards
   - 1a82740: bump guard
@@ -75,7 +75,7 @@ Work Log:
   ('standards/**') does not fire on submodule pointer bumps (gitlink
   change, not file change)
 - Fixed workflow: dropped paths filter for push trigger
-- Pushed Z-ai-platform: 70fc5f4 → 7c3461f (workflow fix)
+- Pushed Z-ai-platform: 70fc5f4 -> 7c3461f (workflow fix)
 - CI confirmed: Run #5 event=push head_sha=7c3461f conclusion=success
 
 Stage Summary:
@@ -191,9 +191,9 @@ Task: Push session docs to GitHub; verify CI
 Work Log:
 - Committed docs/session/ (3 files, 1161 insertions) to Z-ai-platform
 - Commit: f2ee6e1 "Add docs/session/: worklog, SESSION_NOTES, DECISIONS_LOG"
-- Pushed to origin/main: 7c3461f → f2ee6e1
+- Pushed to origin/main: 7c3461f -> f2ee6e1
 - CI Run #6: event=push, head_sha=f2ee6e1, conclusion=success (45 sec after push)
-- Created symlink /home/z/my-project/worklog.md → docs/session/worklog.md
+- Created symlink /home/z/my-project/worklog.md -> docs/session/worklog.md
   for cross-session discoverability
 
 Stage Summary:
@@ -277,7 +277,7 @@ Work Log:
   - RELATIONS.md (47 lines — PlantUML diagram of doc relationships + contradictions table)
   - verify.sh (202 lines — 11 groups of checks for sandbox state)
 - Checked current sandbox state: NO .zscripts/, NO src/app/, NO next.config.ts
-  → current session is docs/methodology, NOT fullstack web-dev
+  -> current session is docs/methodology, NOT fullstack web-dev
 - Identified 3 internal contradictions (per RELATIONS.md):
   1. npm vs bun (Guide says bun, Migration Guide says npm)
   2. API routes (Guide forbids, Hooks cookbook creates /api/ai/*)
@@ -366,19 +366,19 @@ Task: Move Z.ai Sandbox Documentation (7 files) into standards/docs/sandbox/; ad
 Plan (committed BEFORE execution, per user instruction "профессионально = дублировать план в worklog"):
 1. Create `Z-ai-platform/standards/docs/sandbox/` directory.
 2. Move 7 files from `upload/` to `standards/docs/sandbox/` with standardized snake-case names:
-   - Z.ai-Sandbox-Guide.md → sandbox-guide.md
-   - Z.ai-Sandbox-Guide-Hooks.md → sandbox-hooks-cookbook.md
-   - Z.ai-Sandbox-Guide_commands_reference.md → sandbox-commands-cheatsheet.md
-   - Z.ai-Sandbox-Migration Guide.md → sandbox-migration.md
-   - Z.ai-Sandbox-Super-Z-Subagents-Education.md → sandbox-subagents-architecture.md
-   - RELATIONS.md → INDEX.md (renamed + updated internal links to new filenames)
-   - verify.sh → verify-sandbox.sh
+   - Z.ai-Sandbox-Guide.md -> sandbox-guide.md
+   - Z.ai-Sandbox-Guide-Hooks.md -> sandbox-hooks-cookbook.md
+   - Z.ai-Sandbox-Guide_commands_reference.md -> sandbox-commands-cheatsheet.md
+   - Z.ai-Sandbox-Migration Guide.md -> sandbox-migration.md
+   - Z.ai-Sandbox-Super-Z-Subagents-Education.md -> sandbox-subagents-architecture.md
+   - RELATIONS.md -> INDEX.md (renamed + updated internal links to new filenames)
+   - verify.sh -> verify-sandbox.sh
 3. Add §3.0 "Bootstrap Procedure for New Project" to ENV-002-zai-integration.md:
    - Thin (< 60 lines), 7-step bootstrap flow, references docs/sandbox/* on demand.
-   - Inserts BEFORE existing §3 "Project Directory" so bootstrap→directory ordering is preserved.
+   - Inserts BEFORE existing §3 "Project Directory" so bootstrap->directory ordering is preserved.
    - Existing §3 / §3.1 numbering UNCHANGED (no broken cross-references).
 4. Harden verify-id-graph.js with new SOFT warnings (do NOT promote to HARD — would break CI):
-   - W11: Size anomaly. Standard .md > 1000 lines → warn; > 1500 lines → critical warn.
+   - W11: Size anomaly. Standard .md > 1000 lines -> warn; > 1500 lines -> critical warn.
      Rationale: DESIGN-001 is 1780 lines (anomaly); median is ~640 lines.
    - W12: Missing §XA Known Issues section. Every standard MUST have a Known Issues section
      (per doc convention established in ENV-002 v1.2 §10A).
@@ -479,13 +479,13 @@ Stage Summary (actual):
 
 Task ID: cascade-diagram-w13-sweep-2026-06-18
 Agent: main
-Task: Two parallel-track improvements to standards repo: (1) Add explicit Cascade State diagram subsection to ARCH-001 to formalize direction of propagation (Standards → Guard → Skills → runtime); (2) Sweep all 75 W13 warnings (broken cross-doc .md/.sh references, mostly README.md pointing to pre-restructure filenames like IMPLEMENTATION_ORDER.md, STANDARD_ID_SYSTEM.md).
+Task: Two parallel-track improvements to standards repo: (1) Add explicit Cascade State diagram subsection to ARCH-001 to formalize direction of propagation (Standards -> Guard -> Skills -> runtime); (2) Sweep all 75 W13 warnings (broken cross-doc .md/.sh references, mostly README.md pointing to pre-restructure filenames like IMPLEMENTATION_ORDER.md, STANDARD_ID_SYSTEM.md).
 
 Plan (committed BEFORE execution per professional protocol):
 1. Collect full W13 list via `verify-id-graph.js --json` to know exactly which files reference which broken paths.
 2. Build old-name -> new-name mapping table (20 standards renamed during flat-layout restructure).
 3. ARCH-001 cascade subsection (insert as §X "Cascade State and Propagation Direction"):
-   - PlantUML diagram: Standards (normative) → Guard rules (enforcement) → Skills (ZAI implementation) → runtime
+   - PlantUML diagram: Standards (normative) -> Guard rules (enforcement) -> Skills (ZAI implementation) -> runtime
    - Direction table: each layer reads from above, writes to below
    - Anti-patterns: no upward edges (skills can't redefine standards)
    - Cross-reference to G04 layer matrix in verify-id-graph.js
@@ -589,7 +589,7 @@ standards. User instruction: "делать обе задачи — §XA в SKILL
 
 Plan (committed BEFORE execution):
 - Phase A — §10A Known Issues in SKILL-001:
-  * Read SKILL-001 fully (700 lines) ✓ done
+  * Read SKILL-001 fully (700 lines) [OK] done
   * Convention: `## 10A. Known Issues and Proposed Solutions` between §10 and §11
     (matches ARCH-001 §10A, ENV-002 §10A)
   * W12 regex: `^\s*##\s+\d*[A-Z]\.?\s*Known\s+Issues` (case-insensitive)
@@ -611,12 +611,12 @@ Plan (committed BEFORE execution):
   | STD-SEC-002 | Production security (auth, passwords) | RULE-MONOLITH-014 (Pre-commit checklist) | Pre-commit is the natural enforcement gate for production security checks |
   | STD-TEST-001 | Testing pyramid, coverage, AAA | ZAI-QA-001 (qa-test-planner) | QA test planning IS the executor of the testing standard |
   
-  All 5 edges are RULE→STD or ZAI→STD, both allowed by layer matrix (G04).
+  All 5 edges are RULE->STD or ZAI->STD, both allowed by layer matrix (G04).
   Current Related: counts: RULE-MONOLITH-007 (2), RULE-MONOLITH-008 (2),
   RULE-MONOLITH-014 (3), ZAI-DEV-002 (1), ZAI-QA-001 (1).
 
 - Phase C — Verify + commit + push:
-  * Run verify-id-graph.js — expect: 13/13 HARD PASS, W03: 5→0, W12: 1→0
+  * Run verify-id-graph.js — expect: 13/13 HARD PASS, W03: 5->0, W12: 1->0
   * Commit standards submodule (SKILL-001 §10A)
   * Commit guard submodule (3 RULE edits)
   * Commit skills submodule (2 SKILL.md edits)
@@ -635,10 +635,10 @@ Work Log:
 - Confirmed NONE of the 5 dead standards are mentioned in any RULE or ZAI body
   text — all current mentions are in OTHER STD files (ARCH-002, META-001, etc.)
 - Listed all 17 RULE files with YAML frontmatter (id, title, related) — found
-  current Related: edges total 17 across RULE files (mostly RULE→RULE or
-  RULE→TOOL/PROC/ENV/DOC/ARCH)
+  current Related: edges total 17 across RULE files (mostly RULE->RULE or
+  RULE->TOOL/PROC/ENV/DOC/ARCH)
 - Listed all 24 ZAI skills with frontmatter — current Related: edges are mostly
-  ZAI→STD-SKILL-001 (skill format standard) + intra-domain ZAI→ZAI edges
+  ZAI->STD-SKILL-001 (skill format standard) + intra-domain ZAI->ZAI edges
 - Read bodies of all 5 target files (RULE-MONOLITH-007/008/014, commit-work,
   qa-test-planner) to confirm semantic relevance of planned edges
 
@@ -824,7 +824,7 @@ Verification targets after split:
 - W14: 0 -> 0 (no new OPEN Known Issues; in fact we'll add DES-006
   documenting the split, which is RESOLVED-in-v3.1.0)
 - W15: 0 -> 0 (new file matches <DOMAIN>-<NNN>-<name>.md pattern)
-- W12: 0 -> 0 (companion file has no `> ID:` blockquote → not picked
+- W12: 0 -> 0 (companion file has no `> ID:` blockquote -> not picked
   up as normative; if verifier complains, add an `> Companion to:`
   blockquote line that doesn't match the ID-regex)
 
@@ -975,7 +975,7 @@ Task: Fix broken `verify-standards.js` — retarget paths to current `standards/
 Work Log (planned — execution follows after this entry):
 
 Phase 1 — Path fixes (mechanical, no invariant changes):
-  - STANDARDS_DIR: `upload/standards-v2/standards` → `standards` (relative to
+  - STANDARDS_DIR: `upload/standards-v2/standards` -> `standards` (relative to
     REPO_ROOT, i.e. `<standards-submodule>/standards/`)
   - UPLOAD_DIR: removed (no longer exists). Guides now under `docs/sandbox/`.
   - File name constants updated to current `<DOMAIN>-<NNN>-<name>.md` form:
@@ -1019,7 +1019,7 @@ confirmed by execution):
     Page/Route 30/50, custom hook 50/100, Barrel 30/50, useState 2 (3rd
     triggers extraction), exception ceiling 300 (with) / 400 (absolute).
     DISPOSITION: update V07 to current thresholds (File 150/250, Page 30/50,
-    useState 2→3, exception 300/400).
+    useState 2->3, exception 300/400).
   - V08 (code fence language tags): KEEP. Universal invariant. Should PASS.
   - V09 (English-only <2% Cyrillic): KEEP. Universal invariant. Should PASS.
   - V10 (README_TEMPLATE.md mandates badges, ≥3 shields.io): OUTDATED.
@@ -1048,7 +1048,7 @@ Phase 4 — Run final, verify exit 0, commit + push:
       verify-standards.js: content-level invariants (V04 no emoji,
         V08 fence language tags, V09 English-only, V05 META registry
         mentions, V06 delegation, V07 thresholds, V10 README badges).
-    → Complementary, not overlapping. Both should run in CI.
+    -> Complementary, not overlapping. Both should run in CI.
   - Commit standards submodule, push.
   - Bump parent submodule pointer + worklog entry, push.
 
@@ -1089,9 +1089,9 @@ Phase 2 — V## dispositions (executed):
     matching. Now PASS.
   - V08 UNCHANGED logic, but exposed real standards violations:
       * SEC-001-security-core.md L403: plain ``` fence around
-        DATABASE_URL example → added `env` language tag.
+        DATABASE_URL example -> added `env` language tag.
       * SKILL-001-skill-format.md L44: plain ``` fence around ASCII
-        box-drawing diagram → added `text` language tag.
+        box-drawing diagram -> added `text` language tag.
     Both standards fixed. V08 now PASS.
   - V09 UNCHANGED logic, target list pruned (removed deprecated
     upload/SKILL.md, MARKDOWN_STANDARD.md, UNICODE_POLICY.md references —
@@ -1218,8 +1218,8 @@ Phase 4 — Test the hook fires:
     exit 0
 
 Phase 5 — Verify both verifiers still green (no regression):
-  - `node standards/scripts/verify-standards.js` → exit 0 (7/7 PASS)
-  - `node standards/scripts/verify-id-graph.js` → 13/13 HARD PASS,
+  - `node standards/scripts/verify-standards.js` -> exit 0 (7/7 PASS)
+  - `node standards/scripts/verify-id-graph.js` -> 13/13 HARD PASS,
     2 soft warnings (unchanged)
 
 Phase 6 — Commit + push:
@@ -1725,7 +1725,7 @@ Investigated 12 starting points (5 explicit skill dirs + 7 other suspected locat
 - Owner / perms: z:z, drwxr-xr-x (WRITABLE by z)
 - Count: 79 top-level skill folders (65 from official zips + 14 sp-* from .superpowers-zai/install-zai.sh)
 - Mount: overlay rootfs (`c-6a339da8-...-rootfs on / type overlay rw,relatime,...,volatile,...`)
-  → **NOT persistent across sessions.** Recreated at session start by extract-official-skills.sh.
+  -> **NOT persistent across sessions.** Recreated at session start by extract-official-skills.sh.
 - Sample folder is a real directory (NOT a symlink). Verified via `readlink -f` and inode check.
 - Includes: ASR, LLM, TTS, VLM, docx, charts, pdf, pptx, xlsx, skill-creator (Z.ai official), 14 sp-* (Superpowers), fullstack-dev, agent-browser, image-*, video-*, web-*, etc.
 - The official Z.ai `skill-creator` here has md5 40d31855... (matches /home/official_skills/skill-creator.zip exactly) — Apache-2.0 eval-pipeline variant, 485 lines, with agents/ eval-viewer/ scripts/.
@@ -1735,7 +1735,7 @@ Investigated 12 starting points (5 explicit skill dirs + 7 other suspected locat
 - Owner / perms: root:root, drwxrwxrwx (mode looks writable but mount is RO — see below)
 - Count: 69 entries = 68 *.zip + 1 stages.yaml (whitelist of which zips to extract)
 - Mount: `ossfs on /home/official_skills type fuse.ossfs (ro,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other)` over a tmpfs base
-  → **READ-ONLY. Persistent across sessions. Managed by Z.ai (Alibaba OSS).**
+  -> **READ-ONLY. Persistent across sessions. Managed by Z.ai (Alibaba OSS).**
 - Format: each entry is a single zip (e.g. LLM.zip, docx.zip, skill-creator.zip). Not unpacked folders.
 - stages.yaml lists 7 stages (default, qingyan_writing, pipi, life_coach, professional_writer, info_scout, cyber_friend); their union is the whitelist.
 - extract-official-skills.sh unpacks only zips in this whitelist (3 filtered out: aminer-open-academic, frontend-design, skill-vetter).
@@ -1745,14 +1745,14 @@ Investigated 12 starting points (5 explicit skill dirs + 7 other suspected locat
 - Owner / perms: z:z, drwxrwxrwx (WRITABLE)
 - Count: 19 *.zip files (anti-monolith, anti-hallucination-guard, api-retry, code-reviewer, dev-watchdog, fallback, git-checkpoint, git-safe-ops, git-safety, health-check, performance-code-generator, performance-code-generator_sts, pptx, prompt-engineering, sanitize-validate, video-generator, web-craft, work-summary, z-ai-web-dev-sdk)
 - Mount: `PolarFS:pcs-ue6ju0nuiu0hz7tjc-0e3odv6t4dackr8s3 on /home/user_skills type fuse.pfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,allow_other,max_read=131072)` over a tmpfs base
-  → **READ-WRITE. PERSISTENT across sessions (PolarFS = Alibaba persistent cloud-native storage).**
+  -> **READ-WRITE. PERSISTENT across sessions (PolarFS = Alibaba persistent cloud-native storage).**
 - CRITICAL FINDING: extract-official-skills.sh does NOT touch this directory. Of the 19 zips, NONE appear unpacked in /home/z/my-project/skills/ (except pptx, which is shadowed by the official pptx.zip from official_skills). No system script in /etc, /usr/local/bin, or /home references user_skills. Conclusion: persistence of the zip is guaranteed, but auto-install into the runtime skills dir is NOT — user must manually unzip at session start, OR a higher-level orchestration outside this container does it on-demand.
 
 ## A.4 /home/z/my-project/Z-ai-platform/skills/skills/  (USER GIT REPO — DISPOSABLE)
 - Absolute path: /home/z/my-project/Z-ai-platform/skills/skills
 - Owner / perms: z:z, drwxr-xr-x (WRITABLE)
 - Count: 36 entries = 35 skill folders + 1 INDEX.md
-- Mount: overlay rootfs (same disposable overlay as A.1) → **NOT persistent across sessions.**
+- Mount: overlay rootfs (same disposable overlay as A.1) -> **NOT persistent across sessions.**
 - HOWEVER: this directory is inside the Z-ai-platform git repo (submodule of GitHub.com/stsgs1980/Z-ai-platform), so its content is recoverable via `git clone --recurse-submodules`. The canonical persistent copy lives on GitHub, not on the local filesystem.
 - Contains: anti-monolith, api-retry, code-reviewer, commit-work, context-consolidation, database-schema-designer, dev-watchdog, fallback, folder-indexer, frontend-styling-expert_sts, gepetto, health-check, humanizer, memory-delete, memory-export, memory-query, memory-store, mermaid-diagrams, performance-code-generator_sts, phi-layout, phi-layout_sts, project-clone, prompt-engineering_sts, qa-test-planner, react-dev, reducing-entropy, requirements-clarity, session-experience, session-handoff, session-log, skill-creator (toolkit variant ZAI-META-002), skill-id-system, sync-toolkit_sts, workflow-discipline_sts, z-ai-web-dev-sdk, zai-ui-composer_sts.
 - This is the Z.ai Agent Toolkit repo (the user's own canonical source for their 24 ZAI-* ID'd skills).
@@ -1818,48 +1818,48 @@ Investigated 12 starting points (5 explicit skill dirs + 7 other suspected locat
 # B. Sample skill folder anatomy
 
 ## B.1 /home/z/my-project/skills/LLM/  (official, simple, 4 files)
-```
+```text
 LLM/
-├── SKILL.md           21913 bytes  (frontmatter + instructions)
-├── LICENSE.txt         1080 bytes  (Apache 2.0)
-└── scripts/
-    └── chat.ts         758 bytes  (z-ai-web-dev-sdk wrapper)
+--- SKILL.md           21913 bytes  (frontmatter + instructions)
+--- LICENSE.txt         1080 bytes  (Apache 2.0)
+--- scripts/
+    --- chat.ts         758 bytes  (z-ai-web-dev-sdk wrapper)
 ```
 
 ## B.2 /home/z/my-project/skills/skill-creator/  (official, rich, 14 files)
-```
+```text
 skill-creator/
-├── SKILL.md           33082 bytes  (485 lines, eval-pipeline skill)
-├── LICENSE.txt        11357 bytes  (Apache 2.0)
-├── agents/                         (subagent prompts)
-│   ├── analyzer.md    10376 bytes
-│   ├── comparator.md   7287 bytes
-│   └── grader.md       9049 bytes
-├── assets/
-│   └── eval_review.html 7058 bytes
-├── eval-viewer/                    (HTML results viewer)
-│   ├── generate_review.py 16365 bytes
-│   └── viewer.html        44989 bytes
-├── references/
-│   └── schemas.md     12047 bytes
-└── scripts/                        (eval harness)
-    ├── __init__.py             0 bytes
-    ├── aggregate_benchmark.py 14386 bytes
-    ├── generate_report.py     12841 bytes
-    ├── improve_description.py 10493 bytes
-    ├── package_skill.py        4234 bytes
-    ├── quick_validate.py       3972 bytes
-    ├── run_eval.py            11419 bytes
-    ├── run_loop.py            13605 bytes
-    └── utils.py                1661 bytes
+--- SKILL.md           33082 bytes  (485 lines, eval-pipeline skill)
+--- LICENSE.txt        11357 bytes  (Apache 2.0)
+--- agents/                         (subagent prompts)
+-   --- analyzer.md    10376 bytes
+-   --- comparator.md   7287 bytes
+-   --- grader.md       9049 bytes
+--- assets/
+-   --- eval_review.html 7058 bytes
+--- eval-viewer/                    (HTML results viewer)
+-   --- generate_review.py 16365 bytes
+-   --- viewer.html        44989 bytes
+--- references/
+-   --- schemas.md     12047 bytes
+--- scripts/                        (eval harness)
+    --- __init__.py             0 bytes
+    --- aggregate_benchmark.py 14386 bytes
+    --- generate_report.py     12841 bytes
+    --- improve_description.py 10493 bytes
+    --- package_skill.py        4234 bytes
+    --- quick_validate.py       3972 bytes
+    --- run_eval.py            11419 bytes
+    --- run_loop.py            13605 bytes
+    --- utils.py                1661 bytes
 ```
 
 ## B.3 /home/z/my-project/Z-ai-platform/skills/skills/skill-creator/  (toolkit, minimal, 2 files)
-```
+```text
 skill-creator/
-├── SKILL.md            9012 bytes  (370 lines, ZAI-META-002 ID-assignment variant)
-└── references/
-    └── id-assignment-guide.md  4204 bytes
+--- SKILL.md            9012 bytes  (370 lines, ZAI-META-002 ID-assignment variant)
+--- references/
+    --- id-assignment-guide.md  4204 bytes
 ```
 
 # C. Where the skill-creator skill says to save new skills
@@ -1970,16 +1970,16 @@ In order of preference:
 # G. Key dedup / md5 confirmations
 
 - /home/z/my-project/skills/LLM/SKILL.md md5 = 965fb1576fb036732fbd544110cbe8d7
-- /home/official_skills/LLM.zip unpacked SKILL.md md5 = 965fb1576fb036732fbd544110cbe8d7  ✓ IDENTICAL
-  → confirms runtime LLM is unpacked from official LLM.zip
+- /home/official_skills/LLM.zip unpacked SKILL.md md5 = 965fb1576fb036732fbd544110cbe8d7  [OK] IDENTICAL
+  -> confirms runtime LLM is unpacked from official LLM.zip
 - /home/z/my-project/skills/skill-creator/SKILL.md md5 = 40d31855044682e5d82e91a4b51919eb
-- /home/official_skills/skill-creator.zip unpacked SKILL.md md5 = 40d31855044682e5d82e91a4b51919eb  ✓ IDENTICAL
-  → confirms runtime skill-creator is the official Z.ai Apache-2.0 eval-pipeline version
-- /home/z/my-project/Z-ai-platform/skills/skills/skill-creator/SKILL.md md5 = 54897db1161af90c4bc1d5b51c4e9a94  ✗ DIFFERENT
-  → confirms toolkit variant (ZAI-META-002, ID-assignment focused) is a separate file
+- /home/official_skills/skill-creator.zip unpacked SKILL.md md5 = 40d31855044682e5d82e91a4b51919eb  [OK] IDENTICAL
+  -> confirms runtime skill-creator is the official Z.ai Apache-2.0 eval-pipeline version
+- /home/z/my-project/Z-ai-platform/skills/skills/skill-creator/SKILL.md md5 = 54897db1161af90c4bc1d5b51c4e9a94  [FAIL] DIFFERENT
+  -> confirms toolkit variant (ZAI-META-002, ID-assignment focused) is a separate file
 - /home/user_skills/anti-monolith.zip unpacked SKILL.md md5 = 728e767b961d25b1ef1256b56ac07c85
-- /home/z/my-project/Z-ai-platform/skills/skills/anti-monolith/SKILL.md md5 = 2a4fa2c4cee585fb43f9c30f692979e5  ✗ DIFFERENT
-  → the user_skills/anti-monolith.zip is an OLDER/different snapshot than the git repo version. The git repo is more recent.
+- /home/z/my-project/Z-ai-platform/skills/skills/anti-monolith/SKILL.md md5 = 2a4fa2c4cee585fb43f9c30f692979e5  [FAIL] DIFFERENT
+  -> the user_skills/anti-monolith.zip is an OLDER/different snapshot than the git repo version. The git repo is more recent.
 
 Stage Summary:
 
@@ -2020,7 +2020,7 @@ Work Log:
      /home/z/my-project/skills/ с unzip -o (force overwrite).
   2. /home/user_skills/ — PolarFS-persistent, но НЕ распаковывается
      ни одним из видимых скриптов. Zips лежат мёртвым грузом.
-  3. skills/ в .gitignore → не попадает в repo.tar → custom skills в
+  3. skills/ в .gitignore -> не попадает в repo.tar -> custom skills в
      /home/z/my-project/skills/ теряются при рестарте.
   4. .zscripts/dev.sh — единственный официальный хук пользовательской
      инициализации, который запускается /start.sh (шаг 9) ПОСЛЕ
@@ -2136,8 +2136,8 @@ Work Log:
       zai-skill-registry (переименованный C) для ID assignment
     - Обязательный раздел "Persistence" (закрывает критический пробел
       обоих вариантов)
-    - Migration path из 5 этапов: документация → валидатор →
-      переименование → skill-creator A обновление → existing skills
+    - Migration path из 5 этапов: документация -> валидатор ->
+      переименование -> skill-creator A обновление -> existing skills
       migration (опционально)
     - 6 открытых вопросов для обсуждения с пользователем
 
@@ -2182,7 +2182,7 @@ Stage Summary:
   2. Написать новый validate_skill.py с профилями
   3. Обновить skill-creator A (добавить persistence раздел, обновить
      шаблон SKILL.md)
-  4. Переименовать C → zai-skill-registry (или принять альтернативное
+  4. Переименовать C -> zai-skill-registry (или принять альтернативное
      решение по вопросу 1)
   5. Запустить новый валидатор на всех 79 official skills — собрать
      отчёт о нарушениях
@@ -2293,7 +2293,7 @@ Work Log:
     semantic change). Full repo run now 32/32 PASS.
   - Conducted overlap audit across A11Y-001, DESIGN-001, FE-001,
     TEST-001, DOC-003. Identified 3 real overlap points + 2 non-issues:
-      [REAL] FE-001 §11.5 → A11Y-001 §7 (empty table) — RESOLVED by
+      [REAL] FE-001 §11.5 -> A11Y-001 §7 (empty table) — RESOLVED by
               updating FE-001 §11.5 to reference the new automated
               report.
       [REAL] A11Y-001 §5.1 (prefers-reduced-motion) ↔ DESIGN-001 §11
@@ -2397,9 +2397,9 @@ Work Log:
   - 3 layer clusters (L1 STD blue / L2 RULE amber / L3 ZAI green) + orphan cluster
   - Flags: --out, --platform, --dot-only, --open
 - Created 3 Mermaid source files in docs/_diagrams/:
-  - pipeline.mmd      — flowchart: push → pre-commit → CI → verify → graph → upload
-  - agent-lookup.mmd  — sequence: User → Agent → Skill loader → ID-graph → Standard → Rule
-  - bootstrap.mmd     — sequence: sandbox start → clone → submodules → symlink → ready
+  - pipeline.mmd      — flowchart: push -> pre-commit -> CI -> verify -> graph -> upload
+  - agent-lookup.mmd  — sequence: User -> Agent -> Skill loader -> ID-graph -> Standard -> Rule
+  - bootstrap.mmd     — sequence: sandbox start -> clone -> submodules -> symlink -> ready
 - Created `standards/scripts/render-diagrams.sh`:
   - Reads docs/_diagrams/*.mmd sources
   - Emits SVG + PNG via mmdc with proper puppeteer config (--no-sandbox for CI)
@@ -2453,10 +2453,10 @@ Work Log:
        Creation, Orchestration, JSON Registry (skill-registry.json)
     2. flow-execution-server-side.svg (HLXRSZ~1) — sequence diagram
        "3A Studio: Flow Execution - Server-Side Path":
-       User → useFlowActions → route.ts → flow-utils.ts → node-exec.ts
+       User -> useFlowActions -> route.ts -> flow-utils.ts -> node-exec.ts
     3. skill-creation-registration.svg (ZLTTRN~1) — sequence diagram
        "Взаимодействие агентов: Создание и регистрация скилла":
-       User → Orchestrator (L2 Approved) → Creator → Guardian
+       User -> Orchestrator (L2 Approved) -> Creator -> Guardian
 - Copied all 3 to /home/z/my-project/Z-ai-platform/docs/_diagrams/
   uploaded-plantuml/ with descriptive names so they survive session
   restart. NOT committed — pending user decision in next session.
@@ -2468,7 +2468,7 @@ Stage Summary:
   layered infrastructure).
 - Decision needed next session:
   (a) Keep PlantUML as alternative view, link from README
-  (b) Convert PlantUML → Mermaid for unified toolchain
+  (b) Convert PlantUML -> Mermaid for unified toolchain
   (c) Add PlantUML renderer alongside render-diagrams.sh
   (d) Discard if these were just exploratory sketches
 - Files NOT deleted, NOT committed. Safe in upload/ and copied to
@@ -2528,7 +2528,7 @@ review feedback ("skeleton" claim). Audit actual state vs META-001 §4.14/§4.15
 
 Work Log:
 - Audited Z-ai-guard repo actual contents:
-  * rules/ — 17 RULE-MONOLITH-*.md + INDEX.md ✅ (M002 complete)
+  * rules/ — 17 RULE-MONOLITH-*.md + INDEX.md [OK] (M002 complete)
   * No scripts/, no tools/, no instructions/, no registry.json,
     no MIGRATIONS.md in this repo
 - Cross-checked STD-META-001 §4.14 (Procedures) and §4.15 (Tools):
@@ -2552,9 +2552,9 @@ Work Log:
   * Actual repository layout (only rules/ + README.md)
   * Planned layout (after M003 + M004)
   * M002 section marked COMPLETE with full mapping table
-  * M003 section: PENDING, with planned PROC-* → file mapping +
+  * M003 section: PENDING, with planned PROC-* -> file mapping +
     "implements rule" column
-  * M004 section: PENDING, with planned TOOL-* → file mapping +
+  * M004 section: PENDING, with planned TOOL-* -> file mapping +
     "used by rules" column
   * Procedures table: 4 rows, all marked PENDING migration
   * Tools table: 2 rows, marked PENDING migration, with note that
@@ -3592,20 +3592,20 @@ Work Log:
   confirmed, session-handoff surfaced as first Phase C2 target), stale
   skills remediation queue (5 skills, ~75 min total), cross-references,
   change history.
-- Fixed `skills/skills/INDEX.md` (5 edits): bumped count 35→36,
+- Fixed `skills/skills/INDEX.md` (5 edits): bumped count 35->36,
   corrected skill-creator ID, added zai-skill-registry row, updated
-  META section (skill-creator→zai-skill-registry), updated STS section
-  (7→8 skills, added skill-creator). Added correction note at top.
+  META section (skill-creator->zai-skill-registry), updated STS section
+  (7->8 skills, added skill-creator). Added correction note at top.
 - Ran verify-standards.js + verify-id-graph.js after INDEX.md fix.
   Both PASS: 8/8 + 13/13, 0 warnings.
 - Wrote SESSION_NOTES §13 (250 lines, new section). 4 subsections:
   summary table (6 rows: 4 BLOCKING / 1 PARTIAL-ACCEPTABLE / 1
   ACCEPTABLE), per-row findings (Rows 1-6 each with evidence +
   what's missing + closing phase), cascade implications (confirms
-  B→C→D→E→F ordering; surfaces O-019 and O-020 candidates), honest
+  B->C->D->E->F ordering; surfaces O-019 and O-020 candidates), honest
   uncertainties (3: blocking-threshold call, closing-order may
   diverge, Row 6 feedback-loop is research-grade).
-- Updated O-017 in DECISIONS_LOG.md: status OPEN→"Phase A COMPLETE,
+- Updated O-017 in DECISIONS_LOG.md: status OPEN->"Phase A COMPLETE,
   awaits Phase B approval". Added "Phase A outcome" section with A1
   + A2 deliverable descriptions, 3 unanticipated findings affecting
   Phase B, status-of-cascade-phases checklist ([x] for A1+A2, [ ]
@@ -3625,7 +3625,7 @@ Stage Summary:
   2. `docs/session/SESSION_NOTES.md` §13 (250 lines, new section) —
      gap audit with 6-row classification, per-row evidence, cascade
      implications, 3 honest uncertainties.
-- INDEX.md corrected (35→36 skills, skill-creator ID fixed, zai-
+- INDEX.md corrected (35->36 skills, skill-creator ID fixed, zai-
   skill-registry added).
 - O-17 status updated: Phase A COMPLETE, awaits Phase B approval.
 - 2 new open question candidates surfaced (NOT yet formalized):
@@ -3697,7 +3697,7 @@ Work Log:
   Commits format on commit message. G4 regex (BLOCK), G5 subject
   length ≤72 (BLOCK), G6 body wrap 72 (WARN). Skips merge/revert/
   squash/fixup commits (git-generated messages, cannot enforce).
-- Updated .githooks/pre-commit (91→122 lines). Added Phase 0: worklog
+- Updated .githooks/pre-commit (91->122 lines). Added Phase 0: worklog
   freshness check (find docs/session/worklog.md -mmin -60). WARN
   only — false positives common (user edits worklog manually,
   quick-fix commits, worklog entries in other files). Preserved
@@ -3708,14 +3708,14 @@ Work Log:
   for reference.
 
 Smoke testing (4 tests):
-1. run-contract.sh --dry-run → 3 PASS, 0 WARN, 0 FAIL. Correct.
-2. run-contract.sh --commit "bad message no format" → G4 FAIL,
+1. run-contract.sh --dry-run -> 3 PASS, 0 WARN, 0 FAIL. Correct.
+2. run-contract.sh --commit "bad message no format" -> G4 FAIL,
    commit NOT created. Correct.
 3. git commit -m "bad message no format" (real git, after running
-   install-hooks.sh to activate core.hooksPath=.githooks) →
+   install-hooks.sh to activate core.hooksPath=.githooks) ->
    pre-commit PASS (Phase 0/1/2 all green), commit-msg BLOCK (G4
    regex fail). Commit NOT created. Correct.
-4. git commit -m "test(contract): smoke test good message" → all
+4. git commit -m "test(contract): smoke test good message" -> all
    checks PASS, commit created. Correct.
 
 Gotcha discovered during smoke testing (happened TWICE):
@@ -3735,7 +3735,7 @@ Gotcha discovered during smoke testing (happened TWICE):
   is "rewrite the files each time you accidentally wipe them".
 
 Updated O-017 in DECISIONS_LOG.md:
-- Status: OPEN → "Phase A + Phase B COMPLETE, awaits Phase C approval"
+- Status: OPEN -> "Phase A + Phase B COMPLETE, awaits Phase C approval"
 - Phase B checklist items marked [x]
 - Added "Phase B outcome" section (B1 + B2 deliverable descriptions,
   4 smoke test results, gotcha documentation, 5-tuple validation
@@ -3749,7 +3749,7 @@ Stage Summary:
   1. skills/skills/commit-work/CONTRACT.md (368 lines, new)
   2. skills/skills/commit-work/scripts/run-contract.sh (270 lines, new)
   3. .githooks/commit-msg (120 lines, new)
-  4. .githooks/pre-commit (91→122 lines, modified — Phase 0 added)
+  4. .githooks/pre-commit (91->122 lines, modified — Phase 0 added)
   5. install-hooks.sh (modified — documents both hooks)
   6. skills/skills/commit-work/SKILL.md (modified — contract pointer
      in frontmatter + Execution Contract section in body)
@@ -3783,11 +3783,11 @@ Work Log:
 Item 1 — LESSON-004 (SESSION_NOTES §12.7):
 - Read SESSION_NOTES.md §12 structure: 3 existing LESSON entries
   (LESSON-001 root-cause O(1)/O(N), LESSON-002 core.fileMode,
-  LESSON-003 W11→V11 promotion).
+  LESSON-003 W11->V11 promotion).
 - Added §12.7 LESSON-004: `git reset --hard` wipes uncommitted work
   tree; stash before reset. Triggered twice in Phase B smoke testing.
   Includes operational recipe (git stash push -u -m "pre-reset-safety"
-  → git reset --hard HEAD~1 → git stash pop).
+  -> git reset --hard HEAD~1 -> git stash pop).
 - Noted: distinct from LESSON-001 family (operational hygiene, not
   O(1)/O(N) scaling). Candidate for promotion into commit-work
   CONTRACT.md as guard check G0 in Phase C.
@@ -3805,7 +3805,7 @@ Item 2 — Stale skills remediation (discovered to be false positive):
   - Read /home/z/my-project/scripts/catalog_skills.py — found the bug.
   - parse_frontmatter() used simple `line.partition(":")` parser.
   - For `description: >` lines, it recorded value as ">" (literal).
-  - Classifier then saw `desc.startswith(">")` as true → flagged as
+  - Classifier then saw `desc.startswith(">")` as true -> flagged as
     stale.
   - False positive: 5 skills incorrectly classified as stale.
 
@@ -3829,14 +3829,14 @@ Item 2 — Stale skills remediation (discovered to be false positive):
 
   Re-ran catalog_skills.py:
   - Classification counts: {'active': 35, 'duplicate-candidate': 1}
-  - Was: 30 active / 5 stale / 1 dup → now 35 active / 1 dup.
+  - Was: 30 active / 5 stale / 1 dup -> now 35 active / 1 dup.
   - All 5 previously-stale skills now show ver=1.0, class=active,
     real descriptions 403-484 chars.
 
   CATALOG.md updates:
-  - §2: reworded "stale=5" → "stale=0" with explanation of false
+  - §2: reworded "stale=5" -> "stale=0" with explanation of false
     positive.
-  - §3: updated 5 rows (v? → 1.0, stale → active).
+  - §3: updated 5 rows (v? -> 1.0, stale -> active).
   - §3: added Note on remaining v? entries (4 skills: gepetto,
     phi-layout, reducing-entropy, session-handoff — legitimate
     Phase C candidates).
@@ -3893,7 +3893,7 @@ Item 3 — CI/CD rewrite (merge 2 drafts + fix 12 bugs):
   - §6 L4 bootstrap on clean sandbox (timestamped /tmp path — NEVER
     live working tree per LESSON-004)
   - §7 L7 migration resilience test (manual monthly)
-  - §8 Test cadence cheat sheet (event → what to run)
+  - §8 Test cadence cheat sheet (event -> what to run)
   - §9 Recommended additions (snapshot test, e2e test, symlink check,
     registry.json, version-bump detection, verify-skills.js,
     run-contract.sh in CI — mapped to Phase D/E)
@@ -3921,7 +3921,7 @@ Stage Summary:
 - Verifier status: 8/8 + 13/13 PASS, 1 benign soft warning.
 - Honest finding: my original "5 stale skills" report was a false
   positive caused by my own catalog_skills.py bug. Less work needed
-  than originally scoped (75 min → 30 min actual). User was
+  than originally scoped (75 min -> 30 min actual). User was
   notified in chat before proceeding.
 - LESSON-001 corroborated a 4th time: root-cause fix (parser) beat
   whitelist approach (manually marking each as not-stale).
@@ -4016,7 +4016,7 @@ Stage Summary:
 - 2 artifacts updated:
   1. SESSION_NOTES.md §12.8 LESSON-004a (new, 89 lines) + ToC fix
      + Change History row
-  2. CI-AND-TESTING.md §9 rewrite (flat table → P0/P1/P2 matrix
+  2. CI-AND-TESTING.md §9 rewrite (flat table -> P0/P1/P2 matrix
      with owners) + §10.8.1 LESSON-004a + §10.5.1 W13 limitation
      + §11 #12 cross-ref + Change History row. Document grew from
      483 to 704 lines.
@@ -4051,7 +4051,7 @@ Task: Implement all 3 P0 items from CI-AND-TESTING.md §9.2 (snapshot
 test, verify-skills.js, e2e test) — all blocked v2.5.0 release.
 
 Work Log:
-- Planned execution order: P0.1 (snapshot) → P0.2 (verify-skills) →
+- Planned execution order: P0.1 (snapshot) -> P0.2 (verify-skills) ->
   P0.3 (e2e). Rationale: snapshot test gives safety net for any
   refactoring of verify-id-graph.js (needed for P0.2 shared path-
   resolution code); verify-skills.js is the largest item, e2e is
@@ -4080,9 +4080,9 @@ P0.1 — Snapshot test for verify-id-graph.js:
 - Created standards/_snapshots/ directory + id-graph-baseline.json
   (61 IDs, 115 edges, 2 warnings as of initial creation).
 - Smoke tested 4 scenarios: (1) self-compare PASS, (2) modified
-  baseline → FAIL with 4 diffs (hard_pass, hard_fail, G15.status,
-  G15.details), (3) --update-snapshot --compare → rewrites baseline,
-  (4) round-trip after update → PASS.
+  baseline -> FAIL with 4 diffs (hard_pass, hard_fail, G15.status,
+  G15.details), (3) --update-snapshot --compare -> rewrites baseline,
+  (4) round-trip after update -> PASS.
 - Backward compat verified: --json still works, plain run (no flags)
   still works, --help shows new flags.
 - Added "Snapshot compare" step to .github/workflows/verify-id-graph.yml
@@ -4130,15 +4130,15 @@ P0.2 — verify-skills.js:
 
 P0.3 — End-to-end test:
 - Wrote .github/workflows/e2e-verifiers.yml (180 lines) with 5 tests:
-  - Test 1: V11 violation (1004-line _e2e_test_v11.md) → expects
+  - Test 1: V11 violation (1004-line _e2e_test_v11.md) -> expects
     verify-standards.js exit 1 with V11 in output.
-  - Test 2: cleanup → expects verify-standards.js PASS.
-  - Test 3: S02 violation (_e2e-test-skill/ with wrong name) → expects
+  - Test 2: cleanup -> expects verify-standards.js PASS.
+  - Test 3: S02 violation (_e2e-test-skill/ with wrong name) -> expects
     verify-skills.js --strict exit 1 with S02 in output.
-  - Test 4: cleanup → expects verify-skills.js PASS.
-  - Test 5: snapshot compare mismatch (modify baseline in-memory) →
+  - Test 4: cleanup -> expects verify-skills.js PASS.
+  - Test 5: snapshot compare mismatch (modify baseline in-memory) ->
     expects verify-id-graph.js --compare exit 1 with MISMATCH in
-    output. Restore + re-run → PASS.
+    output. Restore + re-run -> PASS.
 - Triggers: workflow_dispatch + pull_request (path-filtered to
   standards/scripts/** + the workflow file itself, to avoid wasted
   runner minutes on unrelated PRs).
@@ -4171,12 +4171,12 @@ Stage Summary:
   2. standards/_snapshots/id-graph-baseline.json (snapshot baseline)
   3. .github/workflows/e2e-verifiers.yml (180 lines, 5 tests)
 - Modified artifacts:
-  1. standards/scripts/verify-id-graph.js (v1.1.3 → v1.1.4, +147
+  1. standards/scripts/verify-id-graph.js (v1.1.3 -> v1.1.4, +147
      lines for snapshot/compare)
   2. .githooks/pre-commit (+33 lines for Phase 3 verify-skills.js)
   3. .github/workflows/verify-id-graph.yml (+52 lines for snapshot
      compare step + verify-skills.js step)
-  4. standards/docs/CI-AND-TESTING.md (704 → 795 lines, §9.2 marked
+  4. standards/docs/CI-AND-TESTING.md (704 -> 795 lines, §9.2 marked
      IMPLEMENTED with detailed status per item)
 - Honest finding: verify-skills.js found 15 real violations in the
   existing skills corpus. Rather than block CI on pre-existing tech
@@ -4429,10 +4429,10 @@ Work Log:
      Pure data module.
   2. standards/scripts/lib/parsers.js (188 lines):
      parseYAMLFrontmatter, parseBlockquoteHeader, parseHTMLComment,
-     extractReferences. Pure string in → object out. Could be reused
+     extractReferences. Pure string in -> object out. Could be reused
      by verify-skills.js (which currently duplicates parseFrontmatter).
   3. standards/scripts/lib/graph-algorithms.js (96 lines):
-     tarjanSCC. Pure (nodes, edges) in → SCCs out. O(V+E) Tarjan
+     tarjanSCC. Pure (nodes, edges) in -> SCCs out. O(V+E) Tarjan
      algorithm with reference citation.
   4. standards/scripts/lib/snapshot.js (126 lines):
      compareSnapshot. Has 1 fs.readFileSync call (read baseline) but
@@ -4447,7 +4447,7 @@ Work Log:
     fs.readFileSync — impure, belongs in main file).
   - Kept phase1-phase10 inline (they mutate global `results` state —
     would require larger refactor to extract; deferred).
-  - Bumped VERSION 1.1.4 → 1.1.5, EFFECTIVE_DATE 2026-06-17 → 2026-06-21.
+  - Bumped VERSION 1.1.4 -> 1.1.5, EFFECTIVE_DATE 2026-06-17 -> 2026-06-21.
   - compareSnapshot wrapped in 2-arg backward-compat shim that passes
     VERSION to the 3-arg lib/snapshot.js function.
 - Hit one regression during smoke test: VALID_DOMAINS collision.
@@ -4457,7 +4457,7 @@ Work Log:
   are valid sets but for different domains. Fixed by NOT importing
   VALID_DOMAINS from lib/constants (left a comment explaining why).
 - Smoke test post-fix: JSON output byte-identical to baseline except
-  for `version` (1.1.4 → 1.1.5) and `effective_date` (2026-06-17 →
+  for `version` (1.1.4 -> 1.1.5) and `effective_date` (2026-06-17 ->
   2026-06-21) — expected version-bump changes. All structural fields
   (summary, checks, warnings) byte-identical.
 - Updated snapshot baseline: --update-snapshot wrote new baseline
@@ -4473,7 +4473,7 @@ Work Log:
 
 Stage Summary:
 - O-018 (verify-id-graph.js modularization) COMPLETE.
-- verify-id-graph.js: 1593 → 1354 lines (-239 lines, -15%).
+- verify-id-graph.js: 1593 -> 1354 lines (-239 lines, -15%).
 - 4 new lib/ submodules (500 lines total) with comprehensive
   docstrings, ready for unit testing (none exist yet — Phase D2
   or later could add a test harness that imports lib/*.js directly).
@@ -4481,7 +4481,7 @@ Stage Summary:
   ones. lib/parsers.js can be required by verify-skills.js to
   eliminate the parseFrontmatter duplication (TODO — deferred to
   avoid scope creep in this task).
-- Honest finding: total line count grew (1593 → 1854) because the
+- Honest finding: total line count grew (1593 -> 1854) because the
   new lib/ files have detailed docstrings (every function gets a
   JSDoc block explaining semantics + edge cases + reference for
   tarjanSCC). This is intentional — the docstrings are the test
@@ -4513,8 +4513,8 @@ Work Log:
 - Updated META-001 §4.18.5: added cross-link for CONTRACT.md to STD-SKILL-001 §8.2.
 - Updated STD-SKILL-001 §8.2: added CONTRACT.md ceiling line.
 - Updated STD-SKILL-001 §10.1: replaced deferred PROC-LINECOUNT-004 row with active verify-skills.js S10a/S10b rows.
-- Implemented S10 in verify-skills.js v1.0.0 → v1.1.0: S10a (SKILL.md ≤ 800, HARD, all skills) + S10b (CONTRACT.md ≤ 500, HARD, if present). HARD from day 1 (current corpus passes). References explicitly NOT scanned (exempt per §4.18.1). README.md cap deferred (2 violations need remediation first).
-- V11 regression: META-001 grew to 1017 lines (>1000 hard cap) after adding §4.18.6 rationale. Compressed §4.18.6 from ~38 lines to ~14 lines → META-001 now 994 lines, V11 PASS.
+- Implemented S10 in verify-skills.js v1.0.0 -> v1.1.0: S10a (SKILL.md ≤ 800, HARD, all skills) + S10b (CONTRACT.md ≤ 500, HARD, if present). HARD from day 1 (current corpus passes). References explicitly NOT scanned (exempt per §4.18.1). README.md cap deferred (2 violations need remediation first).
+- V11 regression: META-001 grew to 1017 lines (>1000 hard cap) after adding §4.18.6 rationale. Compressed §4.18.6 from ~38 lines to ~14 lines -> META-001 now 994 lines, V11 PASS.
 - Snapshot baseline updated twice: first after §4.18.6 addition (4 new W13 false positives from prose mentions of CONTRACT.md in META-001/SKILL-001), then after §9.3.3 addition to CI-AND-TESTING.md (4 more W13 false positives from prose mentions of CONTRACT.md paths). Final baseline: 61 IDs, 115 edges, 11 warnings. W13 root-cause fix (whitelist scales as O(N) per LESSON-001) deferred to O-018.
 - Updated CI-AND-TESTING.md §9.3.3: IMPLEMENTED badge, full rationale, what was NOT added (README cap, references cap), companion standard changes list, verification output.
 - Updated DECISIONS_LOG.md O-017: Phase D marked COMPLETE (both D1 + D2 done). Change history entry added.
@@ -4526,7 +4526,7 @@ Stage Summary:
 - verify-id-graph.js: 13/13 HARD + snapshot OK (61 IDs, 115 edges, 11 warnings — 8 new W13 false positives from prose mentions, root-cause fix deferred to O-018).
 - Tiered caps: SKILL.md ≤ 800 (existing §4.18.1 row, NEW enforcement), CONTRACT.md ≤ 500 (NEW row, validated against 2 pilots), references exempt (O-017's "≤2000" rejected as wrong per §4.18.1). README.md ≤ 400 deferred (2 violations need remediation first: gepetto 485, react-dev 404).
 - LESSON-001 applied: original O-017 estimate of 200 for CONTRACT.md was pre-pilot; cap adjusted to fit measured reality (500) rather than compressing structural 10-section shape. Symptom-fix (compress pilots to fit wrong cap) scales as O(N) over time; root-cause fix (set cap to fit reality) scales as O(1).
-- Files changed: META-001-standard-id-system.md (+CONTRACT.md row in §4.18.1, +§4.18.6 rationale, +cross-link in §4.18.5), SKILL-001-skill-format.md (§8.2 + CONTRACT.md line, §10.1 replaced PROC-LINECOUNT-004 with S10a/S10b), verify-skills.js (v1.0.0 → v1.1.0, +S10 check, +help text, +header docstring), CI-AND-TESTING.md (+§9.3.3 IMPLEMENTED), DECISIONS_LOG.md (O-017 Phase D status + change history), worklog.md (this entry), standards/_snapshots/id-graph-baseline.json (updated, +8 W13 warnings).
+- Files changed: META-001-standard-id-system.md (+CONTRACT.md row in §4.18.1, +§4.18.6 rationale, +cross-link in §4.18.5), SKILL-001-skill-format.md (§8.2 + CONTRACT.md line, §10.1 replaced PROC-LINECOUNT-004 with S10a/S10b), verify-skills.js (v1.0.0 -> v1.1.0, +S10 check, +help text, +header docstring), CI-AND-TESTING.md (+§9.3.3 IMPLEMENTED), DECISIONS_LOG.md (O-017 Phase D status + change history), worklog.md (this entry), standards/_snapshots/id-graph-baseline.json (updated, +8 W13 warnings).
 - Next: O-018 (verify-id-graph.js modularization — 1355 lines, target ≤1000).
 
 ---
@@ -4540,23 +4540,23 @@ Work Log:
 - Created `lib/health-warnings.js` (349 lines incl docstrings): extracted phase10_healthWarnings + W13_WHITELIST + stripChangeHistory + buildCandidates + VALID_DOMAINS. Function signature changed to take `warnFn` parameter (dependency injection — keeps module testable). Caller updated to pass `warn` from main verifier.
 - W13 ROOT-CAUSE FIX (LESSON-001 applied): expanded `buildCandidates()` to include `path.join(platformRoot, 'skills', 'skills', refPath)` — resolves path-like refs (`commit-work/CONTRACT.md`, `session-handoff/CONTRACT.md`, `gepetto/README.md`, `react-dev/README.md`) to actual files in skills/skills/ tree. Also fixed submodule path resolution: submodules are mounted inside `Z-ai-platform/` (per .gitmodules: skills/ at Z-ai-platform/skills/, guard/ at Z-ai-platform/guard/), NOT as siblings at `../Z-ai-skills/` or `../Z-ai-guard/`. Original candidates list used `../Z-ai-skills/` which never resolved. Added correct paths `path.join(platformRoot, 'skills', ...)` and `path.join(platformRoot, 'guard', ...)`.
 - W13 whitelist kept for genuinely planned/historical/generic refs (validate.sh, install.sh, doctor.sh, AGENT_RULES.md, STANDARDS.md, SKILL.md, CONTRACT.md, etc.). Whitelist is now stable — new prose mentions of skills/ paths won't require new whitelist entries (root-cause fix in candidates list).
-- W13 false-positive count: 11 → 0. All 11 prior false positives (commit-work/CONTRACT.md, session-handoff/CONTRACT.md, gepetto/README.md, react-dev/README.md, CONTRACT.md, Z-ai-skills/skills/skill-id-system/SKILL.md, etc.) now resolve correctly.
+- W13 false-positive count: 11 -> 0. All 11 prior false positives (commit-work/CONTRACT.md, session-handoff/CONTRACT.md, gepetto/README.md, react-dev/README.md, CONTRACT.md, Z-ai-skills/skills/skill-id-system/SKILL.md, etc.) now resolve correctly.
 - Created `lib/output.js` (152 lines): extracted emitHumanReadable + emitJSON. Functions take `results, version, effectiveDate, opts` parameters (pure — no module-level state). Thin wrappers in main file pass `results, VERSION, EFFECTIVE_DATE, opts`.
 - Created `lib/file-scanner.js` (138 lines): extracted listFiles + globFiles + matchesPattern + SKIP_DIRS. JSDoc comment fix: had to remove regex patterns from comment block (`**/` triggers end-of-JSDoc). Replaced with prose description ("double-star slash" instead of `**/`).
 - Created `lib/declarations.js` (251 lines): extracted extractDeclaration + parseMigrations + ID_TOKEN_RE. These are impure (fs.readFileSync) but kept together for testability (future test harness can mock fs). Import dependencies: lib/constants (ID_REGEX), lib/parsers (parseYAMLFrontmatter, parseBlockquoteHeader, parseHTMLComment).
-- Bumped verify-id-graph.js v1.1.5 → v1.1.6. Updated header docstring version.
+- Bumped verify-id-graph.js v1.1.5 -> v1.1.6. Updated header docstring version.
 - Updated snapshot baseline: 61 IDs, 115 edges, 0 warnings (was 11). All 11 prior W13 false positives removed.
 - All 3 verifiers regression-checked: verify-standards.js 8/8 PASS, verify-id-graph.js 13/13 HARD + 0 warnings + snapshot OK, verify-skills.js --strict 8/8 HARD PASS.
 
 Stage Summary:
-- verify-id-graph.js: 1355 → 829 lines (-526 lines, -39%). Under 1000-line target.
+- verify-id-graph.js: 1355 -> 829 lines (-526 lines, -39%). Under 1000-line target.
 - lib/ footprint: 7 files, 1390 lines total (4 existing + 3 new in this task: declarations 251, file-scanner 138, health-warnings 349, output 152). Plus existing: constants 90, graph-algorithms 96, parsers 188, snapshot 126.
-- W13 root-cause fix: 11 false-positive warnings → 0. LESSON-001 applied — candidates-list expansion (O(1)) preferred over whitelist growth (O(N)). Whitelist kept small (~15 entries) for genuinely planned/historical/generic refs.
+- W13 root-cause fix: 11 false-positive warnings -> 0. LESSON-001 applied — candidates-list expansion (O(1)) preferred over whitelist growth (O(N)). Whitelist kept small (~15 entries) for genuinely planned/historical/generic refs.
 - Submodule path resolution bug fixed: original `../Z-ai-skills/` never resolved (submodules are mounted inside Z-ai-platform/, not as siblings). New candidates list uses correct paths `Z-ai-platform/skills/...` and `Z-ai-platform/guard/...`.
-- Files changed: verify-id-graph.js (v1.1.5 → v1.1.6, -526 lines), lib/health-warnings.js (NEW, 349 lines), lib/output.js (NEW, 152 lines), lib/file-scanner.js (NEW, 138 lines), lib/declarations.js (NEW, 251 lines), standards/_snapshots/id-graph-baseline.json (updated, 11 warnings removed), DECISIONS_LOG.md (O-018 COMPLETE entry), worklog.md (this entry).
+- Files changed: verify-id-graph.js (v1.1.5 -> v1.1.6, -526 lines), lib/health-warnings.js (NEW, 349 lines), lib/output.js (NEW, 152 lines), lib/file-scanner.js (NEW, 138 lines), lib/declarations.js (NEW, 251 lines), standards/_snapshots/id-graph-baseline.json (updated, 11 warnings removed), DECISIONS_LOG.md (O-018 COMPLETE entry), worklog.md (this entry).
 - Honest finding: total code footprint grew slightly (verify-id-graph.js 829 + lib/ 1390 = 2219 lines vs previous 1354 + lib/ 500 = 1854 lines, +365 lines / +20%). This is because new lib/ files have comprehensive JSDoc docstrings (every function gets a block explaining semantics + edge cases + dependencies). The docstrings are the test plan for future unit tests. Pure line-count reduction was NOT the goal — modularization for testability and isolation was. The main file being under 1000 lines means a reader can scan it end-to-end in one sitting.
-- Honest finding #2: W13 root-cause fix was unanticipated scope creep. Original task was "modularize verify-id-graph.js". But while extracting health-warnings.js, I noticed the whitelist had grown to ~30 entries — a LESSON-001 anti-pattern. The fix (expand candidates list to include skills/skills/ tree + fix submodule paths) was small (~20 lines) and delivered 11→0 warning improvement. Worth the scope expansion.
-- Next: ALL tasks from "делать все по приоритетам" authorization are now COMPLETE. D2 (tiered hard caps) ✅, O-018 (modularization) ✅. Phase E (consumer integration) explicitly deferred per user. Phase F (dashboard) blocked by E1.
+- Honest finding #2: W13 root-cause fix was unanticipated scope creep. Original task was "modularize verify-id-graph.js". But while extracting health-warnings.js, I noticed the whitelist had grown to ~30 entries — a LESSON-001 anti-pattern. The fix (expand candidates list to include skills/skills/ tree + fix submodule paths) was small (~20 lines) and delivered 11->0 warning improvement. Worth the scope expansion.
+- Next: ALL tasks from "делать все по приоритетам" authorization are now COMPLETE. D2 (tiered hard caps) [OK], O-018 (modularization) [OK]. Phase E (consumer integration) explicitly deferred per user. Phase F (dashboard) blocked by E1.
 
 ---
 Task ID: S10c-readme-cap-2026-06-22
@@ -4566,43 +4566,43 @@ Task: Remediate 2 READMEs (gepetto 485, react-dev 404) that violated the §4.18.
 Work Log:
 - Checked v2.5.0 tag status: already exists (ef9c3d5, 2026-06-21 15:39 UTC), annotated, points to the §9.2.2 remediation commit. Reports this to user; asks whether to also cut v2.6.0 for post-v2.5.0 work (Phase C, Phase D2, O-018, S10c).
 - Read gepetto/README.md (485 lines) and identified compression targets:
-  - 27-line ASCII workflow diagram (lines 82-108) → replaced with 6-line text description of the 6 phases
-  - 15-line TOC (lines 35-49) → removed (README of this size doesn't need nav)
-  - 3 overlapping sections ("Implementing the Plan" lines 248-296, "Integration with ralph-loop" lines 299-377, "Integration with Ralphy" lines 380-453) → consolidated into one "Implementing the Plan" section with key differences in a comparison table. Preserved all 6 output-file examples, 5 best practices, 3 implementation options (A/B/C), full installation instructions, file structure, and Differences-from-Similar-Tools table.
-  - Result: 485 → 302 lines (-183, -38%). Well under the 400 cap.
+  - 27-line ASCII workflow diagram (lines 82-108) -> replaced with 6-line text description of the 6 phases
+  - 15-line TOC (lines 35-49) -> removed (README of this size doesn't need nav)
+  - 3 overlapping sections ("Implementing the Plan" lines 248-296, "Integration with ralph-loop" lines 299-377, "Integration with Ralphy" lines 380-453) -> consolidated into one "Implementing the Plan" section with key differences in a comparison table. Preserved all 6 output-file examples, 5 best practices, 3 implementation options (A/B/C), full installation instructions, file structure, and Differences-from-Similar-Tools table.
+  - Result: 485 -> 302 lines (-183, -38%). Well under the 400 cap.
 - Read react-dev/README.md (404 lines, only 4 over cap) and identified minimal cuts:
-  - "Reference File Organization" section (12 lines, 7-bullet list with file descriptions) → condensed to one paragraph preserving all 7 file names and their scope (3 lines saved)
-  - "Related Skills" section (3-bullet list) → condensed to one line (3 lines saved)
-  - Result: 404 → 392 lines (-12, -3%). Just barely under cap, but enough.
-- Implemented S10c in verify-skills.js v1.1.0 → v1.1.1:
+  - "Reference File Organization" section (12 lines, 7-bullet list with file descriptions) -> condensed to one paragraph preserving all 7 file names and their scope (3 lines saved)
+  - "Related Skills" section (3-bullet list) -> condensed to one line (3 lines saved)
+  - Result: 404 -> 392 lines (-12, -3%). Just barely under cap, but enough.
+- Implemented S10c in verify-skills.js v1.1.0 -> v1.1.1:
   - Added READMEMD_CAP = 400 constant, readmeMdOffenders collection, readmeMdChecked counter
   - Added S10c loop block: scans skills/skills/{name}/README.md if present, counts lines, pushes offender if > 400
   - Added S10c check() call with same pattern as S10a/S10b
-  - Updated header docstring: "runs 10 checks" → "runs 11 checks", added S10c line to S10 block
+  - Updated header docstring: "runs 10 checks" -> "runs 11 checks", added S10c line to S10 block
   - Updated SCOPE block: added README.md row
   - Updated S10 rationale comment block: added S10c context (cap existed 2026-06-21, deferred pending 2 violations, both remediated 2026-06-22, now HARD from day 1)
   - Added (c) to FAILURE MODE block: "For README.md, move detailed integration examples to references/ — README is for onboarding/overview only"
   - Updated help text: HARD block adds S10c row, S10 rationale block adds 2026-06-22 S10c activation context
-  - Bumped VERSION 1.1.0 → 1.1.1, EFFECTIVE_DATE 2026-06-21 → 2026-06-22
+  - Bumped VERSION 1.1.0 -> 1.1.1, EFFECTIVE_DATE 2026-06-21 -> 2026-06-22
 - Updated META-001-standard-id-system.md:
   - §4.18.1 README.md row pre-existing (400/250) — no change needed
   - §4.18.4 exempt list: COMPRESSED from 4 multi-row markdown tables (one per file, ~85 lines) to 4 compact paragraphs (~36 lines). Top-10 references kept, rest summarised as "33 files range 46-450 lines, full list regenerable via scripts/audit_md_files.py". Saved ~50 lines. This compression was needed because §4.18.7 addition would have pushed META-001 over the V11 1000-line hard cap.
-  - §4.18.5: added cross-link "STD-SKILL-001 §8.2 → README.md hard ceiling: 400 lines, see META-001 §4.18.1 (README.md row); soft warn at 250" (added 2026-06-22, S10c activation — see §4.18.7)
-  - §4.18.7 (NEW): "README.md cap rationale (added 2026-06-22, S10c activation)" — documents (a) the 400-line ceiling existed in §4.18.1 since 2026-06-21 but was not enforced until S10c v1.1.1, (b) 2 pre-existing violations (gepetto 485, react-dev 404) blocked HARD enforcement from day 1, (c) both remediated on 2026-06-22 (gepetto 485→302, react-dev 404→392), (d) the 400-line ceiling reflects README's purpose as onboarding/overview doc, (e) failure-mode protocol (move detailed integration examples to references/), (f) remediation approach used for gepetto (consolidated 3 overlapping sections) and react-dev (condensed 1 multi-item bullet list).
+  - §4.18.5: added cross-link "STD-SKILL-001 §8.2 -> README.md hard ceiling: 400 lines, see META-001 §4.18.1 (README.md row); soft warn at 250" (added 2026-06-22, S10c activation — see §4.18.7)
+  - §4.18.7 (NEW): "README.md cap rationale (added 2026-06-22, S10c activation)" — documents (a) the 400-line ceiling existed in §4.18.1 since 2026-06-21 but was not enforced until S10c v1.1.1, (b) 2 pre-existing violations (gepetto 485, react-dev 404) blocked HARD enforcement from day 1, (c) both remediated on 2026-06-22 (gepetto 485->302, react-dev 404->392), (d) the 400-line ceiling reflects README's purpose as onboarding/overview doc, (e) failure-mode protocol (move detailed integration examples to references/), (f) remediation approach used for gepetto (consolidated 3 overlapping sections) and react-dev (condensed 1 multi-item bullet list).
   - META-001 final size: 962 lines (was 994 before this patch, V11 PASS with 38-line headroom).
 - Updated STD-SKILL-001-skill-format.md:
-  - §8.2: added README.md ceiling line ("README.md hard ceiling: 400 lines (META-001 §4.18.1, README.md row); soft warn at 250 — added 2026-06-22 (S10c activation after gepetto 485→302 + react-dev 404→392 remediation). See META-001 §4.18.7 for rationale.")
+  - §8.2: added README.md ceiling line ("README.md hard ceiling: 400 lines (META-001 §4.18.1, README.md row); soft warn at 250 — added 2026-06-22 (S10c activation after gepetto 485->302 + react-dev 404->392 remediation). See META-001 §4.18.7 for rationale.")
   - §10.1: added V12c row to per-skill checks table ("README.md ≤ 400 lines (META-001 §4.18.1, README.md row) | verify-skills.js | V12c | HARD (all skills with README.md) — added 2026-06-22 (S10c activation, gepetto+react-dev remediated)")
   - Footer: appended V12c addition note to change history
 - Updated CI-AND-TESTING.md §9.3.3:
-  - Status badge: "IMPLEMENTED (2026-06-21, O-017 Phase D2)" → "IMPLEMENTED + EXTENDED (2026-06-21, O-017 Phase D2; S10c added 2026-06-22)"
-  - Version reference: v1.1.0 → v1.1.1
+  - Status badge: "IMPLEMENTED (2026-06-21, O-017 Phase D2)" -> "IMPLEMENTED + EXTENDED (2026-06-21, O-017 Phase D2; S10c added 2026-06-22)"
+  - Version reference: v1.1.0 -> v1.1.1
   - Added S10c row to "What was added" table (Cap 400, Scope 10 skills with README.md)
   - Added "Why S10c was activated on 2026-06-22 (not 2026-06-21 with S10a/S10b)" subsection explaining the deferred-from-day-1 pattern
   - Replaced "What was NOT added (deferred)" section: removed README.md bullet (no longer deferred), kept References bullet (correctly NOT added because exempt per §4.18.1, not because of violations)
-  - Updated companion standard changes list: added §4.18.7 (new), README.md rows in §4.18.5/§8.2/§10.1, version bump v1.1.0 → v1.1.1
-  - Updated verification output: 8/8 → 9/9 HARD PASS, added S10c line (10 README.md files ≤ 400, max: 392 react-dev)
-  - Updated Status line: "COMPLETE 2026-06-21" → "COMPLETE 2026-06-22 (S10a+S10b on 2026-06-21, S10c on 2026-06-22)"
+  - Updated companion standard changes list: added §4.18.7 (new), README.md rows in §4.18.5/§8.2/§10.1, version bump v1.1.0 -> v1.1.1
+  - Updated verification output: 8/8 -> 9/9 HARD PASS, added S10c line (10 README.md files ≤ 400, max: 392 react-dev)
+  - Updated Status line: "COMPLETE 2026-06-21" -> "COMPLETE 2026-06-22 (S10a+S10b on 2026-06-21, S10c on 2026-06-22)"
 - W13 warning root-cause fix (caught by verify-id-graph.js): initial draft of §4.18.7 mentioned "references/readme-supplement.md" as an example file path. verify-id-graph.js flagged this as W13 (referenced file does not exist in standards/ tree). Fixed by rephrasing to "a new file under references/ (topic-specific, e.g. references/integration-<tool>.md)" — same guidance, no false positive.
 - Final verifier sweep:
   - verify-standards.js: 8/8 PASS (V11 scanned 40 files, all ≤1000; META-001 = 962 lines)
@@ -4633,13 +4633,13 @@ Work Log:
   - verify-id-graph.js: 13/13 HARD PASS, 0 warnings, snapshot compare OK
   - verify-skills.js --strict (v1.1.1): 9/9 HARD PASS, 0 SOFT warnings (S10a 36 SKILL.md ≤ 800, S10b 2 CONTRACT.md ≤ 500, S10c 10 README.md ≤ 400 — max 392 react-dev)
 - Catalogued post-v2.5.0 work included in this tag:
-  - platform/ (5 commits): 78879d0 O-017 Phase C+D1 worklog → 5b86c19 O-018 worklog → 794b10b O-017 Phase D2 complete → 7702111 O-018 complete → 2cb7787 S10c shipped + 2 submodule bumps (HEAD)
-  - standards/ submodule (4 commits since 7dd54d1): 613122e O-018 modularize → 4c03289 O-017 Phase D2 V12 caps → 9c4fdd1 O-018 complete → a259a6b S10c v1.1.1 (HEAD pointer)
-  - skills/ submodule (2 commits since 3bddaa5): a685d9a O-017 Phase C session-handoff + template → 9797e69 READMEs remediation for S10c (HEAD pointer)
+  - platform/ (5 commits): 78879d0 O-017 Phase C+D1 worklog -> 5b86c19 O-018 worklog -> 794b10b O-017 Phase D2 complete -> 7702111 O-018 complete -> 2cb7787 S10c shipped + 2 submodule bumps (HEAD)
+  - standards/ submodule (4 commits since 7dd54d1): 613122e O-018 modularize -> 4c03289 O-017 Phase D2 V12 caps -> 9c4fdd1 O-018 complete -> a259a6b S10c v1.1.1 (HEAD pointer)
+  - skills/ submodule (2 commits since 3bddaa5): a685d9a O-017 Phase C session-handoff + template -> 9797e69 READMEs remediation for S10c (HEAD pointer)
   - guard/ submodule: unchanged (2e2579d, same as at v2.5.0 — no guard rules changed in this window)
 - Wrote annotated tag message to /home/z/my-project/scripts/v2.6.0-tag-message.txt covering: (1) O-017 Phase D2 V12a+b tiered hard caps, (2) O-018 verify-id-graph.js modularization into 8 lib/ modules, (3) S10c V12c README.md ≤ 400 HARD cap activation, (4) final verifier status, (5) submodule pointers, (6) O-017 cascade status, (7) intentional deferrals (E1/E2/Phase E/F).
 - Created annotated tag: `git tag -a v2.6.0 -F <message-file> HEAD`. Points to 2cb778724a0b477b84b0b85ee3e4baed74e0d5ad. Tag object SHA: 53e1648c64ddbbc75a1896de6909f5b964004b95.
-- Pushed to origin: `git push origin v2.6.0` → * [new tag] v2.6.0 -> v2.6.0. Verified via `git ls-remote --tags origin v2.6.0` → 53e1648c64ddbbc75a1896de6909f5b964004b95 refs/tags/v2.6.0.
+- Pushed to origin: `git push origin v2.6.0` -> * [new tag] v2.6.0 -> v2.6.0. Verified via `git ls-remote --tags origin v2.6.0` -> 53e1648c64ddbbc75a1896de6909f5b964004b95 refs/tags/v2.6.0.
 
 Stage Summary:
 - v2.6.0 ANNOTATED TAG CUT AND PUSHED. Located at platform HEAD 2cb7787. Backed by clean green state across all 3 repos.
@@ -4652,13 +4652,13 @@ Stage Summary:
 ---
 Task ID: dense-graph-repo-2026-06-22
 Agent: Super Z (main)
-Task: User asked to collect all ID-graph visualization work into a new external GitHub repo `stsgs1980/Dense-graph` for fork discussion. Then iteratively: rename viewer/→examples/, add 6 P-MAS wireframes user uploaded, analyze them, propose 4-layer architecture, decide to defer CLI to Phase 2, build hierarchy-live.html with 3 layout modes (Flat/Clustered/Radial) using P-MAS wireframe design system + live Z-ai ID-graph data.
+Task: User asked to collect all ID-graph visualization work into a new external GitHub repo `stsgs1980/Dense-graph` for fork discussion. Then iteratively: rename viewer/->examples/, add 6 P-MAS wireframes user uploaded, analyze them, propose 4-layer architecture, decide to defer CLI to Phase 2, build hierarchy-live.html with 3 layout modes (Flat/Clustered/Radial) using P-MAS wireframe design system + live Z-ai ID-graph data.
 
 Work Log:
 - Staged repo at /home/z/my-project/Dense-graph/ with structure: examples/ data/ renders/ scripts/ + README + .gitignore
 - Init git, first commit (35421b4): 14 files, 60 IDs / 113 edges data + 2 viewers + 2 extractors + Graphviz renders
 - Pushed to https://github.com/stsgs1980/Dense-graph.git (used GH token from upload/Zai push.txt, then stripped from remote URL for security)
-- Renamed viewer/ → examples/ (commit 70db96a), updated README paths, added Repository layout section explaining convention `examples/wireframe-*.html` for new wireframes
+- Renamed viewer/ -> examples/ (commit 70db96a), updated README paths, added Repository layout section explaining convention `examples/wireframe-*.html` for new wireframes
 - Analyzed 6 P-MAS wireframes user uploaded to upload/:
   - 01-dashboard.html (47 KB): KPI strip, status donut, top performers, network chart, system health
   - 02-hierarchy.html (52 KB): tree + force canvas + detail panel
@@ -4676,7 +4676,7 @@ Work Log:
 - Built /home/z/my-project/Dense-graph/examples/hierarchy-live.html (49 KB, single-file):
   - P-MAS wireframe design system (pure black + cyan, 56px header, 240px left sidebar, 340px right panel, 44px KPI strip)
   - 3 layout modes: Flat (pure force), Clustered (4 repo clusters with gravity), Radial (concentric by in-degree, top hub at center)
-  - Left sidebar: expandable tree of 4 modules → individual IDs (60 total)
+  - Left sidebar: expandable tree of 4 modules -> individual IDs (60 total)
   - Center canvas: D3 v7 force simulation, zoom/pan, drag nodes, edge-type filters
   - Right panel: per-ID detail (title, file, repo badge, in/out/total deg) + clickable in/out edges + BFS shortest-path search
   - KPI strip: 60 IDs / 113 edges / 4 repos / isolated count / top hub (STD-SKILL-001, 23 in-edges)
@@ -4692,193 +4692,7 @@ Stage Summary:
 - External repo https://github.com/stsgs1980/Dense-graph fully populated and pushed (5 commits, ~440 KB total, 14+ files).
 - examples/hierarchy-live.html is the main Phase 1 deliverable: P-MAS-styled Hierarchy view with real Z-ai ID-graph data, 3 layout modes, BFS path search, all clickable.
 - Phase 2 (CLI Terminal + coding + autonomous agents) explicitly DEFERRED until user verifies all module links visible and working in hierarchy-live.html.
-- 4-layer architecture documented: UI → Control (deferred) → Orchestration (rewrite) → Knowledge (existing Z-ai submodules).
+- 4-layer architecture documented: UI -> Control (deferred) -> Orchestration (rewrite) -> Knowledge (existing Z-ai submodules).
 - Fork name decided: `Z.ai-Dense-graph` (not yet created — waiting for Phase 2 green light).
 - Token from upload/Zai push.txt was used for push, then stripped from remote URL. User advised to revoke the token in GitHub settings as safety net.
-- Next when user returns: open examples/hierarchy-live.html locally, test 3 layout modes + BFS path search, report any visual/UX issues. If satisfied → green light Phase 2. If issues → iterate on hierarchy-live.html.
-
----
-Task ID: agent-rules-md-2026-06-22
-Agent: Super Z (main)
-Task: Close Gap 1 (no single entry point) + Gap 3 (no arbitration layer) from external reviewer feedback. Create AGENT_RULES.md as single orchestration entry point for agents. Extend bootstrap.sh to print it + run sanity verifiers at session start (warning-only).
-
-Work Log:
-- Verified all 4 gaps from reviewer feedback against actual repo state:
-  - Gap 1 (5 entry points): confirmed, but platform/ root IS the platform (not separate dir)
-  - Gap 2 (rules not enforced in runtime): confirmed, guard/README.md self-documents this (PROC 0/4, TOOL 0/2, instructions 0, registry.json 0)
-  - Gap 3 (no arbitration layer): confirmed, no priority order documented anywhere
-  - Gap 4 (Superpowers orphan): COULD NOT VERIFY — no .superpowers-zai/ dir, no sp-* skills in skills/skills/. Reviewer describes component that does not exist in our project.
-- User clarified: Superpowers = external Zcode plugin adapted for Z.ai. Policy: treat as Priority 4, never overrides Z-ai standards. One-line policy in AGENT_RULES.md §6.
-- Created /home/z/my-project/Z-ai-platform/AGENT_RULES.md (207 lines, 8 KB) at platform ROOT (not in guard/ — entry point can't live inside what it points to):
-  - §1 Onboarding Protocol (6 sequential steps)
-  - §2 Priority Order: STD-* > RULE-MONOLITH-* > AGENT_RULES.md > ZAI-* skills (with worked example)
-  - §3 Rule Registry reference (guard/rules/INDEX.md, top 5 most-bitten rules listed)
-  - §4 Skill Catalog reference (skills/skills/INDEX.md, 36 skills, 25 with ZAI-* ID)
-  - §5 Standards Install Order reference (ARCH-002, tier 1/2/3 listed)
-  - §6 Superpowers Policy (external plugin, Priority 4, untrusted)
-  - §7 Sanity Verifiers (warning-only at session start)
-  - §8 Forbidden Actions (7 hard stops, all reference specific RULE-MONOLITH-* or STD-* IDs)
-  - §9 Version Lock (v2.6.0, submodule SHAs)
-  - §10 Change Protocol (owned by platform maintainer, not editable from subagent context)
-- Extended bootstrap.sh with Step 5 + Step 6:
-  - Step 5: cat AGENT_RULES.md to stdout (so agent sees it at session start)
-  - Step 6: run verify-standards.js + verify-id-graph.js (warning-only, non-blocking, tail -10)
-  - Used [WARN] prefix (ASCII) not unicode warning symbol (RULE-MONOLITH-015 compliance)
-  - bash -n syntax check: PASS
-- Verified no regressions:
-  - verify-standards.js: 8/8 PASS (AGENT_RULES.md is not in standards/ tree, so V11 1000-line cap doesn't apply, but file is 207 lines anyway)
-  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings
-  - verify-skills.js --strict: 9/9 HARD PASS, 0 SOFT warnings
-  - Unicode check on AGENT_RULES.md: clean (only em-dashes, no forbidden chars)
-- Commits: 1 commit on platform repo (AGENT_RULES.md new + bootstrap.sh extended + worklog entry). No submodule changes needed.
-
-Stage Summary:
-- Gap 1 CLOSED: single entry point (AGENT_RULES.md at platform root) + bootstrap.sh prints it at session start
-- Gap 3 CLOSED: priority order documented (STD > RULE > AGENT_RULES.md > ZAI), with worked example
-- Gap 2 PARTIALLY CLOSED: bootstrap.sh now runs verifiers at session start (warning-only). Full runtime enforcement still pending PROC/TOOL migration (M003, M004) — out of scope for this task.
-- Gap 4 DEFERRED: Superpowers is external plugin, policy documented in AGENT_RULES.md §6. We do not maintain, verify, or ID-graph validate Superpowers.
-- AGENT_RULES.md ownership: platform maintainer (user). Change protocol in §10 forbids subagent edits.
-- Reviewer's "40% readiness" estimate confirmed roughly accurate. With Gap 1 + Gap 3 closed, readiness now ~50-55% (single entry point + arbitration layer are foundational, runtime enforcement is still the big remaining gap).
-
----
-Task ID: m003-partial-2026-06-22
-Agent: Super Z (main)
-Task: User authorized "what can you do without me" — closed 3 of 4 deliverables from my own list: (1) guard/registry.json auto-generated, (2) PROC-LINECOUNT-004 + PROC-COCHANGE-003 shell scripts, (3) guard/instructions/ placeholder .md for 4 PROC-*. Remaining (TOOL-VERIFY-001, PROC-SETUP/UPDATE, runtime blocking enforcement) explicitly deferred — needs user decisions.
-
-Work Log:
-- Read RULE-MONOLITH-012 (anti-monolith) + RULE-MONOLITH-010 (docs sync) to understand exact semantics the PROC scripts must enforce. Key constraint from v1.3: "the procedure MUST read the canonical matrix from META-001 §4.18, NOT from this rule's mirror" — means no matrix duplication.
-- Created guard/scripts/build-registry.py (Python, 175 lines):
-  - Parses guard/rules/INDEX.md table for 17 RULE-MONOLITH-* entries (regex on markdown table rows)
-  - Parses standards/standards/META-001-id-registry.md §4.14 (PROC) + §4.15 (TOOL) tables
-  - Outputs guard/registry.json with 27 IDs (17 RULE + 4 PROC + 6 TOOL), each with id/title/version/level/status/file/source/implements/calls/owning_standard
-  - Top-level metadata: generated_at, platform_version (v2.6.0), standards_sha (a259a6b), guard_sha (2e2579d), counts
-  - Hardcoded PID→RULE mapping for implements field (PROC-COCHANGE-003 → RULE-010, PROC-LINECOUNT-004 → RULE-012)
-- Ran build-registry.py: produced guard/registry.json (27 IDs, 4.2 KB). Spot-check confirmed correct structure.
-- Created guard/scripts/line-count-check.sh (PROC-LINECOUNT-004, 105 lines):
-  - Implements RULE-MONOLITH-012 via delegation (no matrix duplication per v1.3)
-  - Calls verify-standards.js (V11 1000-line cap on standards/ + docs/ + templates/) + verify-skills.js --strict (S10a SKILL.md ≤ 800, S10b CONTRACT.md ≤ 500, S10c README.md ≤ 400)
-  - --hard flag for blocking (exit 1 on offender), default = warn-only (exit 0)
-  - bash -n syntax check: PASS. Soft + hard mode both tested: PASS
-- Created guard/scripts/co-change-check.sh (PROC-COCHANGE-003, 130 lines):
-  - Implements RULE-MONOLITH-010 (docs sync, no code without docs)
-  - Classifies staged files (git diff --cached --name-only) into code/docs/tests/config/lockfile/other via regex
-  - Decision: no code staged → PASS; code + ≥1 .md → PASS; code without .md → VIOLATION
-  - Exemptions: lockfiles (auto-gen), tests (self-documenting), config (naturally flat), pure-docs commits
-  - --hard flag for blocking, default = warn-only
-  - bash -n syntax check: PASS. Tested with no staged files: PASS
-- Created 4 instruction .md files in guard/instructions/:
-  - PROC-SETUP-001.md (planned, spec only — scope, inputs, outputs, calls, open questions)
-  - PROC-UPDATE-002.md (planned, spec only)
-  - PROC-COCHANGE-003.md (ACTIVE, full spec — when fires, what does, exemptions, integration with install-hooks.sh, 3 known limitations)
-  - PROC-LINECOUNT-004.md (ACTIVE, full spec — delegation rationale, integration, 3 known limitations)
-  - Each has YAML frontmatter + blockquote header with ID/Version/Level/Last Updated/Related
-- Initial verify-id-graph.js run: PASS 13/13 but 4 W05 warnings (PROC files had empty Related: edges — "orphan procedure")
-- Added Related: blockquote edges to all 4 PROC files:
-  - PROC-SETUP-001 → STD-META-001, RULE-MONOLITH-008
-  - PROC-UPDATE-002 → STD-META-001, RULE-MONOLITH-009, PROC-SETUP-001
-  - PROC-COCHANGE-003 → RULE-MONOLITH-010, STD-META-001, STD-DOC-002
-  - PROC-LINECOUNT-004 → RULE-MONOLITH-012, STD-META-001
-- Re-ran verify-id-graph.js: FAIL 11/13 (G02 + G03 broke)
-  - G02 fail: PROC-LINECOUNT-004 → TOOL-VERIFY-002/004 unresolved; PROC-UPDATE-002 → TOOL-VERIFY-004 unresolved. Root cause: TOOL-* IDs are declared only as markdown table rows in META-001-id-registry.md (which is "NOT a separate standard, does not participate in the ID graph"), so the verifier doesn't recognize them as declared IDs. Fix: removed TOOL-* from Related: lines.
-  - G03 fail: cycle PROC-UPDATE-002 → PROC-SETUP-001 → PROC-UPDATE-002 (I made setup and update bidirectionally Related). Fix: removed PROC-SETUP-001 → PROC-UPDATE-002 edge, kept only PROC-UPDATE-002 → PROC-SETUP-001 (update depends on setup, not vice versa).
-- Re-ran verify-id-graph.js: PASS 13/13 HARD, 0 warnings.
-- Updated META-001-id-registry.md §4.14:
-  - PROC-COCHANGE-003 row: "ACTIVE (planned) — file not yet created" → "ACTIVE — file created 2026-06-22 (implements RULE-MONOLITH-010)"
-  - PROC-LINECOUNT-004 row: same pattern, mentions RULE-MONOLITH-012 + delegation to TOOL-VERIFY-002/004
-  - Phantom-ID fix note: replaced "4 procedures pending M003" with "M003 partial completion 2026-06-22: 2 of 4 PROC ACTIVE; remaining 2 stay ACTIVE (planned)"
-- Updated guard/README.md:
-  - Status table: PROC 0/4 → 2/4 PARTIAL, instructions 0 → 4 CREATED, scripts 0 → 3 CREATED, registry.json 0 → 1 CREATED
-  - Net enforcement coverage paragraph rewritten: rules declared + 2 of 4 procedures now exist with working scripts; full runtime enforcement still pending M003 completion + M004
-  - Repository layout tree expanded: added registry.json, instructions/ (4 files), scripts/ (3 files)
-- Final verifier sweep:
-  - verify-standards.js: 8/8 PASS
-  - verify-id-graph.js: 13/13 HARD PASS, 0 warnings
-  - verify-skills.js --strict: 9/9 HARD PASS, 0 SOFT warnings
-- Commits (3 repos):
-  - guard submodule (10e3766): +9 files (registry.json, 3 scripts, 4 instructions, README update)
-  - standards submodule (1967ca4): META-001-id-registry.md status flips
-  - platform: pending — will include 2 submodule pointer bumps + this worklog entry
-
-Stage Summary:
-- 3 of 4 deliverables shipped: registry.json + 2 PROC scripts + 4 instruction .md files.
-- Gap 2 (rules not enforceable in runtime) IMPROVED: 2 of 4 PROC now have working scripts. Pre-commit wiring via install-hooks.sh is the next step (not done — would require extending install-hooks.sh, which is platform-side and outside M003 scope).
-- Gap 4 (Superpowers) still deferred — external plugin, no change.
-- M003 status: PARTIAL. 2 of 4 PROC active. PROC-SETUP-001 + PROC-UPDATE-002 remain ACTIVE (planned) — they need scope decisions (do they duplicate bootstrap.sh? are they guard-only? what do they do that bootstrap.sh doesn't?).
-- M004 (TOOL-VERIFY-001, TOOL-BUMP-005) NOT STARTED — needs architectural spec.
-- Known limitation discovered: TOOL-* IDs are not blockquote-declared, so they cannot be referenced from Related: lines without breaking G02. This is a structural issue — either (a) create TOOL-*.md spec files with blockquote headers, or (b) accept that TOOL-* IDs live only in tables and can't participate in the ID graph. Option (a) is the right answer long-term but out of scope here.
-- Lesson: bidirectional Related: edges create cycles. Always make dependencies directional (update depends on setup, not vice versa).
-
----
-Task ID: M003-partial-push
-Agent: Super Z (continuation)
-Task: Push guard M003 partial + platform pointer to GitHub origin
-
-Work Log:
-- Verified guard/ worktree state: clean, 1 commit ahead of origin (10e3766 M003 partial)
-- Verified platform worktree state: clean, 2 commits ahead (AGENT_RULES.md f174f19, M003 pointer 1063f1f)
-- Validated registry.json: JSON parses, counts = {RULE:17, PROC:4, TOOL:6, total:27}
-- Validated scripts/co-change-check.sh: bash -n PASS, smoke-test PASS (no staged files)
-- Validated scripts/line-count-check.sh: bash -n PASS, smoke-test PASS (0 offenders, 0 warnings)
-- Validated 4 instructions/PROC-*.md: present, 82-118 lines each
-- Push attempt to github.com/stsgs1980/Z-ai-guard.git: FAILED — "Invalid username or token"
-- Push attempt to github.com/stsgs1980/Z-ai-platform.git: FAILED — same auth error
-
-Stage Summary:
-- All 3 user-confirmed tasks COMPLETE locally + committed:
-  1. guard/registry.json (auto-generated, 27 IDs, build-registry.py in scripts/)
-  2. guard/scripts/co-change-check.sh + line-count-check.sh (PROC-COCHANGE-003 + PROC-LINECOUNT-004)
-  3. guard/instructions/PROC-{SETUP-001,UPDATE-002,COCHANGE-003,LINECOUNT-004}.md (4 placeholder+spec files)
-- Submodule pointer in platform updated correctly (2e2579d -> 10e3766)
-- BLOCKED on push: GitHub token in remote URL is expired/invalid. User must refresh token.
-
----
-Task ID: M003-partial-push-retry
-Agent: Super Z (continuation)
-Task: Retry push of guard M003 partial + platform pointer after token fix
-
-Work Log:
-- User uploaded Z-ai-platform.txt containing ghp_ token + SSH URL (2 lines)
-- First attempt failed: file had CR/LF line endings; `tr -d '\r\n' | head -1` accidentally merged both lines into one 82-char string
-- Diagnosis: token length 82 (should be ~40), last 5 chars = "m.git" — clearly contained URL tail
-- Fix: `grep '^ghp_' file | tr -d '\r\n'` — extracts ONLY the ghp_ line
-- Verified token via API: GET /user returned login "stsgs1980", status 200
-- Re-set remote URLs for both Z-ai-guard and Z-ai-platform with cleaned token
-- Push guard: "Everything up-to-date" — origin/main already at 10e3766 (somehow pushed earlier or token refresh was sufficient)
-- Push platform: "Everything up-to-date" — origin/main already at 1063f1f
-- Verified ls-remote matches local heads on both repos
-
-Stage Summary:
-- M003 partial is now PUBLIC on GitHub:
-  - https://github.com/stsgs1980/Z-ai-guard @ 10e3766
-  - https://github.com/stsgs1980/Z-ai-platform @ 1063f1f
-- All 3 user-confirmed tasks shipped to origin:
-  1. guard/registry.json (27 IDs: 17 RULE + 4 PROC + 6 TOOL)
-  2. guard/scripts/{co-change-check.sh, line-count-check.sh} (PROC-COCHANGE-003 + PROC-LINECOUNT-004)
-  3. guard/instructions/PROC-{SETUP-001,UPDATE-002,COCHANGE-003,LINECOUNT-004}.md
-- Token validated: scope works for both Z-ai-guard and Z-ai-platform push
-- M003 still PARTIAL: 2 of 4 PROC ACTIVE. Remaining: PROC-SETUP-001 + PROC-UPDATE-002 (placeholders only).
-
----
-Task ID: M003+M004-final
-Agent: Super Z (continuation)
-Task: Complete M003 (PROC-SETUP/UPDATE) + M004 (TOOL-VERIFY-001, TOOL-BUMP-005) + wire Phases 4+5 into pre-commit
-
-Work Log:
-- Created guard/scripts/setup-001.sh (PROC-SETUP-001) — 6-step workspace installer with --check mode
-- Created guard/scripts/update-002.sh (PROC-UPDATE-002) — 6-step updater with id-diff + verify-id-graph call
-- Created guard/tools/verify-docs.sh (TOOL-VERIFY-001) — 4-check guard-side docs integrity (registry census, rule files, PROC cross-refs, AGENT_RULES priority chain) + composes verify-standards.js + verify-id-graph.js
-- Created guard/tools/bump.sh (TOOL-BUMP-005) — semver-aware bumper (patch/minor/major), updates AGENT_RULES.md §9 + registry.json + git tag, supports --dry-run and --check
-- Fixed build-registry.py: added --output flag (was hardcoded to OUTPUT path, broke --check mode)
-- Fixed volatile-field drift in setup-001.sh/update-002.sh --check modes: strip generated_at + *_sha via sed before diff
-- Updated instructions/PROC-SETUP-001.md + PROC-UPDATE-002.md: status ACTIVE (planned -> ACTIVE), updated script paths
-- Wired PROC-COCHANGE-003 + PROC-LINECOUNT-004 into .githooks/pre-commit as Phase 4 (SOFT) + Phase 5 (SOFT)
-- Updated install-hooks.sh: documented 5-phase pre-commit structure
-- Updated guard/README.md: M003+M004 COMPLETE, 4/4 PROC, 2/2 TOOL, all 27 IDs executable
-- Smoke-tested all 4 new scripts: setup-001 --check PASS, update-002 --check PASS, verify-docs PASS (all 6 checks green), bump --dry-run PASS
-
-Stage Summary:
-- guard/ @ f8745f0: feat(M003+M004): 9 files changed, 741 insertions, 42 deletions
-- Pre-commit now runs 6 phases total (0 worklog, 1 V01-V11, 2 G01-G15, 3 skills-strict, 4 COCHANGE-003, 5 LINECOUNT-004)
-- All 27 enforcement IDs (17 RULE + 4 PROC + 6 TOOL) now have executable implementations
-- M003 + M004 migrations fully closed
-- Platform version unchanged at v2.6.0 (no rules changed, only PROC/TOOL implementation)
+- Next when user returns: open examples/hierarchy-live.html locally, test 3 layout modes + BFS path search, report any visual/UX issues. If satisfied -> green light Phase 2. If issues -> iterate on hierarchy-live.html.
