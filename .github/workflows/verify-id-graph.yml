@@ -55,25 +55,11 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # Authentication for private submodules
-      # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # GITHUB_TOKEN only grants access to THIS repo, not to sibling private
-      # repos (Z-ai-standards, Z-ai-guard, Z-ai-skills). Two options:
-      #
-      # Option A (preferred): SSH deploy key
-      #   - Add the private key as DEPLOY_KEY secret in this repo
-      #   - Add the public key as a read-only deploy key on each submodule repo
-      #
-      # Option B: PAT token
-      #   - Create a fine-grained PAT with contents:read on all 4 repos
-      #   - Add it as PAT_TOKEN secret in this repo
       - name: Checkout Z-ai-platform (with submodules)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Submodule status
         run: git submodule status
