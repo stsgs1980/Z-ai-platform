@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# PROC-COCHANGE-003: code + docs sync (RULE-MONOLITH-010)
+bash guard/scripts/co-change-check.sh --hard
+
 npx lint-staged
