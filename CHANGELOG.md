@@ -8,6 +8,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ---
 
+## [1.1.0] - 2026-07-02
+
+### Changed
+- Renamed ESLint rule `no-unicode-policy` -> `unicode-policy` in `eslint.config.js`
+- All rule names updated: `no-emoji` -> `emoji`, `no-unicode-graphics` -> `unicode-graphics`
+- `.husky/pre-commit`: wired PROC-COCHANGE-003 (`co-change-check.sh --hard`) before lint-staged
+- Updated submodule pointers:
+  - standards: `f5a5bd4` (CRLF fixes + Unicode cleanup + V10 fix + snapshot update)
+  - guard: `a624215` (co-change-check.sh auto-detect + Unicode cleanup)
+  - skills: `59b4a89` (Unicode cleanup)
+
+### Fixed
+- `parseBlockquoteHeader` regex: `\r\n` line endings broke blockquote parsing on Windows (2 IDs extracted instead of 66)
+- `parseYAMLFrontmatter` regex: `\r\n` line endings broke YAML frontmatter parsing (RULE-MONOLITH-* not detected)
+- `file-scanner.js`: `path.relative()` returns backslashes on Windows, breaking glob matching for guard/skills repos
+- `graph-deps.sh`: temporary `.graph-transform.js` failed in ESM context (`"type": "module"` in package.json), renamed to `.cjs`
+- G03 cycle in Related graph: META-002 had bidirectional Related edges with GIT-001, DOC-002, AGENT-001 (trimmed to META-001 only)
+- SUBMODULE_DIRS: platform repo scanned into standards/guard/skills submodules, causing 20+ duplicate IDs (G01)
+
+### Added
+- Workspace boundary rule in `AGENT_RULES.md` section 8
+- `worklog.md` and `CHANGELOG.md`
+
+---
+
 ## [1.0.0] - 2026-07-02
 
 ### Added
