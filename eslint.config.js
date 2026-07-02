@@ -1,5 +1,5 @@
 // eslint.config.js
-// Enforces: STD-DOC-002 (Markdown Standard), STD-DOC-003 (No-Unicode Policy)
+// Enforces: STD-DOC-002 (Markdown Standard), STD-DOC-003 (Unicode Policy)
 //
 // Architecture:
 // 1. Custom markdown-snippets processor extracts code blocks from .md
@@ -14,7 +14,7 @@
 
 import markdown from "eslint-plugin-markdown";
 import tsParser from "@typescript-eslint/parser";
-import noUnicodePolicy from "./eslint-rules/no-unicode-policy.js";
+import unicodePolicy from "./eslint-rules/unicode-policy.js";
 import codeBlockLanguage from "./eslint-rules/code-block-language.js";
 import markdownSnippetsProcessor from "./eslint-processors/markdown-snippets.js";
 
@@ -67,12 +67,12 @@ export default [
       reportUnusedDisableDirectives: false,
     },
     plugins: {
-      "no-unicode-policy": noUnicodePolicy,
+      "unicode-policy": unicodePolicy,
     },
     rules: {
       // STD-DOC-003: No emoji/unicode in code examples
-      "no-unicode-policy/no-emoji": "error",
-      "no-unicode-policy/no-unicode-graphics": "error",
+      "unicode-policy/emoji": "error",
+      "unicode-policy/unicode-graphics": "error",
     },
   },
 
@@ -81,15 +81,15 @@ export default [
   {
     files: ["**/*.md"],
     plugins: {
-      "no-unicode-policy": noUnicodePolicy,
+      "unicode-policy": unicodePolicy,
       "code-block-language": codeBlockLanguagePlugin,
     },
     rules: {
       // STD-DOC-003 [C] Critical: No emoji in Markdown documentation
-      "no-unicode-policy/no-emoji-in-md": "error",
+      "unicode-policy/emoji-in-md": "error",
 
       // STD-DOC-003 [C] Critical: No Unicode icons in Markdown documentation
-      "no-unicode-policy/no-unicode-graphics-in-md": "error",
+      "unicode-policy/unicode-graphics-in-md": "error",
 
       // STD-DOC-002 section 5.4: Code blocks must specify a language
       "code-block-language/require-language": "error",
@@ -108,14 +108,14 @@ export default [
       },
     },
     plugins: {
-      "no-unicode-policy": noUnicodePolicy,
+      "unicode-policy": unicodePolicy,
     },
     rules: {
       // STD-DOC-003 [C] Critical: No emoji in production code / UI strings
-      "no-unicode-policy/no-emoji": "error",
+      "unicode-policy/emoji": "error",
 
       // STD-DOC-003 [C] Critical: No Unicode graphics in production code
-      "no-unicode-policy/no-unicode-graphics": "error",
+      "unicode-policy/unicode-graphics": "error",
 
       // STD-DOC-002: no irregular whitespace (NBSP, ZWSP, etc.)
       "no-irregular-whitespace": "error",

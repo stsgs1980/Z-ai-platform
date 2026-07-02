@@ -1,13 +1,12 @@
-// eslint-rules/no-unicode-policy.js
-// Enforces STD-DOC-003: No emoji / Unicode graphics in source code and documentation
-// Derived from: DOC-002-eslint-integration.md section 10.5
+// eslint-rules/unicode-policy.js
+// Enforces STD-DOC-003: Unicode Policy (no emoji / Unicode graphics in code and documentation)
 
 const emojiPattern =
   /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2702}-\u{27B0}]/u;
 
-const unicodeGraphicsPattern = /[\u2500-\u257F\u2580-\u259F\u25A0-\u25FF\u2800-\u28FF]/;
+const unicodeGraphicsPattern = /[\u{2500}-\u{257F}\u{2580}-\u{259F}\u{25A0}-\u{25FF}\u{2800}-\u{28FF}]/u;
 
-const noEmoji = {
+const emoji = {
   meta: {
     type: "problem",
     docs: {
@@ -34,7 +33,7 @@ const noEmoji = {
   },
 };
 
-const noUnicodeGraphics = {
+const unicodeGraphics = {
   meta: {
     type: "problem",
     docs: {
@@ -61,14 +60,44 @@ const noUnicodeGraphics = {
   },
 };
 
-const noEmojiInMd = {
+function stripFencedCode(text) {
+  const lines = text.split(/\r?\n/);
+  let inFence = false;
+  let fenceChar = "";
+  let fenceLen = 0;
+  return lines
+    .map((line) => {
+      const m = line.match(/^[ \t]*(`{3,}|~{3,})(.*)$/);
+      if (m) {
+        const ch = m[1][0];
+        const len = m[1].length;
+        if (!inFence) {
+          inFence = true;
+          fenceChar = ch;
+          fenceLen = len;
+          return "";
+        }
+        if (ch === fenceChar && len >= fenceLen && /^\s*$/.test(m[2])) {
+          inFence = false;
+          fenceChar = "";
+          fenceLen = 0;
+          return "";
+        }
+      }
+      if (inFence) return "";
+      return line;
+    })
+    .join("\n");
+}
+
+const emojiInMd = {
   meta: {
     type: "problem",
     docs: {
       description: "No emoji in Markdown documentation (STD-DOC-002 section 4.4, STD-DOC-003)",
     },
     messages: {
-      noEmojiInMd:
+      emojiInMd:
         "Emoji are prohibited in Markdown documentation. Use text tags like [OK], [FAIL] instead (STD-DOC-002 section 4.4, STD-DOC-003).",
     },
   },
@@ -80,7 +109,7 @@ const noEmojiInMd = {
       Program() {
         lines.forEach((line, index) => {
           if (emojiPattern.test(line)) {
-            context.report({ loc: { line: index + 1, column: 0 }, messageId: "noEmojiInMd" });
+            context.report({ loc: { line: index + 1, column: 0 }, messageId: "emojiInMd" });
           }
         });
       },
@@ -88,15 +117,15 @@ const noEmojiInMd = {
   },
 };
 
-const noUnicodeGraphicsInMd = {
+const unicodeGraphicsInMd = {
   meta: {
     type: "problem",
     docs: {
       description: "No Unicode box/line drawing in Markdown documentation (STD-DOC-003)",
     },
     messages: {
-      noUnicodeGraphicsInMd:
-        "Unicode box/line drawing characters are prohibited in Markdown. Use ASCII or code blocks (STD-DOC-003).",
+      unicodeGraphicsInMd:
+        "Unicode box/line drawing characters are prohibited. Use ASCII or code blocks (STD-DOC-003).",
     },
   },
   create(context) {
@@ -107,7 +136,7 @@ const noUnicodeGraphicsInMd = {
       Program() {
         lines.forEach((line, index) => {
           if (unicodeGraphicsPattern.test(line)) {
-            context.report({ loc: { line: index + 1, column: 0 }, messageId: "noUnicodeGraphicsInMd" });
+            context.report({ loc: { line: index + 1, column: 0 }, messageId: "unicodeGraphicsInMd" });
           }
         });
       },
@@ -117,13 +146,13 @@ const noUnicodeGraphicsInMd = {
 
 export default {
   meta: {
-    name: "no-unicode-policy",
+    name: "unicode-policy",
     version: "1.0.0",
   },
   rules: {
-    "no-emoji": noEmoji,
-    "no-unicode-graphics": noUnicodeGraphics,
-    "no-emoji-in-md": noEmojiInMd,
-    "no-unicode-graphics-in-md": noUnicodeGraphicsInMd,
+    "emoji": emoji,
+    "unicode-graphics": unicodeGraphics,
+    "emoji-in-md": emojiInMd,
+    "unicode-graphics-in-md": unicodeGraphicsInMd,
   },
 };

@@ -20,7 +20,7 @@ digraph zai_id_graph {
     "STD-ARCH-002" [label="STD-ARCH-002\nImplementation Order", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
     "STD-DESIGN-001" [label="STD-DESIGN-001\nDesign System Standard", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
     "STD-DOC-002" [label="STD-DOC-002\nMarkdown Formatting", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
-    "STD-DOC-003" [label="STD-DOC-003\nNo-Unicode Policy", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
+    "STD-DOC-003" [label="STD-DOC-003\nUnicode Policy", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
     "STD-ENV-001" [label="STD-ENV-001\nReproducibility", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
     "STD-ENV-002" [label="STD-ENV-002\nZ.ai Integration", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];
     "STD-ERR-001" [label="STD-ERR-001\nError Handling Core", fillcolor="#dbeafe", color="#1e40af", fontcolor="#1e3a8a"];

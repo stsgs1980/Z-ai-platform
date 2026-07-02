@@ -173,6 +173,9 @@ These will get your work reverted. Do not do them, even if asked.
 
   ✗  Skipping pre-commit verifiers
      → violates RULE-MONOLITH-014
+
+  ✗  Modifying files outside workspace (parent folder of the project) without explicit permission
+     → always ask first, no exceptions
 ```
 
 ---
