@@ -5038,6 +5038,13 @@ Step 7 — Added zai-sandbox-rules to Z-ai-platform/skills/skills/ submodule.
 Bootstrap.sh will now symlink it into /home/z/my-project/skills/ in new sandbox sessions.
 Both submodule (skills) and parent (Z-ai-platform) pushed to GitHub.
 
+Step 8 — Audit against sandbox-guide.md (524 lines). Found 4 gaps:
+- Rule 1 missing npx create-next-app prohibition
+- No git submodule rules (§8, §9 in guide)
+- No Prisma commands
+- No useful commands section
+Fixed in v1.4.0: added Rules 11 (submodules), 12 (Prisma), useful commands, updated Rule 1.
+
 Full pipeline test (Z.ai chat + bootstrap.sh):
 - Rule 1 (dev server refusal): FAILED in v1.2.0 (agent executed bun run dev despite skill loaded). Fixed in v1.3.0: added aggressive triggers (bun run dev, npm run dev, next dev, start dev, run dev, запусти dev) + STOP warning in Purpose. Retested: PASSED — agent refused, cited sandbox rules, explained .zscripts/dev.sh mechanism, checked PID/status.
 - Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
