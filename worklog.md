@@ -176,3 +176,40 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 **Next steps:** Optional cleanup of deprecation warnings.
 
 ---
+
+### 2026-07-03 00:44-00:55
+**Entry:** Resolve all remaining deprecation warnings (checkout v4, upload-artifact v5, husky v9)
+
+**Context:** User requested fixing all remaining warnings: Node 20 deprecation on actions + husky deprecated shebang.
+
+**Work completed:**
+
+1. **`actions/checkout@v4` -> `v5`** (drops Node 20 runtime deprecation)
+   - 5 files: platform (e2e-verifiers, release-please, verify-id-graph) + guard lint-markdown + skills lint-markdown
+   - Submodules committed/pushed: guard `a2e4147`, skills `217626e`
+   - Platform commit `5cea187`
+
+2. **`actions/upload-artifact@v5` -> `v7`** (last action on Node 20, surfaced after checkout bump)
+   - verify-id-graph.yml (2 usages: graph artifact + verifier output)
+   - Commit `7f6dc88`
+   - After this: NO "forced to run on Node.js 24" warnings remain (verified empty grep on run #28631115201)
+
+3. **Husky v9 deprecated shebang removed** from `.husky/pre-commit` and `.husky/pre-push`
+   - Removed `#!/usr/bin/env sh` + `. "$(dirname -- "$0")/_/husky.sh"` (v9 runs hooks via `.husky/_/h` wrapper)
+
+4. **Fixed corrupted `core.hooksPath`** (root-caused via systematic-debugging)
+   - Found: `core.hooksPath = --version/_` (corrupted, caused `env: unknown option -- version` on commit)
+   - Correct value: `.husky/_` (git runs `.husky/_/pre-commit` -> sources `h` -> runs user `.husky/pre-commit`)
+   - Fixed: `git config core.hooksPath .husky/_`
+   - Reproduced: `npm run prepare` does NOT re-corrupt (sets `.husky/_` correctly) -> corruption was a one-time glitch
+   - Note: this is local-only config (CI uses its own checkout, no husky)
+
+**Verification:**
+- Local commit `5cea187`: pre-commit ran with NO "husky - DEPRECATED" warning, NO env error
+- Verify ID Graph #28631115201 = GREEN (47s), grep for "forced to run on Node.js 24" = empty
+- Guard #28630864660 = GREEN, Skills #28630871672 = GREEN
+
+**Remaining (not actionable in workflow config):**
+- Node-internal `punycode` (DEP0040) and `url.parse()` (DEP0169) warnings from JS dependencies (harmless, require dependency updates to silence)
+
+---
