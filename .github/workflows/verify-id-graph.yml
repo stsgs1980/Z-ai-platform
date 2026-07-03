@@ -60,7 +60,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Submodule status
         run: git submodule status
