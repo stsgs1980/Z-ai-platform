@@ -6,7 +6,8 @@
 #   bash /home/z/my-project/Z-ai-platform/save-work.sh "what you did"
 #
 # What it does:
-#   1. Stages ALL changes in Z-ai-platform + all 3 submodules (skills, standards, guard)
+#   1. Stages ALL changes in Z-ai-platform + 2 submodules (standards, guard)
+#      Note: skills/ is an inline monorepo since a3d358b, not a submodule.
 #   2. Commits with your message (+ timestamp)
 #   3. Pushes everything to GitHub
 #
@@ -20,8 +21,8 @@ cd "$PLATFORM_DIR"
 
 MSG="${1:-manual save at $(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 
-echo "=== 1. Save submodule changes (skills, standards, guard) ==="
-for sub in skills standards guard; do
+echo "=== 1. Save submodule changes (standards, guard) ==="
+for sub in standards guard; do
     if [ -d "$sub/.git" ]; then
         echo "--- $sub ---"
         cd "$sub"
@@ -44,7 +45,7 @@ done
 
 echo ""
 echo "=== 2. Update submodule pointers in parent repo ==="
-git add skills standards guard 2>/dev/null || true
+git add standards guard 2>/dev/null || true
 
 echo ""
 echo "=== 3. Stage + commit parent repo changes ==="

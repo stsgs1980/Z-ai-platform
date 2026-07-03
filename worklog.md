@@ -607,3 +607,27 @@ where "Zai" is the Title-Case form of the `zai-` namespace.
 - `node standards/scripts/verify-skills.js` -> 6/6 HARD PASS, 1 SOFT warning.
   (Previously 8/9 with 1 FAIL — the FAIL was unrelated S03 `_sts` suffix
   check, which requires upstream std fix; non-strict mode passes.)
+
+---
+
+## 2026-07-04 — save-work.sh: drop skills from submodule loop
+
+**Task:** Synchronize save-work.sh with the monorepo reality. Since
+commit a3d358b skills/ is an inline directory, not a git submodule.
+
+**Problem:** The script iterated `for sub in skills standards guard`
+and guarded each with `[ -d "$sub/.git" ]`. For `skills/` this check
+returns false (no .git there), so the skills branch of the loop was
+dead code — silently skipped every run. Behaviour was accidentally
+correct (skills- changes get committed at the parent step), but the
+loop and the header comment lied about 3 submodules.
+
+**Fix:**
+- Header comment: "3 submodules (skills, standards, guard)" ->
+  "2 submodules (standards, guard)" + note that skills/ is inline.
+- Loop body: `for sub in skills standards guard` -> `for sub in standards guard`.
+- Submodule-pointer step: `git add skills standards guard` -> `git add standards guard`.
+
+**Verified:** `bash -n save-work.sh` -> OK syntax.
+Runtime check in sandbox deferred (script commits + pushes; running it
+locally would sweep unrelated WT changes into a save commit).
