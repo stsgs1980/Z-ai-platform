@@ -103,3 +103,40 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 **Next steps:** Push workflow files for guard/skills (need PAT with `workflow` scope)
 
 ---
+
+### 2026-07-03 00:15-00:30
+**Entry:** Push workflow files for guard/skills (next step from previous session)
+
+**Context:** CI workflows for submodules guard and skills. Skills already had `lint-markdown.yml` on remote but CI was RED. Guard had no workflow at all.
+
+**Work completed:**
+
+1. **GitHub CLI auth:** added `workflow` scope to active account `stsgs1980` via `gh auth refresh -h github.com -s workflow`
+
+2. **Guard: created lint-markdown workflow**
+   - Synced local `main` to `origin/main` (was 5 commits behind, detached HEAD)
+   - Created `.github/workflows/lint-markdown.yml` (modeled on skills workflow)
+   - Verified locally: `npm run lint` passes clean
+   - Committed `9d5e889`: `ci: add lint-markdown workflow (STD-DOC-002, STD-DOC-003)`
+   - Pushed; CI run #28630011239 = GREEN (14s)
+
+3. **Skills: fixed RED CI (emoji violations)**
+   - CI run #28616182908 failed: emoji in `CHANGELOG.md:25` and `worklog.md:40`
+   - Root cause: previous Unicode cleanup (59b4a89) documented removed emoji but left the actual emoji characters in worklog/CHANGELOG
+   - Replaced `log-emoji`/`star+log-emoji` characters with ASCII descriptions
+   - Verified locally: `npx eslint . --max-warnings=0` = 0 errors
+   - Committed `50773af`: `fix: replace remaining emoji in worklog/CHANGELOG (STD-DOC-003)`
+   - Pushed; CI run #28630139493 = GREEN (16s)
+
+4. **Bumped submodule pointers** in Z-ai-platform (guard + skills)
+
+**Submodule pointers at session end:**
+- guard: `9d5e889` (lint-markdown workflow added)
+- skills: `50773af` (emoji fix)
+- standards: `e1e68fa` (unchanged)
+
+**Known issue (non-fatal):** both workflows use `actions/checkout@v4` which triggers Node 20 deprecation warning. Optional: bump to `checkout@v5`.
+
+**Next steps:** Optional workflow version bump to silence Node 20 deprecation.
+
+---
