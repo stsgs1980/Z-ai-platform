@@ -9,7 +9,7 @@ architecture without breaking the ID graph.
 Z-ai-platform/      (orchestrator, L0 — this repo)
 --- standards/      (submodule -> Z-ai-standards, L1)
 --- guard/          (submodule -> Z-ai-guard, L2)
---- skills/         (submodule -> Z-ai-skills, L3)
+--- skills/         (monorepo — 14 skills, L3)
 --- .gitmodules     (clean HTTPS URLs, no PAT)
 --- .github/workflows/verify-id-graph.yml   (CI for the ID graph)
 --- README.md
@@ -17,6 +17,7 @@ Z-ai-platform/      (orchestrator, L0 — this repo)
 ```
 
 The 4-repo split exists so that:
+
 - **Standards** (L1) can evolve without forcing rule/skill updates
 - **Guard** (L2) can ship rule changes on its own cadence
 - **Skills** (L3) can be consumed standalone by the sandbox runtime
@@ -92,7 +93,7 @@ node standards/scripts/verify-standards.js
 ```
 
 You must see `Result: PASS (13/13 hard checks, N warnings)` from
-`verify-id-graph.js` and `Total: 7 | PASS: 7 | FAIL: 0` from
+`verify-id-graph.js` and `Total: 8 | PASS: 8 | FAIL: 0` from
 `verify-standards.js`. If any HARD check fails, the CI on GitHub will
 also fail and the PR cannot merge.
 
@@ -101,13 +102,13 @@ some indicate real cleanup opportunities.
 
 ## 4. ID graph — quick reference
 
-| Prefix | Layer | Lives in     | Example              |
-|--------|-------|--------------|----------------------|
-| STD    | L1    | standards/   | STD-META-001         |
-| RULE   | L2    | guard/       | RULE-MONOLITH-002    |
-| PROC   | L2    | guard/       | PROC-MONOLITH-SETUP  |
-| TOOL   | L2    | guard/       | TOOL-MONOLITH-VERIFY |
-| ZAI    | L3    | skills/      | ZAI-META-001         |
+| Prefix | Layer | Lives in   | Example              |
+| ------ | ----- | ---------- | -------------------- |
+| STD    | L1    | standards/ | STD-META-001         |
+| RULE   | L2    | guard/     | RULE-MONOLITH-002    |
+| PROC   | L2    | guard/     | PROC-MONOLITH-SETUP  |
+| TOOL   | L2    | guard/     | TOOL-MONOLITH-VERIFY |
+| ZAI    | L3    | skills/    | ZAI-META-001         |
 
 **Related:** directed edges, must respect the layer matrix (see
 `standards/standards/STD-META-001-v2.0.md` §6.1). Cross-layer STD->RULE
@@ -146,10 +147,10 @@ Must be reciprocated (both sides must declare it).
 
 ### 5.2 Add a new skill
 
-1. Create `skills/skills/<name>/SKILL.md` with YAML frontmatter.
+1. Create `skills/<name>/SKILL.md` with YAML frontmatter.
 2. Add an ID only if the skill will be referenced from elsewhere:
    `id: ZAI-<DOMAIN>-NNN`. Otherwise omit `id:`.
-3. Update `skills/skills/INDEX.md`.
+3. Update `skills/INDEX.md`.
 4. Run verifier, commit, push inside submodule, bump pointer.
 
 ### 5.3 Add a new standard
@@ -163,7 +164,7 @@ Must be reciprocated (both sides must declare it).
 - **Never** commit a PAT in any tracked file.
 - **Never** embed a PAT in `.git/config` or `.gitmodules`.
 - Use `~/.git-credentials` (mode 600) via `git config --global
-  credential.helper store`.
+credential.helper store`.
 - After a push, delete the PAT from disk and revoke it on GitHub.
 - Prefer **fine-grained PATs** (e.g. `github_pat_...`) over classic
   PATs (`ghp_...`) — they are less prone to auto-revocation.

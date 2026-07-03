@@ -70,7 +70,7 @@ The platform uses a 4-layer repository architecture where each layer can evolve 
 
 - `standards/` - Z-ai-standards submodule (L1): STD-* files, verifier scripts, snapshots
 - `guard/` - Z-ai-guard submodule (L2): RULE-MONOLITH-* rules, procedures, tools
-- `skills/` - Z-ai-skills submodule (L3): 35 skill directories with ZAI-* IDs
+- `skills/` - Monorepo (L3): 14 skill directories with ZAI-* IDs
 - `.github/workflows/` - CI workflows (verify-id-graph.yml, e2e-verifiers.yml)
 - `eslint-rules/` - Custom ESLint rules for STD-DOC-003 compliance
 - `eslint-processors/` - Custom markdown processor for code-snippet linting
@@ -78,14 +78,14 @@ The platform uses a 4-layer repository architecture where each layer can evolve 
 
 ## Scripts
 
-| Script | Description |
-|--------|-------------|
-| `node standards/scripts/verify-standards.js` | Content-level invariants (V04-V11) |
-| `node standards/scripts/verify-id-graph.js` | Cross-repo ID-graph invariants (G01-G15) |
-| `node standards/scripts/verify-skills.js --strict` | Skills-side format verifier (S01-S09) |
-| `bash standards/scripts/graph-deps.sh` | Render ID dependency graph (dot/svg/png) |
-| `./install-hooks.sh` | Bootstrap pre-commit hooks for local verification |
-| `./bootstrap.sh` | One-command skill restore for fresh sandbox sessions |
+| Script                                             | Description                                          |
+| -------------------------------------------------- | ---------------------------------------------------- |
+| `node standards/scripts/verify-standards.js`       | Content-level invariants (V04-V11)                   |
+| `node standards/scripts/verify-id-graph.js`        | Cross-repo ID-graph invariants (G01-G15)             |
+| `node standards/scripts/verify-skills.js --strict` | Skills-side format verifier (S01-S09)                |
+| `bash standards/scripts/graph-deps.sh`             | Render ID dependency graph (dot/svg/png)             |
+| `./install-hooks.sh`                               | Bootstrap pre-commit hooks for local verification    |
+| `./bootstrap.sh`                                   | One-command skill restore for fresh sandbox sessions |
 
 ## CI Behavior
 

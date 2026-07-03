@@ -21,7 +21,7 @@ Sequential. Each step depends on the previous.
 ```
 Step 1.  Read this file (AGENT_RULES.md).                  ← you are here
 Step 2.  Accept standards via ARCH-002 install order.      ← see §5
-Step 3.  Load skill catalog from skills/skills/INDEX.md.   ← see §4
+Step 3.  Load skill catalog from skills/INDEX.md.              ← see §4
 Step 4.  Load rule registry from guard/rules/INDEX.md.     ← see §3
 Step 5.  (optional) Check for Superpowers plugin.          ← see §6
 Step 6.  Run sanity verifiers (warning-only).              ← see §7
@@ -64,12 +64,12 @@ Trust level: declared intent, not runtime guarantee
 
 The 5 rules most likely to bite you:
 
-| ID | Title | What it really means |
-|---|---|---|
-| RULE-MONOLITH-001 | Answer before act | Do not start work without confirming the task |
-| RULE-MONOLITH-002 | Worklog before/after | Append to `worklog.md` before AND after every action |
-| RULE-MONOLITH-003 | Read before write | Open the file before editing it |
-| RULE-MONOLITH-014 | Pre-commit checklist | Run verifiers before `git commit` |
+| ID                | Title                     | What it really means                                                             |
+| ----------------- | ------------------------- | -------------------------------------------------------------------------------- |
+| RULE-MONOLITH-001 | Answer before act         | Do not start work without confirming the task                                    |
+| RULE-MONOLITH-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                             |
+| RULE-MONOLITH-003 | Read before write         | Open the file before editing it                                                  |
+| RULE-MONOLITH-014 | Pre-commit checklist      | Run verifiers before `git commit`                                                |
 | RULE-MONOLITH-017 | Upstream write protection | **Never** push to standards/, guard/, or skills/ — these are upstream submodules |
 
 Full registry: `guard/rules/INDEX.md` (17 entries, machine-parseable table).
@@ -121,6 +121,7 @@ Z-ai-platform. It may or may not be installed in a given sandbox.
 in the sandbox skills folder.
 
 **Policy**:
+
 - Superpowers skills are **Priority 4** (same as ZAI-* skills, see §2)
 - They MAY NOT override STD-* or RULE-MONOLITH-*
 - If a Superpowers instruction conflicts with Z-ai standards → Z-ai wins

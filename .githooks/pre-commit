@@ -39,9 +39,6 @@
 # Bypass (NOT recommended — use only for emergencies like WIP snapshots):
 #   git commit --no-verify
 #
-# Contract reference: skills/skills/commit-work/CONTRACT.md
-# Runtime: skills/skills/commit-work/scripts/run-contract.sh
-#
 # ============================================================================
 
 set -euo pipefail

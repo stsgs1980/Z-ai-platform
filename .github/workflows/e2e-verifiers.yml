@@ -33,8 +33,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'standards/scripts/**'
-      - '.github/workflows/e2e-verifiers.yml'
+      - "standards/scripts/**"
+      - ".github/workflows/e2e-verifiers.yml"
 
 permissions:
   contents: read
@@ -59,7 +59,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: "20"
 
       # -------------------------------------------------------------------
       # Test 1: verify-standards.js detects V11 (>1000 line file).
@@ -124,8 +124,8 @@ jobs:
       - name: Test 3 — verify-skills.js --strict catches S02
         run: |
           set -e
-          mkdir -p skills/skills/_e2e-test-skill
-          cat > skills/skills/_e2e-test-skill/SKILL.md <<'EOF'
+          mkdir -p skills/_e2e-test-skill
+          cat > skills/_e2e-test-skill/SKILL.md <<'EOF'
           ---
           name: wrong-name
           description: "E2E test skill with deliberately wrong name field."
@@ -144,18 +144,18 @@ jobs:
           echo "$output"
           if [ $exit_code -ne 1 ]; then
             echo "::error::Test 3 FAILED: expected verify-skills.js --strict to exit 1, got $exit_code"
-            rm -rf skills/skills/_e2e-test-skill
+            rm -rf skills/_e2e-test-skill
             exit 1
           fi
           if ! echo "$output" | grep -q "S02"; then
             echo "::error::Test 3 FAILED: S02 not mentioned in output"
-            rm -rf skills/skills/_e2e-test-skill
+            rm -rf skills/_e2e-test-skill
             exit 1
           fi
           echo "Test 3 PASS: verify-skills.js --strict correctly detected S02 violation"
 
           # Cleanup
-          rm -rf skills/skills/_e2e-test-skill
+          rm -rf skills/_e2e-test-skill
 
       # -------------------------------------------------------------------
       # Test 4: verify-skills.js PASSES after cleanup.

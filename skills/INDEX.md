@@ -1,7 +1,7 @@
 # Z-ai-skills — Skill Catalog (hand-maintained index)
 
 > Source: Z-ai-platform
-> Owning standard: STD-SKILL-001 v1.0
+> Owning standard: STD-SKILL-001 v1.1
 > Last Updated: 2026-07-03
 
 Total skills: 14
@@ -16,7 +16,7 @@ Total skills: 14
 | zai-project-clone | ZAI-DEV-001 | v1.0 | Smart project cloning with confirmation |
 | zai-skill-registry | ZAI-META-002 | v1.2 | Reference registry for skill IDs |
 | zai-sandbox-rules | — | v1.5.0 | Guardrail skill for Z.ai sandbox |
-| zai-skill-creator | ZAI-STS-008 | v? | Create new skills with ID assignment |
+| zai-skill-creator | ZAI-STS-008 | v1.0 | Create new skills with ID assignment |
 | zai-frontend-styling-expert | ZAI-STS-004 | v1.0 | CSS, styling, responsive design, UI/UX |
 | zai-performance-code-generator | ZAI-STS-003 | v1.0 | High-performance code generation |
 | zai-phi-layout | ZAI-STS-005 | v3.0 | Proportional CSS Grid layouts |
@@ -44,7 +44,7 @@ Total skills: 14
 - ZAI-STS-001 — zai-prompt-engineering v1.1
 - ZAI-STS-007 — zai-workflow-discipline v2.0
 - ZAI-STS-006 — zai-ui-composer v1.1.2
-- ZAI-STS-008 — zai-skill-creator v?
+- ZAI-STS-008 — zai-skill-creator v1.0
 
 ## Skills Without ZAI-ID (3)
 - zai-sandbox-rules v1.5.0
