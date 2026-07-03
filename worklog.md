@@ -539,3 +539,43 @@ and earlier. Four issues identified during configuration audit.
 - Line 1077: "3554-line ... docs/session/worklog.md" -> "500+ line ... worklog.md (root, canonical)".
 - Remaining refs in `worklog.md` lines 309/315/421 left intact (append-only history).
 - Upstream refs in `standards/` (CI-AND-TESTING.md, META-001) NOT touched — separate PR per RULE-MONOLITH-017.
+
+---
+
+## 2026-07-04 — zai-sandbox-rules SKILL.md audit (5 issues)
+
+**Task:** Audit `skills/zai-sandbox-rules/SKILL.md` for structure correctness.
+Sources: file itself + `Desktop/ZAI SANDBOX/ZAI ACTUAL/Z.ai-Sandbox-Guide.md`
+(canonical cheat-sheet from the user).
+
+**1. Duplicate Rule 8 (FAIL)**
+- Two `## Rule 8` headers (Build Verification at line 125, Init Sandbox at 135).
+- Fix: cascade renumber. Init Sandbox -> Rule 9, White Screen -> 10,
+  File System -> 11, Git Submodules -> 12, Database -> 13. Final: 13 rules.
+- Verified cross-refs in file: only Rules 1, 3, 4, 5, 7 — none in cascade zone.
+
+**2. init-fullstack_*.sh placeholder (FAIL)**
+- 8 occurrences of `init-fullstack_*.sh` (wildcard, not a real URL).
+- Fix: replaced with concrete `init-fullstack_1775040338514.sh` per cheat-sheet
+  (line 142 of Z.ai-Sandbox-Guide.md). 8 occurrences, 0 wildcards remaining.
+
+**3. bun run build contradiction (FAIL)**
+- Rule 8 (Build Verification) prescribed `bun run build` for verification.
+- Rationalization Table claimed `bun run build` is "also prohibited".
+- Cheat-sheet (rule 8, line 533; step 6, line 145) says build is REQUIRED
+  after cloning. Internal contradiction resolved by removing the bad row.
+
+**4. "Rules 1 through 10" (WARNING)**
+- Stale count after the cascade renumber.
+- Fix: updated to "Rules 1 through 13" in Red Flags section.
+
+**5. §8 Stack Signature (OK — no change)**
+- The §8 override mention is valid after commit 74539d9 (DOC-002 v2.4.4
+  reversed the skill scope exclusion). No edit needed.
+
+**Verified:**
+- `bash standards/scripts/check-md.sh skills/zai-sandbox-rules/SKILL.md`
+  -> static checks PASS (ESLint warning is pre-existing: skills/** is in
+  eslint.config.js global ignores; lint-staged uses --no-warn-ignored).
+- Frontmatter intact: name, author, version 1.5.0, trigger (singular).
+- 13 rules total, no gaps, no duplicates.

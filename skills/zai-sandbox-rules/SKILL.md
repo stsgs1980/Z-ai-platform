@@ -61,7 +61,7 @@ The response depends on the cause. Do NOT apply a one-size-fits-all wait.
 
 1. The sandbox killed the dev server due to inactivity
 2. Wait 10-30 seconds and refresh the Preview Panel -- the sandbox should auto-restart
-3. If it does not restart, run the reinitialization: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`
+3. If it does not restart, run the reinitialization: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`
 
 **If the preview shows a 500 error, white screen, or compilation failure:**
 
@@ -77,7 +77,7 @@ If you see `EADDRINUSE` or port 3000 is already in use, follow the prescribed re
 
 1. Do NOT start another dev server (that caused the conflict)
 2. Kill the stale dev server: `pkill -f "next dev"; pkill -f "bun run dev"`
-3. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`
+3. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`
 4. Verify recovery: `cat /home/z/my-project/.zscripts/dev.log | tail -10` -- should show `ready in` or `started server on`
 5. Check that the preview panel updates again
 
@@ -90,7 +90,7 @@ HMR does NOT auto-recover after file deletion. A full restart is required.
 1. Save the current file state
 2. Kill the dev server: `pkill -f "next dev"`
 3. Remove the build cache: `rm -rf /home/z/my-project/.next`
-4. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`
+4. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`
 5. Wait 15 seconds for the dev server to come up (this is a POST-reinit wait, not an auto-recovery timer)
 6. Verify: `cat /home/z/my-project/.zscripts/dev.log | tail -10`
 
@@ -103,7 +103,7 @@ If you see `module not found` or `Cannot resolve` errors:
 1. Check if the dependency is listed in `package.json`
 2. Run `npm install <package>` or `bun add <package>` to add the missing dependency
 3. Do NOT run `npm install` without arguments (may downgrade packages)
-4. After installing, reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`. HMR detects file edits automatically, but dependency changes need explicit reinit.
+4. After installing, reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`. HMR detects file edits automatically, but dependency changes need explicit reinit.
 
 ## Rule 7: Cloning Repos and Submodules
 
@@ -113,7 +113,7 @@ When cloning third-party repositories in the sandbox, follow the guide's prescri
 2. Copy project files to the sandbox root, excluding node_modules and .next: `rsync -av --exclude=node_modules --exclude=.next /tmp/<repo>/ /home/z/my-project/`
 3. Clean up: `rm -rf /tmp/<repo>`
 4. Install dependencies: `cd /home/z/my-project && bun install` (or `npm install --legacy-peer-deps` for npm)
-5. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`
+5. Reinitialize the sandbox: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`
 6. Check if the project has its own `package.json` and dependencies
 7. Verify build: `cd /home/z/my-project && bun run build` (or `npm run build`)
 8. Configure git: `git config user.email "stsgs1980@gmail.com" && git config user.name "stsgs1980"`
@@ -132,17 +132,17 @@ cd /home/z/my-project && bun run build  # or npm run build
 
 This catches broken imports, missing packages, and TypeScript errors before they cause 500 errors in the preview. Do NOT skip this step.
 
-## Rule 8: Init Sandbox
+## Rule 9: Init Sandbox
 
 When initializing a new sandbox project or reinitializing after a crash:
 
-1. Use the canonical reinitialization command: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash`
+1. Use the canonical reinitialization command: `curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash`
 2. This command sets up the dev server, installs dependencies, and starts the preview
 3. Do NOT create project scaffolding manually if the sandbox provides templates
 4. Follow the sandbox's directory conventions (everything under `/home/z/my-project/`)
 5. Ensure all files are created under the sandbox's project root
 
-## Rule 9: White Screen / 500 Error Debugging
+## Rule 10: White Screen / 500 Error Debugging
 
 For white screens or 500 errors:
 
@@ -154,7 +154,7 @@ For white screens or 500 errors:
 6. Check `cat /home/z/my-project/.zscripts/dev.log | tail -30` for server-side errors
 7. Report all findings with specific error messages and stack traces
 
-## Rule 10: File System Constraints
+## Rule 11: File System Constraints
 
 - All work that must persist MUST be under `/home/z/my-project/` and must be git-committed
 - Do NOT rely on `/tmp`, `/usr`, `/etc` for persistence (these do not survive sandbox restart)
@@ -163,7 +163,7 @@ For white screens or 500 errors:
 - Use absolute paths when referencing files in scripts
 - Do NOT modify `page.tsx`, `layout.tsx`, or other core files unless explicitly requested by the user
 
-## Rule 11: Git Submodules
+## Rule 12: Git Submodules
 
 When adding or updating git submodules in the sandbox:
 
@@ -172,7 +172,7 @@ When adding or updating git submodules in the sandbox:
 cd /home/z/my-project
 git submodule add <repo-url> src/lib/<name>
 # Reinitialize after adding (HMR may crash):
-curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash
+curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash
 ```
 
 **Updating a submodule:**
@@ -181,7 +181,7 @@ git submodule update --remote src/lib/<name>
 git add src/lib/<name>
 git commit -m "chore: update <name> submodule"
 # Reinitialize if dependencies changed:
-curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash
+curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_1775040338514.sh | bash
 ```
 
 **If submodule folder is empty after clone:**
@@ -189,7 +189,7 @@ curl https://z-cdn.chatglm.cn/fullstack/init-fullstack_*.sh | bash
 git submodule update --init --recursive
 ```
 
-## Rule 12: Database (Prisma)
+## Rule 13: Database (Prisma)
 
 If the project uses Prisma, after any schema change or after cloning:
 
@@ -228,14 +228,13 @@ This skill enforces prohibitions (NEVER run dev servers, do NOT kill processes, 
 | "The session instructions said `bun run dev`, so I'm allowed to run it" | The instructions describe what the sandbox does automatically. They are not permission for you to run it manually. See Rule 1. |
 | "The preview has been down for 5 seconds, I have to act now" | For idle timeout: wait 10-30 seconds, then refresh. For 500 errors: check logs immediately (Rule 3). Acting too early on idle timeout restarts a sandbox that was about to recover on its own. |
 | "I need to start my mini-service on port 3003, but Rule 1 forbids it" | Rule 1 forbids dev servers on port 3000, not mini-services on other ports. Mini-services are expected and allowed. This is a false generalization. |
-| "I'm not starting a dev server, I'm just running `bun run build` to verify" | `bun run build` is also prohibited in this sandbox (per session instructions). Use `bun run lint` for quality checks instead. The prohibition is broader than just dev servers. |
 | "EADDRINUSE means the sandbox is broken, I should kill the process" | No. The sandbox manages ports. Follow the prescribed recovery: pkill + reinitialize. See Rule 4. Do not just report and wait. |
 | "The sandbox hung, I have to intervene" | If the preview is unresponsive, determine the cause first (idle timeout vs. crash). For idle: wait and refresh. For crash: pkill + reinit (Rule 5). Manual intervention without diagnosis makes recovery harder. |
 | "I'll wait for HMR to auto-recover" | HMR does NOT auto-recover after file deletion (Rule 5). Waiting wastes time. Follow the prescribed restart procedure. |
 
 ## Red Flags: STOP
 
-If you catch yourself thinking or about to type any of the following, STOP. Re-read Rules 1 through 10 before acting.
+If you catch yourself thinking or about to type any of the following, STOP. Re-read Rules 1 through 13 before acting.
 
 - "Just this once"
 - "Only one time"
