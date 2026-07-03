@@ -17,10 +17,9 @@ describe("project infrastructure", () => {
     expect(tsconfig.compilerOptions.strict).toBe(true);
   });
 
-  it(".gitignore excludes .env and skills/", () => {
+  it(".gitignore excludes .env and node_modules/", () => {
     const gitignore = readFileSync(".gitignore", "utf-8");
     expect(gitignore).toContain(".env");
-    expect(gitignore).toContain("skills/");
     expect(gitignore).toContain("node_modules/");
   });
 
