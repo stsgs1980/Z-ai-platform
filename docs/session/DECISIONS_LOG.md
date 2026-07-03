@@ -6,7 +6,7 @@
 > affected artifacts can be promoted out of stub state.
 >
 > Location: `Z-ai-platform/docs/session/DECISIONS_LOG.md`
-> Last Updated: 2026-06-18
+> Last Updated: 2026-07-03
 
 ---
 
@@ -36,6 +36,13 @@
 - [O-012] Add ui-clarity_sts (6-phase UI redesign methodology) to catalog — OPEN
 - [O-013] Reserve MAS agent IDs (ZAI-ORCH-001, ZAI-META-003/004, ZAI-CORE-001) — OPEN
 - [O-014] Z.ai Sandbox Documentation final triage — DECIDED
+- [O-015] W11 scope = standards/ only (do not extend) — OPEN (deferred)
+- [O-016] Dashboard for 4-module state visualization — OPEN (after consumer onboarding)
+- [O-017] Skills execution contract — cascade (Phases A-D COMPLETE, E/F pending) — OPEN
+- [O-018] verify-id-graph.js modularization — COMPLETE (referenced, no formal section)
+- [O-019] guard/ execution contract — CANDIDATE (not formalized)
+- [O-020] feedback-loop mechanism — CANDIDATE (not formalized)
+- [O-021] Sandbox onboarding flow — 1-2 command entry point — OPEN (research phase)
 
 ---
 
@@ -1295,6 +1302,75 @@ provides structure; iteration provides correction.
 
 ---
 
+### O-021: Sandbox onboarding flow — 1-2 command entry point
+
+**Date raised:** 2026-07-03
+**Status:** OPEN (research + variant-testing phase; paused)
+**Relates to:** O-007 (resolved consumer onboarding), O-017 Phase E (consumer integration, pending), O-014 (sandbox docs triage)
+
+**Source / user intent:** «на старте работы Z.ai chat хочется задать 1-2
+короткие команды, которые упоряочат работу и создание проектов в
+песочнице». Mandate: «тестить различные варианты прежде чем окончательно
+принимать решение».
+
+**Three existing-but-fragmented artifacts:**
+
+1. **Canonical `bootstrap.sh`** (in Z-ai-platform) — clones platform with
+   submodules, symlinks skills into `/home/z/my-project/skills/`, prints
+   AGENT_RULES.md, runs verifiers. Step 6 verifiers are warning-only,
+   non-blocking.
+2. **`zai` CLI prototype** (Desktop `sandbox варианты/`, NOT in canonical
+   repo) — `zai install` + `zai init` + `zai verify`; sets real
+   enforcement (husky pre-commit). Arch doc §15.6 admits "zero tests".
+3. **Skill `zai-sandbox-rules`** (Desktop `SKILLSET LIBRARY/`) — agent
+   behavioral guardrails (Rules 1-10: never run dev servers manually,
+   don't kill processes, don't change ports). Prohibitions only, NOT an
+   onboarding script.
+
+**The gap:** None of the three alone delivers the vision. `bootstrap.sh`
+installs skills but no enforcement; `zai` CLI installs enforcement but no
+skills and is untested/out-of-repo; the skill is prohibitions-only. They
+are complementary but ununified.
+
+**Declared end-state (the oracle — must be TRUE after the 1-2 commands
+in a fresh Z.ai chat sandbox):**
+
+| # | Assertion | Declared by |
+|---|---|---|
+| E1 | Custom skills discoverable by the agent | bootstrap.sh purpose |
+| E2 | `git commit` triggers co-change + worklog + lint | PROC-COCHANGE-003, PROC-WORKLOG-005, STD-DOC-003 |
+| E3 | `zai verify` (or equivalent) exits 0 | arch doc §10 |
+| E4 | Agent has loaded sandbox operational rules | zai-sandbox-rules Rules 1-10 |
+| E5 | Idempotent, re-runnable on every cold start (< ~5s) | usability |
+
+**Variants under consideration** (full analysis: `docs/sandbox-onboarding-research.md`):
+
+| Variant | Entry commands | Skills | Enforcement | Sandbox-rules | In canonical repo |
+|---|---|---|---|---|---|
+| A. bootstrap-centric | `bash <(curl bootstrap.sh)` | yes | no | no | yes |
+| B. zai CLI | `zai install; zai init` | no | yes | no | no (prototype) |
+| C. skill as entry | trigger zai-sandbox-rules | partial | partial | yes | n/a |
+| D. hybrid unified | one unified bootstrap command | yes | yes | yes | to build |
+
+**Recommendation (preliminary):** Variant D (hybrid) — but ONLY after
+empirically testing A/B/C/D against E1-E5. Do not decide by reasoning
+alone.
+
+**Test/evaluation plan:** characterization tests — drive each variant in
+a clean sandbox (or Docker mimic of `/home/z/my-project/`), assert E1-E5.
+Declaration = oracle. See research doc §4.
+
+**Decision needed from:** maintainer (stsgs1980). Paused 2026-07-03 after
+recording; resume by executing the variant test plan in
+`docs/sandbox-onboarding-research.md`.
+
+**References:**
+- `docs/sandbox-onboarding-research.md` (deep-dive: current state, variants, test plan, decision matrix)
+- Desktop `sandbox варианты/` (zai CLI prototype + architecture doc) — outside workspace
+- Desktop `SKILLSET LIBRARY/zai-sandbox-rules/SKILL.md` — the sandbox-rules skill
+
+---
+
 ## Change History
 
 | Date | Change |
@@ -1310,3 +1386,4 @@ provides structure; iteration provides correction.
 | 2026-06-21 | Updated O-017 — Phase C COMPLETE + Phase D1 COMPLETE. **Phase C:** C1 produced `skills/docs/CONTRACT-TEMPLATE.md` (template + validation checklist + when-NOT-to-use guidance, derived from 2 pilot contracts). C2 produced `skills/skills/session-handoff/CONTRACT.md` (second 5-tuple pilot, agent-loop hook domain — vs commit-work's git-hook domain). 5-tuple shape now validated across 2 hook surfaces; shape generalises. **Phase D1:** `standards/scripts/verify-skills.js` v1.0.0 (9 checks S01-S09 mapping to V11a-V14b) shipped earlier in this date with §9.2.1 snapshot test + §9.2.3 e2e workflow; **§9.2.2 remediation closed all 15 pre-existing violations** (8× S02 + 3× S03 + 4× S05) in same session. Root cause of 7 false-positive S02 violations was an internal contradiction in STD-SKILL-001 §3.3 vs §9.1; same patch clarifies the standard AND fixes the verifier (LESSON-001/003 pattern: fix root cause, auto-close N symptoms). Pre-commit Phase 3 + CI workflow promoted to `--strict` default. v2.5.0 release tag cut. Verifier status: 8/8 + 13/13 HARD + 6/6 HARD (--strict), 0 SOFT warnings. **Open:** Phase D2 (tiered hard caps), Phase E (consumer integration), Phase F (dashboard), O-018 (verify-id-graph.js modularization — 1417 lines). |
 | 2026-06-21 | Updated O-017 — Phase D2 COMPLETE -> **Phase D fully COMPLETE**. `verify-skills.js` v1.0.0 -> v1.1.0 added S10 check (V12: tiered hard caps): S10a SKILL.md ≤ 800 (existing §4.18.1 row, NEW runtime enforcement — replaces deferred PROC-LINECOUNT-004), S10b CONTRACT.md ≤ 500 (NEW §4.18.1 row, validated against 2 pilot contracts commit-work 368 + session-handoff 466). Original O-017 proposal of 200 for CONTRACT.md was invalidated by measured reality — both pilots would violate by 1.8×–2.3×; per LESSON-001 cap adjusted to 500 not by compressing the structural 10-section shape. META-001 gained §4.18.6 (rationale) + CONTRACT.md row in §4.18.1 + cross-link in §4.18.5. STD-SKILL-001 §8.2/§10.1 updated. CI-AND-TESTING.md §9.3.3 added (IMPLEMENTED). Snapshot baseline updated (61 IDs, 115 edges, 11 warnings — 8 new W13 false positives from prose mentions of `CONTRACT.md`, `commit-work/CONTRACT.md`, `session-handoff/CONTRACT.md`, `gepetto/README.md`, `react-dev/README.md` in standards/ docs; W13 root-cause fix deferred to O-018). README.md ≤ 400 cap deferred (2 violations: gepetto 485, react-dev 404 — need remediation first). References cap rejected (O-017's "≤2000" was wrong per §4.18.1). Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict, incl. S10a + S10b), 0 SOFT warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1), O-018 (verify-id-graph.js modularization — 1355 lines, NEXT). |
 | 2026-06-21 | **O-018 COMPLETE** — verify-id-graph.js modularization (continuation). Previous O-018 attempt extracted 4 lib/ files (constants, graph-algorithms, parsers, snapshot — 500 lines total), reducing main file from 1593 -> 1354 lines. This continuation extracted 4 more blocks: `lib/health-warnings.js` (Phase 10 W11-W15, 349 lines — includes W13 root-cause fix), `lib/output.js` (emitHumanReadable + emitJSON, 152 lines), `lib/file-scanner.js` (listFiles + globFiles + matchesPattern, 138 lines), `lib/declarations.js` (extractDeclaration + parseMigrations, 251 lines). Main file: 1355 -> 829 lines (-526 lines, -39%). Total lib/ footprint: 7 files, 1390 lines. **W13 root-cause fix** (LESSON-001 applied): expanded candidates list to include `skills/skills/` tree (resolves path-like refs like `commit-work/CONTRACT.md`, `gepetto/README.md` to actual files), AND fixed submodule path resolution (submodules are mounted inside `Z-ai-platform/` per .gitmodules, NOT as siblings at `../Z-ai-skills/`). W13 false-positive count dropped from 11 -> 0. Whitelist kept for genuinely planned/historical/generic refs (planned scripts, historical extraction sources, generic file-type names). verify-id-graph.js v1.1.5 -> v1.1.6. Verifier status: 8/8 + 13/13 HARD + 8/8 HARD (--strict), **0 warnings** (was 11). Snapshot baseline: 61 IDs, 115 edges, 0 warnings. **Open:** Phase E (consumer integration, deferred per user), Phase F (dashboard, blocked by E1). |
+| 2026-07-03 | Added O-021 (Sandbox onboarding flow — 1-2 command entry point). Research-phase OPEN entry capturing user intent: at fresh Z.ai chat sandbox start, 1-2 short commands should organize work + project creation. Identified 3 fragmented artifacts (canonical `bootstrap.sh` = skills-no-enforcement; Desktop `zai` CLI prototype = enforcement-no-skills, untested, out-of-repo; `zai-sandbox-rules` skill = prohibitions-only). Defined 5-point declared end-state (E1-E5) as the characterization oracle; catalogued 4 variants A/B/C/D; mandated empirical variant testing before decision. Deep-dive in new `docs/sandbox-onboarding-research.md`. Index corrected to include O-015/O-016/O-017 (were missing) + O-021; noted O-018 (taken: verify-id-graph modularization) and O-019/O-020 (candidates, not formalized) for ID hygiene. **Paused per user** after recording; resume via the variant test plan. |
