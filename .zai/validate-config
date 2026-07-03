@@ -10,6 +10,12 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/config.json"
+# Convert MSYS path (/c/...) to Windows path (C:/...) for Node on Windows.
+# cygpath is available in Git Bash; absent in Linux sandbox, where the
+# original path already works. See SESSION_NOTES / worklog 2026-07-04.
+if command -v cygpath &>/dev/null; then
+    CONFIG_FILE="$(cygpath -m "$CONFIG_FILE")"
+fi
 STRICT="false"
 
 while [[ $# -gt 0 ]]; do

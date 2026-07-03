@@ -13,8 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "check:md": "bash scripts/check-md.sh",
-    "check:graph": "ts-node scripts/check-id-graph.ts",
+    "check:md": "bash standards/scripts/check-md.sh",
+    "check:graph": "node standards/scripts/verify-id-graph.js",
     "validate": "npm run lint && npm run typecheck && npm run test",
     "prepare": "husky"
   },

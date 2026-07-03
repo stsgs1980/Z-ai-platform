@@ -415,14 +415,14 @@ node standards/scripts/verify-id-graph.js
 # 4. Read session docs for context
 cat docs/session/DECISIONS_LOG.md
 cat docs/session/SESSION_NOTES.md
-cat docs/session/worklog.md   # if pushed; else reconstruct from git log
+cat worklog.md   # canonical (root); if not pushed, reconstruct from git log
 ```
 
 ### 7.3. What MUST be pushed to GitHub before session ends
 
 To survive a session restart, the following MUST be on GitHub:
 - All code changes (committed and pushed to the appropriate repo)
-- `Z-ai-platform/docs/session/worklog.md` (this document)
+- `Z-ai-platform/worklog.md` (canonical root worklog)
 - `Z-ai-platform/docs/session/SESSION_NOTES.md` (this document)
 - `Z-ai-platform/docs/session/DECISIONS_LOG.md`
 - Any in-progress edits that are not yet "done" but represent
@@ -1074,7 +1074,7 @@ invariants (V01-V11, G01-G15 block).
 
 #### Row 4 — worklog.md memory
 
-**Evidence from `docs/session/worklog.md`:** 3554-line append-only
+**Evidence from `worklog.md` (root, canonical):** 500+ line append-only
 markdown with structured per-task entries (Task ID / Agent / Task /
 Work Log / Stage Summary). No semantic-retrieval layer.
 

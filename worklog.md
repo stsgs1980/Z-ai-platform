@@ -502,3 +502,40 @@ fnm/nvm. Sandbox is unaffected; problem is local Windows only.
 
 **Not done:**
 - `~/.bashrc` fnm setup for Git Bash on Windows — out of repo scope, user's local environment.
+
+---
+
+## 2026-07-04 — stale-references cleanup (4-task batch)
+
+**Task:** Resolve drift accumulated since the monorepo conversion (a3d358b)
+and earlier. Four issues identified during configuration audit.
+
+**1. validate-config Windows portability (`.zai/validate-config`)**
+- Bug: `require('/c/Users/...')` (MSYS path) not resolved by Node on Windows.
+- Fix: convert via `cygpath -m` when available; Linux sandbox unaffected
+  (no cygpath, original path works).
+- Verified on Windows: `bash .zai/validate-config` -> RESULT: VALID.
+
+**2. AGENT_RULES.md monorepo drift**
+- §3 enforcement count: "0 enforced" -> "2 enforced" (PROC-COCHANGE-003,
+  PROC-WORKLOG-005 via .husky/pre-commit).
+- §4 skill catalog: "36 skills / skills/skills/INDEX.md" ->
+  "14 skills / skills/INDEX.md (inline monorepo since a3d358b)".
+- §9 version lock: skills@9797e69 submodule pin -> "inline monorepo";
+  standards@/guard@ pins refreshed to actual SHAs (b16d154, 8eb6fe1).
+- §3/§8 RULE-MONOLITH-017 wording: skills/ removed from upstream-protection
+  list (now inline, not upstream).
+- Header pins + Last Updated refreshed.
+
+**3. package.json dead scripts (sandbox-verified 2026-07-04)**
+- check:md:  `bash scripts/check-md.sh`           -> `bash standards/scripts/check-md.sh`
+- check:graph: `ts-node scripts/check-id-graph.ts` -> `node standards/scripts/verify-id-graph.js`
+- Verified: `npm run check:graph` -> PASS (13/13, 31 warnings);
+  `npm run check:md` -> resolves correctly.
+
+**4. Stale worklog-path references in SESSION_NOTES.md**
+- Line 418: `cat docs/session/worklog.md` -> `cat worklog.md` (canonical root).
+- Line 425: push-list entry -> `Z-ai-platform/worklog.md`.
+- Line 1077: "3554-line ... docs/session/worklog.md" -> "500+ line ... worklog.md (root, canonical)".
+- Remaining refs in `worklog.md` lines 309/315/421 left intact (append-only history).
+- Upstream refs in `standards/` (CI-AND-TESTING.md, META-001) NOT touched — separate PR per RULE-MONOLITH-017.

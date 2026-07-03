@@ -2,9 +2,9 @@
 
 > **Owner**: Platform maintainer (this repo's owner)
 > **Target**: Z-ai-platform v2.6.0 (2026-06-22)
-> **Submodule pins**: standards@a259a6b · guard@2e2579d · skills@9797e69
+> **Submodule pins**: standards@b16d154 · guard@8eb6fe1 (skills inline since a3d358b)
 > **Status**: ACTIVE — supersedes bootstrap.sh as the agent onboarding source
-> **Last Updated**: 2026-06-22
+> **Last Updated**: 2026-07-04
 
 This file is the **single orchestration entry point** for any agent
 operating in the Z-ai sandbox. It tells you what to read, in what order,
@@ -58,8 +58,10 @@ Authoritative catalog of all 17 runtime rules. Do not memorize — load it.
 ```
 Location:    guard/rules/INDEX.md
 Count:       17 RULE-MONOLITH-* (declared)
-Enforcement: 0 enforced at runtime (PROC + TOOL migrations pending)
-Trust level: declared intent, not runtime guarantee
+Enforcement: 2 enforced at runtime via .husky/pre-commit
+             - PROC-COCHANGE-003 -> RULE-MONOLITH-010 (docs sync)
+             - PROC-WORKLOG-005  -> RULE-MONOLITH-002 (worklog required)
+Trust level: 2 of 17 enforced; 15 are declared intent only
 ```
 
 The 5 rules most likely to bite you:
@@ -70,21 +72,22 @@ The 5 rules most likely to bite you:
 | RULE-MONOLITH-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                             |
 | RULE-MONOLITH-003 | Read before write         | Open the file before editing it                                                  |
 | RULE-MONOLITH-014 | Pre-commit checklist      | Run verifiers before `git commit`                                                |
-| RULE-MONOLITH-017 | Upstream write protection | **Never** push to standards/, guard/, or skills/ — these are upstream submodules |
+| RULE-MONOLITH-017 | Upstream write protection | **Never** push to standards/ or guard/ — these are upstream submodules (skills/ is now inline) |
 
 Full registry: `guard/rules/INDEX.md` (17 entries, machine-parseable table).
 
 ---
 
-## §4. Skill Catalog — `skills/skills/INDEX.md`
+## §4. Skill Catalog — `skills/INDEX.md`
 
-Authoritative catalog of all 36 skills. 25 have ZAI-* IDs (participate
-in ID-graph validation), 11 do not (opt-out per STD-SKILL-001).
+Authoritative catalog of all 14 skills. 11 have ZAI-* IDs (participate
+in ID-graph validation), 3 do not (opt-out per STD-SKILL-001).
 
 ```
-Location:    skills/skills/INDEX.md
-Count:       36 skills (25 with ZAI-* ID, 11 without)
-Companion:   skills/docs/CATALOG.md (machine-generated, authoritative)
+Location:    skills/INDEX.md
+Count:       14 skills (11 with ZAI-* ID, 3 without)
+Layout:      inline monorepo (since commit a3d358b, 2026-07-03;
+             was a git submodule before)
 ```
 
 Skills are capabilities, not contracts. They tell you HOW to do something.
@@ -154,8 +157,8 @@ the static layer is consistent, but runtime enforcement is still 0%
 These will get your work reverted. Do not do them, even if asked.
 
 ```
-  ✗  git push into standards/, guard/, or skills/ submodules
-     → violates RULE-MONOLITH-017 (upstream protection)
+  ✗  git push into standards/ or guard/ submodules
+     → violates RULE-MONOLITH-017 (upstream protection; skills/ is inline, not upstream)
 
   ✗  Skipping worklog.md before/after an action
      → violates RULE-MONOLITH-002
@@ -188,9 +191,9 @@ drift, this file may give incorrect references.
 
 ```
   Platform:     v2.6.0  (2026-06-22)
-  standards@    a259a6b
-  guard@        2e2579d
-  skills@       9797e69
+  standards@    b16d154  (verified 2026-07-04)
+  guard@        8eb6fe1  (verified 2026-07-04)
+  skills:       inline monorepo (not a submodule since a3d358b)
   Node:         >=20.12.0 (local), v24.x (sandbox)
 ```
 
