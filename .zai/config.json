@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "line_count": {
+    "limit": 500,
+    "extensions": [".md", ".ts", ".js", ".py", ".sh"]
+  },
+  "worklog": {
+    "paths": ["worklog.md", "docs/session/worklog.md"],
+    "min_lines": 1
+  },
+  "emoji": {
+    "enabled": true,
+    "extensions": [".md"]
+  },
+  "exclude_dirs": [".git", "node_modules", ".next", "skills", "guard", "standards"]
+}

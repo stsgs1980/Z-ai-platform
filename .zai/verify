@@ -1,0 +1,157 @@
+#!/usr/bin/env bash
+# .zai/verify — governance verify orchestrator (v5)
+# Usage: bash .zai/verify [--check CHECK_NAME] [--all] [--staged] [--help]
+#   --check NAME   run specific check (line-count, worklog, emoji)
+#   --all          run all checks (default)
+#   --staged       check only staged files (for pre-commit dry-run)
+#   --help         show this help
+# Exit: 0 = all pass, 1 = any fail
+# Called by: user manually, CI, or re-run after setup
+
+set -uo pipefail
+
+show_help() {
+    cat << 'HELP'
+Z.ai Governance Verify
+
+Usage: bash .zai/verify [OPTIONS]
+
+Options:
+  --check NAME    Run specific check: line-count, worklog, emoji
+  --all           Run all checks (default)
+  --staged        Check only staged .md files (pre-commit dry-run)
+  --help          Show this help
+
+Examples:
+  bash .zai/verify                  # Run all checks on all files
+  bash .zai/verify --staged         # Run all checks on staged files only
+  bash .zai/verify --check emoji    # Run only emoji check
+  bash .zai/verify --check worklog --staged  # Worklog check on staged files
+
+Checks:
+  line-count     File line count limit (config: line_count.limit)
+  worklog        Worklog exists and non-empty (config: worklog.paths)
+  emoji          Emoji detection in .md files (config: emoji.enabled)
+
+Config: .zai/config.json
+HELP
+    exit 0
+}
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="${SCRIPT_DIR}/lib"
+
+echo "=== Z.ai Governance Verify ==="
+echo ""
+
+CHECK="all"
+STAGED_FLAG=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --check)  CHECK="$2"; shift 2 ;;
+        --all)    CHECK="all"; shift ;;
+        --staged) STAGED_FLAG="--staged"; shift ;;
+        --help)   show_help ;;
+        *)        echo "Unknown option: $1. Use --help for usage."; exit 2 ;;
+    esac
+done
+
+TOTAL=0
+PASSED=0
+FAILED=0
+SKIPPED=0
+
+run_check() {
+    local name="$1"
+    local script="$2"
+    shift 2
+    local args=("$@")
+
+    TOTAL=$((TOTAL + 1))
+
+    if [[ ! -f "$script" ]]; then
+        echo "[SKIP] $name — $script not found"
+        SKIPPED=$((SKIPPED + 1))
+        echo ""
+        return
+    fi
+
+    echo "--- $name ---"
+    if bash "$script" "${args[@]}"; then
+        echo "[PASS] $name"
+        PASSED=$((PASSED + 1))
+    else
+        echo "[FAIL] $name"
+        FAILED=$((FAILED + 1))
+    fi
+    echo ""
+}
+
+# --- Governance checks ---
+if [[ "$CHECK" == "all" ]] || [[ "$CHECK" == "line-count" ]]; then
+    run_check "Line Count" "${LIB_DIR}/check-line-count.sh" $STAGED_FLAG
+fi
+
+if [[ "$CHECK" == "all" ]] || [[ "$CHECK" == "worklog" ]]; then
+    run_check "Worklog" "${LIB_DIR}/check-worklog.sh"
+fi
+
+if [[ "$CHECK" == "all" ]] || [[ "$CHECK" == "emoji" ]]; then
+    run_check "Emoji (STD-DOC-003)" "${LIB_DIR}/check-emoji.sh" $STAGED_FLAG
+fi
+
+# --- Guard verifiers (if available) ---
+GUARD_DIR="$(cd "${SCRIPT_DIR}/.." 2>/dev/null && pwd)/Z-ai-guard"
+
+if [[ "$CHECK" == "all" ]]; then
+    if [[ -f "${GUARD_DIR}/scripts/verify-standards.js" ]]; then
+        run_check "verify-standards" "node" "${GUARD_DIR}/scripts/verify-standards.js"
+    else
+        echo "[SKIP] verify-standards — not found"
+        SKIPPED=$((SKIPPED + 1))
+        echo ""
+    fi
+
+    if [[ -f "${GUARD_DIR}/scripts/verify-id-graph.js" ]]; then
+        run_check "verify-id-graph" "node" "${GUARD_DIR}/scripts/verify-id-graph.js"
+    else
+        echo "[SKIP] verify-id-graph — not found"
+        SKIPPED=$((SKIPPED + 1))
+        echo ""
+    fi
+
+    if [[ -f "${GUARD_DIR}/scripts/verify-skills.js" ]]; then
+        run_check "verify-skills" "node" "${GUARD_DIR}/scripts/verify-skills.js"
+    else
+        echo "[SKIP] verify-skills — not found"
+        SKIPPED=$((SKIPPED + 1))
+        echo ""
+    fi
+fi
+
+# --- Skills count ---
+SKILLS_DIR="${SCRIPT_DIR}/../skills"
+if [[ -d "$SKILLS_DIR" ]]; then
+    SKILL_COUNT=$(ls -d "${SKILLS_DIR}"/*/ 2>/dev/null | wc -l)
+    echo "[INFO] Skills available: ${SKILL_COUNT}"
+else
+    echo "[INFO] Skills directory not found"
+fi
+
+# --- Summary ---
+echo ""
+echo "=== Summary ==="
+echo "  Total:   ${TOTAL}"
+echo "  Passed:  ${PASSED}"
+echo "  Failed:  ${FAILED}"
+echo "  Skipped: ${SKIPPED}"
+echo ""
+
+if [[ "$FAILED" -gt 0 ]]; then
+    echo "RESULT: SOME CHECKS FAILED"
+    exit 1
+else
+    echo "RESULT: ALL CHECKS PASSED"
+    exit 0
+fi

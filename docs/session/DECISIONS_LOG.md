@@ -1343,7 +1343,7 @@ in a fresh Z.ai chat sandbox):**
 | E4 | Agent has loaded sandbox operational rules | zai-sandbox-rules Rules 1-10 |
 | E5 | Idempotent, re-runnable on every cold start (< ~5s) | usability |
 
-**Variants under consideration** (full analysis: `docs/sandbox-onboarding-research.md`):
+**Variants under consideration** (full analysis: `../../Test/sandbox-onboarding-research.md`):
 
 | Variant | Entry commands | Skills | Enforcement | Sandbox-rules | In canonical repo |
 |---|---|---|---|---|---|
@@ -1362,10 +1362,10 @@ Declaration = oracle. See research doc §4.
 
 **Decision needed from:** maintainer (stsgs1980). Paused 2026-07-03 after
 recording; resume by executing the variant test plan in
-`docs/sandbox-onboarding-research.md`.
+`../../Test/sandbox-onboarding-research.md`.
 
 **References:**
-- `docs/sandbox-onboarding-research.md` (deep-dive: current state, variants, test plan, decision matrix)
+- `../../Test/sandbox-onboarding-research.md` (deep-dive: current state, variants, test plan, decision matrix — вынесено в Test/ чтобы не захламлять основной проект)
 - Desktop `sandbox варианты/` (zai CLI prototype + architecture doc) — outside workspace
 - Desktop `SKILLSET LIBRARY/zai-sandbox-rules/SKILL.md` — the sandbox-rules skill
 
