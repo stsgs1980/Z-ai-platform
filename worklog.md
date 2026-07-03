@@ -140,3 +140,39 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 **Next steps:** Optional workflow version bump to silence Node 20 deprecation.
 
 ---
+
+### 2026-07-03 00:35-00:40
+**Entry:** Fix Z-ai-platform CI failures (checkout auth + release-please permissions)
+
+**Context:** Push `7c59271` triggered 4 CI errors: `actions/checkout@v4` failed with `could not read Username for 'https://github.com': terminal prompts disabled` (exit code 128). Verify ID Graph and Release Please both RED.
+
+**Root cause investigation (systematic-debugging):**
+1. Checked checkout logs: `token: ***` was passed but fetch of the main repo failed with 401
+2. All 4 repos (Z-ai-platform + 3 submodules) are PUBLIC -> anonymous clone works, no token needed
+3. PAT_TOKEN secret existed (set 2026-07-02T14:49) but became invalid (likely an auto-rotating gh CLI OAuth token `gho_`)
+4. Invalid token sent bad Authorization header -> GitHub 401 -> git prompts disabled -> fatal
+5. Confirmed: workflow file unchanged between success (19:19) and failure (19:28) -> token rotated, not config change
+
+**Fix 1: removed `token: ${{ secrets.PAT_TOKEN }}`** from all 3 checkout steps
+- `verify-id-graph.yml`, `e2e-verifiers.yml`, `release-please.yml`
+- Public repos clone anonymously; removes dependency on rotating token
+- Commit `ee3c64d`: `fix(ci): remove invalid PAT_TOKEN from checkout (repos are public)`
+
+**Fix 2: enabled repo setting** `can_approve_pull_request_reviews`
+- After checkout fix, release-please got further but failed: `GitHub Actions is not permitted to create or approve pull requests`
+- Root cause: repo setting `can_approve_pull_request_reviews: false` (was masked by earlier checkout failure)
+- Applied via API: `gh api -X PUT repos/stsgs1980/Z-ai-platform/actions/permissions/workflow -F can_approve_pull_request_reviews=true`
+- Kept `default_workflow_permissions: read` (least privilege; workflows specify own perms)
+
+**Verification:**
+- Verify ID Graph run #28630522838 = GREEN (1m1s)
+- Release Please run #28630522907 (rerun) = GREEN (42s), created release PR #1 "chore(main): release 2.7.0"
+
+**Remaining (non-fatal):**
+- Node 20 deprecation warning on `actions/checkout@v4`
+- Husky deprecated shebang lines in `.husky/*` (will break in v10.0.0)
+- Release PR's Verify ID Graph shows `action_required` (expected: first PR needs workflow approval)
+
+**Next steps:** Optional cleanup of deprecation warnings.
+
+---
