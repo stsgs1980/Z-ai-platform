@@ -234,3 +234,24 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 **Result:** Active workflows now = verify-id-graph.yml + e2e-verifiers.yml. CHANGELOG.md remains manually maintained.
 
 ---
+
+### 2026-07-03 01:11
+**Entry:** Add lint-markdown workflow to standards (close last consistency gap)
+
+**Context:** Audit found standards was the only repo without CI markdown lint, despite having an identical eslint.config.js (unicode-policy for `**/*.md`) as guard/skills. Decision: close the gap for completeness ("rules apply to the rule-maker").
+
+**Note:** Verified standards currently passes its own lint (exit 0) -> no active violation, this is preventive.
+
+**Work completed:**
+- Synced standards local `main` to `origin/main` (was 7 commits behind, detached HEAD)
+- Restored package.json/package-lock.json (side-effect of local npm install had added spurious `z-ai-dense-graph: file:..` dependency)
+- Created `.github/workflows/lint-markdown.yml` (same template as guard/skills, `checkout@v5`)
+- Committed `3f2bfce`: `ci: add lint-markdown workflow (STD-DOC-002, STD-DOC-003)`
+- Standards CI run #28631805161 = GREEN (13s)
+- Bumped platform submodule pointer: standards `e1e68fa` -> `3f2bfce`
+
+**Result:** All 4 repos now have consistent markdown-lint CI enforcement (platform via verify-id-graph submodules check; guard/skills/standards each have their own lint-markdown workflow).
+
+**System status:** All verifiers PASS (8/8 standards, skills OK, 13/13 id-graph), all CI green across 4 repos, all submodule pointers consistent, platform working tree clean.
+
+---
