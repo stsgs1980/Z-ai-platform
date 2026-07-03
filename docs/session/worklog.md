@@ -5034,6 +5034,10 @@ Step 5 — Package: skill.skill created at Test/zai-sandbox-rules-workspace/skil
 
 Step 6 — THIS ENTRY. Worklogs updated, DECISIONS_LOG entries added.
 
+Step 7 — Added zai-sandbox-rules to Z-ai-platform/skills/skills/ submodule.
+Bootstrap.sh will now symlink it into /home/z/my-project/skills/ in new sandbox sessions.
+Both submodule (skills) and parent (Z-ai-platform) pushed to GitHub.
+
 Test results (Z.ai chat sandbox):
 - Rule 1 (dev server refusal): PASSED — agent refused "bun run dev", explained EADDRINUSE/duplicate/HMR, mentioned .zscripts/dev.sh, offered alternative help
 - Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
