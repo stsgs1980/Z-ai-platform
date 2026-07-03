@@ -631,3 +631,31 @@ loop and the header comment lied about 3 submodules.
 **Verified:** `bash -n save-work.sh` -> OK syntax.
 Runtime check in sandbox deferred (script commits + pushes; running it
 locally would sweep unrelated WT changes into a save commit).
+
+---
+
+## 2026-07-04 — status.sh: sync critical-skills check with reality
+
+**Task:** Bring status.sh in line with the actual skill catalog. The
+critical-skills section was looking up names that no longer exist.
+
+**Problems found:**
+- Step 3 loop iterated `skill-creator zai-skill-registry skill-id-system`.
+  `skill-creator` was renamed to `zai-skill-creator`; `skill-id-system`
+  never existed in this repo. Two of three checks always returned MISSING.
+- Step 4 (entire block, ~12 lines) was a tone-detector for the old
+  Anthropic skill-creator ("Cool?", "plumbers", etc.). It read
+  `$SANDBOX_SKILLS_DIR/skill-creator/SKILL.md` which has not existed
+  since the rename -- dead code.
+
+**Fix:**
+- Step 3 loop: `skill-creator zai-skill-registry skill-id-system` ->
+  `zai-skill-creator zai-skill-registry`.
+- Step 4: deleted the Anthropic-detector block, replaced with a short
+  comment marking it as removed.
+
+**Not touched:**
+- Unicode glyphs in script output (✓ ✗ ⚠ →). Out of scope for the
+  "sync with skill names" pass; separate decision needed.
+
+**Verified:** `bash -n status.sh` -> OK syntax.

@@ -62,7 +62,7 @@ echo ""
 
 # 3. Critical skills check
 echo "=== Critical skills check ==="
-for skill in skill-creator zai-skill-registry skill-id-system; do
+for skill in zai-skill-creator zai-skill-registry; do
     target="$SANDBOX_SKILLS_DIR/$skill"
     if [ -L "$target" ]; then
         real_path=$(readlink -f "$target")
@@ -80,21 +80,10 @@ done
 
 echo ""
 
-# 4. Refactored skill-creator check
-echo "=== skill-creator version check ==="
-if [ -f "$SANDBOX_SKILLS_DIR/skill-creator/SKILL.md" ]; then
-    cool_count=$(grep -cE "Cool\?|how could you|plumbers|Good luck!" "$SANDBOX_SKILLS_DIR/skill-creator/SKILL.md" 2>/dev/null || true)
-    cool_count=${cool_count:-0}
-    line_count=$(wc -l < "$SANDBOX_SKILLS_DIR/skill-creator/SKILL.md")
-    if [ "${cool_count:-0}" -eq 0 ]; then
-        echo "✓ Refactored version active ($line_count lines, no conversational tone)"
-    else
-        echo "⚠ Original Anthropic version active ($cool_count conversational phrases found, $line_count lines)"
-        echo "  → Run bootstrap.sh to switch to refactored version"
-    fi
-fi
+# 4. (removed) Refactored skill-creator check
+# Was a tone-detector for the old Anthropic skill-creator. Obsolete since
+# the rename to zai-skill-creator; the path it checked no longer exists.
 
-echo ""
 echo "============================================"
 if [ "$symlink_count" -gt 0 ]; then
     echo "  Status: HEALTHY — your custom skills are loaded."
