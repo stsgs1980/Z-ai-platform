@@ -5045,6 +5045,18 @@ Step 8 — Audit against sandbox-guide.md (524 lines). Found 4 gaps:
 - No useful commands section
 Fixed in v1.4.0: added Rules 11 (submodules), 12 (Prisma), useful commands, updated Rule 1.
 
+Step 9 — Audit against Migration Guide (223 lines). Found 6 additional gaps:
+- Rule 7 missing --legacy-peer-deps for npm
+- No build verification step
+- No git config (user.email, user.name)
+- No rule about not modifying core files unless requested
+- No npm vs bun guidance
+Fixed in v1.5.0: Rule 7 updated, Rule 8 (build verification) added, Rule 10 updated.
+
+Step 10 — Updated sandbox documentation:
+- Z.ai-Sandbox-Guide.md: added build verification step (§3), added Golden Rules 8-9
+- Z.ai-Sandbox-Migration Guide.md: updated Critical Rules (added dev server prohibition), updated checklist (--legacy-peer-deps, dev-server via .zscripts), fixed Port 3000 error solution
+
 Full pipeline test (Z.ai chat + bootstrap.sh):
 - Rule 1 (dev server refusal): FAILED in v1.2.0 (agent executed bun run dev despite skill loaded). Fixed in v1.3.0: added aggressive triggers (bun run dev, npm run dev, next dev, start dev, run dev, запусти dev) + STOP warning in Purpose. Retested: PASSED — agent refused, cited sandbox rules, explained .zscripts/dev.sh mechanism, checked PID/status.
 - Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
