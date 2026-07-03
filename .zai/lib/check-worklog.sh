@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${SCRIPT_DIR}/../config.json"
 
 # Defaults (overridden by config.json, then by CLI args)
-WORKLOG_PATHS="worklog.md,docs/session/worklog.md"
+WORKLOG_PATHS="worklog.md"
 MIN_LINES=1
 
 # Read from config.json if available

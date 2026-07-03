@@ -10,7 +10,7 @@ set -uo pipefail
 PROJECT_ROOT="${ZAI_PROJECT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 ZAI_DIR="${PROJECT_ROOT}/.zai"
 GUARD_DIR="${PROJECT_ROOT}/guard"
-SKILLS_DIR="${PROJECT_ROOT}/skills/skills"
+SKILLS_DIR="${PROJECT_ROOT}/skills"
 CONFIG_FILE="${ZAI_DIR}/config.json"
 
 echo "=== Z.ai Governance Setup (integrated) ==="
@@ -92,7 +92,7 @@ if [[ ! -f "${CONFIG_FILE}" ]]; then
     "extensions": [".md", ".ts", ".js", ".py", ".sh"]
   },
   "worklog": {
-    "paths": ["worklog.md", "docs/session/worklog.md"],
+    "paths": ["worklog.md"],
     "min_lines": 1
   },
   "emoji": {

@@ -467,3 +467,19 @@ Changes:
 Skills included: zai-anti-monolith, zai-debugging, zai-frontend-styling-expert, zai-md-std, zai-mermaid-diagrams, zai-performance-code-generator, zai-phi-layout, zai-project-clone, zai-prompt-engineering, zai-sandbox-rules, zai-skill-creator, zai-skill-registry, zai-ui-composer, zai-workflow-discipline.
 
 All skills have consistent frontmatter: name (zai-*), author: StsDev, version.
+
+---
+
+## 2026-07-04 — worklog dedup (single canonical path)
+
+**Task:** Resolve duplicate worklog registration; keep root `worklog.md` as the only canonical path per AGENTS.md §4.
+
+**What was done:**
+- Deleted `docs/session/worklog.md` (was already removed in WT; staged the deletion).
+- `.zai/lib/check-worklog.sh:16`: default `WORKLOG_PATHS` reduced from `worklog.md,docs/session/worklog.md` to `worklog.md`.
+- `.zai/setup.sh:95`: config template now emits `"paths": ["worklog.md"]` only.
+- `.zai/config.json`: `worklog.paths` already trimmed to `["worklog.md"]` (staged).
+
+**Verified:**
+- `bash .zai/lib/check-worklog.sh` -> PASS on root `worklog.md` (469 lines).
+- `validate-config` fails on a pre-existing path-portability bug (MSYS `/c/...` vs Windows), unrelated to this change.

@@ -5,7 +5,7 @@
     "extensions": [".md", ".ts", ".js", ".py", ".sh"]
   },
   "worklog": {
-    "paths": ["worklog.md", "docs/session/worklog.md"],
+    "paths": ["worklog.md"],
     "min_lines": 1
   },
   "emoji": {
