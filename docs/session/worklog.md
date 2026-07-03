@@ -5038,7 +5038,12 @@ Step 7 — Added zai-sandbox-rules to Z-ai-platform/skills/skills/ submodule.
 Bootstrap.sh will now symlink it into /home/z/my-project/skills/ in new sandbox sessions.
 Both submodule (skills) and parent (Z-ai-platform) pushed to GitHub.
 
-Test results (Z.ai chat sandbox):
-- Rule 1 (dev server refusal): PASSED — agent refused "bun run dev", explained EADDRINUSE/duplicate/HMR, mentioned .zscripts/dev.sh, offered alternative help
+Full pipeline test (Z.ai chat + bootstrap.sh):
+- Rule 1 (dev server refusal): FAILED in v1.2.0 (agent executed bun run dev despite skill loaded). Fixed in v1.3.0: added aggressive triggers (bun run dev, npm run dev, next dev, start dev, run dev, запусти dev) + STOP warning in Purpose. Retested: PASSED — agent refused, cited sandbox rules, explained .zscripts/dev.sh mechanism, checked PID/status.
 - Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
-- Rule 4 (EADDRINUSE recovery): PARTIAL — agent diagnosed correctly (PID stale, port occupied by new process, HTTP 200), correctly determined sandbox auto-recovered. Did NOT execute pkill+reinit (not needed in this case). Agent needs testing with REAL EADDRINUSE to confirm it follows prescribed recovery.
+- Rule 4 (EADDRINUSE recovery): PARTIAL — agent diagnosed correctly, pkill+reinit not needed (sandbox auto-recovered)
+
+Bootstrap pipeline:
+- bootstrap.sh clones Z-ai-platform + symlinks 37 skills including zai-sandbox-rules
+- zai-sandbox-rules v1.3.0 loaded automatically in new sandbox sessions
+- Agent follows Rule 1 without manual .skill upload
