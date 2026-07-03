@@ -659,3 +659,50 @@ critical-skills section was looking up names that no longer exist.
   "sync with skill names" pass; separate decision needed.
 
 **Verified:** `bash -n status.sh` -> OK syntax.
+
+---
+
+## 2026-07-04 — consolidate hooks under Husky (remove .githooks/)
+
+**Task:** Two parallel hook systems were drifting apart. `.husky/`
+(active via core.hooksPath=.husky/_) ran co-change + worklog + lint-staged.
+`.githooks/` (dead unless install-hooks.sh run) held verify-standards,
+verify-id-graph, verify-skills, Conventional Commits validation, line-count.
+User needs BOTH tool groups; consolidation under one hooksPath is the fix.
+
+**What was done:**
+- `.husky/commit-msg` (new): migrated from `.githooks/commit-msg` verbatim,
+  Husky v9 style (no shebang), header updated to note the migration.
+- `.husky/pre-commit` (rewritten): now runs four groups in order --
+  1. guard co-change + worklog (HARD)
+  2. standards verify-standards + verify-id-graph + verify-skills (HARD)
+     with `command -v node` and submodule-presence guards
+  3. guard line-count (SOFT)
+  4. lint-staged
+  Dropped Phase 0 (worklog freshness on docs/session/worklog.md -- path
+  was deprecated in commit 01ae72d; PROC-WORKLOG-005 already covers this).
+- `.githooks/` directory: removed (pre-commit + commit-msg).
+- `install-hooks.sh`: removed. Husky installs via `npm install` (prepare
+  hook runs `husky`, which sets core.hooksPath). install-hooks.sh was the
+  only path that could switch git to the dead .githooks/ system.
+- `README.md`: three references to install-hooks.sh replaced with the
+  Husky auto-install story (`npm install`).
+
+**verify-skills.js --strict caveat:** S03 (_sts suffix) currently fails
+for all 14 skills because the real skills use the `zai-` namespace
+without the suffix. STD-SKILL-001 §9 needs an upstream fix (separate
+PR in Z-ai-standards). The Husky pre-commit calls verify-skills.js in
+non-strict mode locally; CI keeps running --strict to track the gap.
+
+**Verified locally:**
+- `bash -n .husky/pre-commit` OK syntax.
+- `bash -n .husky/commit-msg` OK syntax.
+- `node standards/scripts/verify-standards.js` -> 8/8 PASS.
+- `node standards/scripts/verify-id-graph.js` -> 13/13 HARD PASS, 33 warnings.
+- `node standards/scripts/verify-skills.js` -> 6/6 HARD PASS, 1 SOFT warning.
+- `bash .husky/pre-commit` (dry-run) -> guard PROC checks execute; expected
+  FAIL on worklog-check because the worklog entry for this commit was not
+  staged at dry-run time.
+
+**Pending:** sandbox test after push -- confirm `git commit` in a fresh
+clone fires all four groups end-to-end.

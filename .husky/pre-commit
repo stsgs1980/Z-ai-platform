@@ -1,7 +1,125 @@
+# ==============================================================================
+# pre-commit hook — Z-ai-platform (consolidated under Husky, 2026-07-04)
+# ==============================================================================
+#
+# Two source groups, both run on every commit:
+#
+#   1. guard/ (PROC-COCHANGE-003, PROC-WORKLOG-005)
+#      - code + docs sync (RULE-MONOLITH-010, HARD)
+#      - worklog entry required for code changes (RULE-MONOLITH-002, HARD)
+#
+#   2. standards/ (verify-*.js, migrated from the removed .githooks/)
+#      - verify-standards.js  -- content-level invariants (V01-V11, HARD)
+#      - verify-id-graph.js   -- cross-repo ID-graph invariants (G01-G15, HARD)
+#      - verify-skills.js     -- skill-side format invariants (S01-S09, HARD)
+#        (SOFT checks S06/S07/S08 reported but never block)
+#
+#   3. guard/ (PROC-LINECOUNT-004, SOFT)
+#      - per-category file-size caps (RULE-MONOLITH-012)
+#
+#   4. lint-staged (eslint + prettier on staged files)
+#
+# Bypass (emergencies only): git commit --no-verify
+# ==============================================================================
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+# --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-MONOLITH-010)
 bash guard/scripts/co-change-check.sh --hard
 
 # PROC-WORKLOG-005: worklog entry required for code changes (RULE-MONOLITH-002)
 bash guard/scripts/worklog-check.sh --hard
 
+# --- Group 2: standards/ verify-*.js (HARD) ---------------------------------
+# Locate Node.js. If absent, warn but allow commit (CI will catch regressions).
+if ! command -v node >/dev/null 2>&1; then
+  echo "[pre-commit] WARNING: Node.js not found in PATH -- skipping verifier runs."
+  echo "[pre-commit] CI will catch any regressions; install Node.js to enable local checks."
+else
+  # Verify scripts live in the standards submodule, which MUST be checked out
+  # (`git submodule update --init --recursive`).
+  VERIFY_STANDARDS="standards/scripts/verify-standards.js"
+  VERIFY_ID_GRAPH="standards/scripts/verify-id-graph.js"
+  VERIFY_SKILLS="standards/scripts/verify-skills.js"
+
+  if [ ! -f "$VERIFY_STANDARDS" ] || [ ! -f "$VERIFY_ID_GRAPH" ]; then
+    echo "[pre-commit] WARNING: standards submodule not checked out -- skipping verify runs."
+    echo "[pre-commit] Run: git submodule update --init --recursive"
+    echo "[pre-commit] CI will catch any regressions."
+  else
+    # Phase 1: verify-standards.js (content-level, fast)
+    echo "[pre-commit] verify-standards.js (content-level invariants V01-V11)"
+    if ! node "$VERIFY_STANDARDS" >/tmp/zai-precommit-vstandards.log 2>&1; then
+      echo "[pre-commit] FAIL: verify-standards.js reported invariant violations."
+      echo "[pre-commit] ---- output ----"
+      sed 's/^/  /' /tmp/zai-precommit-vstandards.log
+      echo "[pre-commit] ---- end output ----"
+      echo "[pre-commit] Either fix the offending standard(s), or if the invariant"
+      echo "[pre-commit] itself changed, update the V## check in $VERIFY_STANDARDS."
+      echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+      exit 1
+    fi
+    echo "[pre-commit] OK: verify-standards.js PASS"
+    rm -f /tmp/zai-precommit-vstandards.log
+
+    # Phase 2: verify-id-graph.js (cross-repo structural, slower)
+    echo "[pre-commit] verify-id-graph.js (cross-repo ID-graph invariants G01-G15)"
+    if ! node "$VERIFY_ID_GRAPH" >/tmp/zai-precommit-vgraph.log 2>&1; then
+      echo "[pre-commit] FAIL: verify-id-graph.js reported HARD check violations."
+      echo "[pre-commit] ---- output ----"
+      sed 's/^/  /' /tmp/zai-precommit-vgraph.log
+      echo "[pre-commit] ---- end output ----"
+      echo "[pre-commit] HARD check failures block CI. Fix the offending file(s)"
+      echo "[pre-commit] (in the appropriate submodule if needed), then re-commit."
+      echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+      exit 1
+    fi
+    echo "[pre-commit] OK: verify-id-graph.js PASS (HARD checks)"
+    rm -f /tmp/zai-precommit-vgraph.log
+
+    # Phase 3: verify-skills.js (skills-side format)
+    # HARD failures (S01/S02/S03/S04/S05/S09) block; SOFT (S06/S07/S08)
+    # reported but never block (STD-SKILL-001 section 10.1).
+    # NOTE: S03 (_sts suffix) currently fails for all 14 skills; this requires
+    # an upstream STD-SKILL-001 fix (separate PR). The non-strict mode used
+    # here passes locally; CI runs --strict separately to track S03.
+    if [ -f "$VERIFY_SKILLS" ]; then
+      echo "[pre-commit] verify-skills.js (skills-side invariants)"
+      if ! node "$VERIFY_SKILLS" >/tmp/zai-precommit-vskills.log 2>&1; then
+        echo "[pre-commit] FAIL: verify-skills.js reported HARD violations."
+        echo "[pre-commit] ---- output ----"
+        sed 's/^/  /' /tmp/zai-precommit-vskills.log
+        echo "[pre-commit] ---- end output ----"
+        echo "[pre-commit] Fix the offending SKILL.md to conform to STD-SKILL-001."
+        echo "[pre-commit] To bypass (NOT recommended): git commit --no-verify"
+        exit 1
+      fi
+      if grep -q "WARN" /tmp/zai-precommit-vskills.log 2>/dev/null; then
+        echo "[pre-commit] OK: verify-skills.js HARD PASS (SOFT warnings present, see log)"
+      else
+        echo "[pre-commit] OK: verify-skills.js PASS"
+      fi
+      rm -f /tmp/zai-precommit-vskills.log
+    fi
+  fi
+fi
+
+# --- Group 3: guard line-count (PROC-LINECOUNT-004, SOFT) -------------------
+LINECOUNT="guard/scripts/line-count-check.sh"
+if [ -f "$LINECOUNT" ]; then
+  if ! bash "$LINECOUNT" >/tmp/zai-precommit-linecount.log 2>&1; then
+    echo "[pre-commit] WARN: line-count check reported advisory violations:"
+    sed 's/^/  /' /tmp/zai-precommit-linecount.log
+    echo "[pre-commit] Advisory only -- commit will proceed. RULE-MONOLITH-012 still applies."
+  fi
+  rm -f /tmp/zai-precommit-linecount.log
+fi
+
+# --- Group 4: lint-staged (eslint + prettier on staged files) ---------------
 npx lint-staged
+
+exit 0

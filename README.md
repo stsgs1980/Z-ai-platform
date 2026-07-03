@@ -1,6 +1,6 @@
 # Z-ai-platform
 
-Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard, skills) and enforces cross-repo ID-graph integrity in CI.
+Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard) and contains 14 skills as a monorepo. Enforces cross-repo ID-graph integrity in CI.
 
 [![Status: LIVE](https://img.shields.io/badge/Status-LIVE-brightgreen.svg?style=flat-square)]()
 [![License: Private](https://img.shields.io/badge/License-Private-red.svg?style=flat-square)]()
@@ -20,17 +20,17 @@ Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard,
 
 ## Features
 
-- **4-repo architecture** — platform (L0), standards (L1), guard (L2), skills (L3) evolve independently
-- **Cross-repo ID graph** — 65 IDs with 125 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
+- **3-layer architecture** — platform (L0) + standards (L1) + guard (L2) with 14 inline skills (L3)
+- **Cross-repo ID graph** — 42 IDs with 92 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
 - **Nightly + push CI** — `verify-standards.js`, `verify-id-graph.js`, `verify-skills.js`, and snapshot compare run automatically
-- **Pre-commit hooks** — local verification on `.md` and `verify-*.js` changes via `install-hooks.sh`
-- **Bootstrap script** — one command restores all 35+ custom skills into any fresh Z.ai sandbox session
+- **Pre-commit hooks** — Husky runs guard PROC checks + verify-standards/id-graph/skills + lint-staged on every commit (auto-installed via `npm install`)
+- **Bootstrap script** — one command restores all 14 custom skills into any fresh Z.ai sandbox session
 
 ## Tech Stack
 
 - **Language** - JavaScript (Node.js 20, ESLint 9 flat config)
 - **CI** - GitHub Actions (verify-id-graph.yml, e2e-verifiers.yml)
-- **Submodules** - git submodules for standards, guard, skills
+- **Submodules** - git submodules for standards, guard (skills are inline monorepo)
 - **Verification** - Custom Node.js scripts (verify-standards.js, verify-id-graph.js, verify-skills.js)
 
 ## Getting Started
@@ -39,7 +39,7 @@ Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard,
 
 - Node.js 20+
 - Git with submodule support
-- (For CI) SSH deploy key with read access to all three submodule repos
+- (For CI) SSH deploy key with read access to standards and guard submodule repos
 
 ### Installation
 
@@ -55,8 +55,9 @@ cd Z-ai-platform
 node standards/scripts/verify-standards.js
 node standards/scripts/verify-id-graph.js
 
-# Install pre-commit hooks (optional)
-./install-hooks.sh
+# Pre-commit hooks install automatically via npm install (Husky)
+# To verify they are active:
+git config --get core.hooksPath   # should print .husky/_
 
 # Bootstrap skills into a Z.ai sandbox
 bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
@@ -64,7 +65,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main
 
 ## Architecture
 
-The platform uses a 4-layer repository architecture where each layer can evolve independently. Standards can be amended without forcing rule or skill updates; guard rules ship on their own cadence; skills are consumed standalone by the sandbox runtime. The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/META-001-id-registry.md` for the full ID catalogue and layer matrix.
+The platform uses a 3-layer repository architecture with an inline skills monorepo. Standards (L1) and guard (L2) are submodules that evolve independently. Skills (L3) live directly in this repo for easier development and iteration. The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/META-001-id-registry.md` for the full ID catalogue and layer matrix.
 
 ## Project Structure
 
@@ -84,7 +85,7 @@ The platform uses a 4-layer repository architecture where each layer can evolve 
 | `node standards/scripts/verify-id-graph.js`        | Cross-repo ID-graph invariants (G01-G15)             |
 | `node standards/scripts/verify-skills.js --strict` | Skills-side format verifier (S01-S09)                |
 | `bash standards/scripts/graph-deps.sh`             | Render ID dependency graph (dot/svg/png)             |
-| `./install-hooks.sh`                               | Bootstrap pre-commit hooks for local verification    |
+| `npm install`                                      | Install deps + auto-enable Husky pre-commit hooks    |
 | `./bootstrap.sh`                                   | One-command skill restore for fresh sandbox sessions |
 
 ## CI Behavior
