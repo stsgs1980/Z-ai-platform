@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# check-emoji.sh — detect emoji in .md files (v4, STD-DOC-003)
+# check-emoji.sh — detect emoji in files (STD-DOC-003)
 # Usage: bash check-emoji.sh [--staged] [--file FILE] [--config PATH]
-#   --staged    check only git staged .md files (default: all .md in cwd)
+#   --staged    check only git staged files (default: all matching files in cwd)
 #   --file F    check a specific file
 #   --config P  path to config.json (default: .zai/config.json)
 # Exit: 0 = pass, 1 = emoji found
 # macOS compat: grep -P (GNU) primary, perl -C (BSD) fallback
+# Config: reads emoji.extensions from config.json
 
 set -uo pipefail
 
@@ -23,6 +24,21 @@ while [[ $# -gt 0 ]]; do
         *)        echo "Unknown option: $1"; exit 2 ;;
     esac
 done
+
+# Read extensions from config.json
+if [[ -f "$CONFIG_FILE" ]] && command -v node &>/dev/null; then
+    EXTENSIONS=$(node -e "
+        const c = JSON.parse(require('fs').readFileSync('$CONFIG_FILE','utf8'));
+        const exts = c.emoji?.extensions ?? ['.md'];
+        console.log(exts.join('|'));
+    " 2>/dev/null || echo ".md")
+else
+    EXTENSIONS=".md"
+fi
+
+# Build grep pattern: \.(md|ts|js)$ etc.
+EXT_PATTERN=$(echo "$EXTENSIONS" | sed 's/\./\\./g' | sed 's/|/\\|/g')
+EXT_GREP="\\.\\($(echo "$EXTENSIONS" | sed 's/\./\\./g' | sed 's/ /\\|/g' | sed 's/|/\\|/g')\\)$"
 
 # Emoji regex — covers common Unicode emoji ranges
 EMOJI_REGEX='[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}\x{FE00}-\x{FE0F}\x{1F1E0}-\x{1F1FF}]'
@@ -47,6 +63,17 @@ check_file() {
     return 0
 }
 
+# Build grep pattern for extensions
+build_ext_grep() {
+    local pattern=""
+    for ext in $EXTENSIONS; do
+        [[ -z "$pattern" ]] && pattern="\\${ext}$" || pattern="${pattern}|\\${ext}$"
+    done
+    echo "$pattern"
+}
+
+EXT_GREP=$(build_ext_grep)
+
 FAIL=0
 
 if [[ -n "$TARGET_FILE" ]]; then
@@ -55,12 +82,20 @@ elif [[ "$MODE" == "staged" ]]; then
     while IFS= read -r f; do
         [[ -z "$f" ]] && continue
         check_file "$f" || FAIL=1
-    done < <(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+    done < <(git diff --cached --name-only --diff-filter=ACM | grep -E "$EXT_GREP" || true)
 else
+    # Build find command from extensions
+    FIND_ARGS=()
+    for ext in $EXTENSIONS; do
+        FIND_ARGS+=(-o -name "*${ext}")
+    done
+    # Remove leading -o
+    FIND_ARGS=("${FIND_ARGS[@]:1}")
+
     while IFS= read -r f; do
         [[ -z "$f" ]] && continue
         check_file "$f" || FAIL=1
-    done < <(find . -name '*.md' \
+    done < <(find . \( "${FIND_ARGS[@]}" \) \
         -not -path './.git/*' \
         -not -path './node_modules/*' \
         -not -path './.next/*' \

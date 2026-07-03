@@ -282,3 +282,11 @@ Key features: config.json, emoji check, verify orchestrator, semver validation.
 Integrated into Z-ai-platform as .zai/ layer (adds emoji check to existing hooks).
 Existing .husky/pre-commit preserved (co-change + worklog + lint-staged).
 Ready for sandbox testing.
+
+---
+
+### 2026-07-03 (fix)
+**Entry:** check-emoji.sh now reads emoji.extensions from config.json
+
+Fixed: staged mode was hardcoding `grep '\.md$'` instead of reading extensions from config.json.
+Now reads emoji.extensions array and builds grep pattern dynamically.
