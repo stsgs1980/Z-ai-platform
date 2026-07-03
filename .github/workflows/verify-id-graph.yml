@@ -267,7 +267,7 @@ jobs:
           ls -la docs/_diagrams/
 
       - name: Upload graph artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: id-graph
           path: |
@@ -277,7 +277,7 @@ jobs:
 
       - name: Upload verifier output (on failure)
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: verifier-output
           path: |
