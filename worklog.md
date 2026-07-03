@@ -483,3 +483,22 @@ All skills have consistent frontmatter: name (zai-*), author: StsDev, version.
 **Verified:**
 - `bash .zai/lib/check-worklog.sh` -> PASS on root `worklog.md` (469 lines).
 - `validate-config` fails on a pre-existing path-portability bug (MSYS `/c/...` vs Windows), unrelated to this change.
+
+---
+
+## 2026-07-04 — Node version pin (local + sandbox)
+
+**Task:** Make the Node requirement honest. `lint-staged@17`/`listr2` use
+`node:util.styleText`, available since Node 20.12. Local Windows dev on
+Node 20.11.1 silently fails the pre-commit hook.
+
+**Sandbox check (2026-07-04):** Node v24.16.0 at `/usr/bin/node`, no
+fnm/nvm. Sandbox is unaffected; problem is local Windows only.
+
+**What was done:**
+- `package.json`: `engines.node` bumped from `>=20.0.0` to `>=20.12.0`.
+- `.node-version` (new): `22.22.3` for local Windows dev via fnm.
+- `AGENT_RULES.md` §9 Version Lock: added Node row + explanation paragraph.
+
+**Not done:**
+- `~/.bashrc` fnm setup for Git Bash on Windows — out of repo scope, user's local environment.

@@ -191,7 +191,14 @@ drift, this file may give incorrect references.
   standards@    a259a6b
   guard@        2e2579d
   skills@       9797e69
+  Node:         >=20.12.0 (local), v24.x (sandbox)
 ```
+
+**Node requirement:** `lint-staged@17`/`listr2` use `node:util.styleText`,
+which landed in Node 20.12. Local Windows dev on Node 20.11 will fail the
+pre-commit hook. Use `fnm` (or equivalent) to pin `.node-version`
+(22.22.3) on Windows. The Z.ai sandbox ships Node preinstalled (v24.x)
+— no action needed there.
 
 If `git submodule status` shows different SHAs → re-read ARCH-002,
 INDEX.md, and verify-id-graph.js output before trusting this file.
