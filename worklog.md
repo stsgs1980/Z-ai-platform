@@ -255,3 +255,21 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 **System status:** All verifiers PASS (8/8 standards, skills OK, 13/13 id-graph), all CI green across 4 repos, all submodule pointers consistent, platform working tree clean.
 
 ---
+
+### 2026-07-03 02:00-03:00
+**Entry:** O-021 sandbox onboarding flow research (paused)
+
+**Context:** Three fragmented artifacts exist for agent sandbox onboarding: `bootstrap.sh` (Desktop), `zai` CLI prototype (Desktop/sandbox variants/), `zai-sandbox-rules` skill (Desktop/SKILLSET LIBRARY/). None form a unified "1-2 commands → organized sandbox" experience. Decision O-021: research and unify.
+
+**Research doc created:** `docs/sandbox-onboarding-research.md` (309 lines)
+- 5-point oracle (E1-E5): agent gets FS access, shell, structured dirs, rule loading, verification
+- 4 variants (A/B/C/D) for empirical testing
+- Test plan with measurable acceptance criteria
+- Decision matrix template (§5)
+- Resume steps (§7): open questions re: chat.z.ai sandbox FS+shell access
+
+**Decision recorded:** DECISIONS_LOG.md entry O-021 added + index corrected (missing O-015/016/017 added)
+
+**Status:** Paused. Resume gated on answering §7.3 (does chat.z.ai give agent FS+shell access?).
+
+---
