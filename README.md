@@ -1,6 +1,6 @@
 # Z-ai-platform
 
-Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard, skills) and enforces cross-repo ID-graph integrity in CI.
+Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard), includes skills as monorepo, and enforces cross-repo ID-graph integrity in CI.
 
 [![Status: LIVE](https://img.shields.io/badge/Status-LIVE-brightgreen.svg?style=flat-square)]()
 [![License: Private](https://img.shields.io/badge/License-Private-red.svg?style=flat-square)]()
@@ -20,17 +20,17 @@ Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard,
 
 ## Features
 
-- **4-repo architecture** — platform (L0), standards (L1), guard (L2), skills (L3) evolve independently
+- **Hybrid architecture** — platform (L0) orchestrates two submodules (standards L1, guard L2) and a skills monorepo (L3)
 - **Cross-repo ID graph** — 65 IDs with 125 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
 - **Nightly + push CI** — `verify-standards.js`, `verify-id-graph.js`, `verify-skills.js`, and snapshot compare run automatically
 - **Pre-commit hooks** — local verification on `.md` and `verify-*.js` changes via `install-hooks.sh`
-- **Bootstrap script** — one command restores all 35+ custom skills into any fresh Z.ai sandbox session
+- **Bootstrap script** — one command restores all 14 custom skills into any fresh Z.ai sandbox session
 
 ## Tech Stack
 
 - **Language** - JavaScript (Node.js 20, ESLint 9 flat config)
 - **CI** - GitHub Actions (verify-id-graph.yml, e2e-verifiers.yml)
-- **Submodules** - git submodules for standards, guard, skills
+- **Submodules** - git submodules for standards, guard; skills live in-monorepo
 - **Verification** - Custom Node.js scripts (verify-standards.js, verify-id-graph.js, verify-skills.js)
 
 ## Getting Started
@@ -39,7 +39,7 @@ Orchestrator for the Z-ai ecosystem — pins three submodules (standards, guard,
 
 - Node.js 20+
 - Git with submodule support
-- (For CI) SSH deploy key with read access to all three submodule repos
+- (For CI) SSH deploy key with read access to both submodule repos
 
 ### Installation
 
@@ -64,7 +64,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main
 
 ## Architecture
 
-The platform uses a 4-layer repository architecture where each layer can evolve independently. Standards can be amended without forcing rule or skill updates; guard rules ship on their own cadence; skills are consumed standalone by the sandbox runtime. The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/META-001-id-registry.md` for the full ID catalogue and layer matrix.
+The platform uses a hybrid architecture: two git submodules (standards, guard) for independently-evolving governance layers, and a skills monorepo for tightly-coupled agent capabilities. Standards can be amended without forcing rule updates; guard rules ship on their own cadence; skills evolve together with the orchestrator. The ID graph (G01-G15) enforces that changes in one layer do not silently break references in another. See `standards/standards/META-001-id-registry.md` for the full ID catalogue and layer matrix.
 
 ## Project Structure
 
