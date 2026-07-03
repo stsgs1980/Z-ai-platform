@@ -4865,3 +4865,176 @@ Stage Summary:
 - Existing .husky/pre-commit preserved (co-change + worklog + lint-staged)
 - Emoji check added to existing hook
 - Ready for sandbox testing
+
+---
+
+Task ID: O-021-variant-d-integration-test
+Agent: main
+Task: Live sandbox integration test of .zai/ governance layer
+
+Work Log:
+- Cloned Z-ai-platform into fresh sandbox via `git clone --recurse-submodules`
+- Ran `bash .zai/setup.sh` — all 6 phases passed
+- Phase 1: jq, node, perl all present
+- Phase 2: Existing .husky/pre-commit found with co-change-check.sh, worklog-check.sh, lint-staged
+- Phase 3: config.json created (version 1.0.0)
+- Phase 4: validate-config passed (all fields valid)
+- Phase 5: emoji check added to .husky/pre-commit (line 10-12)
+- Phase 6: Setup complete
+
+Testing:
+- Created test-emoji.md with "🚀" — commit passed (bug found)
+- Direct test: `bash .zai/lib/check-emoji.sh --file test-emoji.md` → exit 1 (correct)
+- Staged test: `bash .zai/lib/check-emoji.sh --staged` → exit 0 (bug: hardcoded grep)
+- Fix: Rewrote check-emoji.sh to read emoji.extensions from config.json
+- Re-test: staged mode now works when file is actually modified (not re-staged committed file)
+
+Key findings:
+- `git diff --cached` only shows files with actual changes
+- worklog-check.sh requires root `worklog.md`, not `docs/session/worklog.md`
+- Co-change-check counts `.md` as docs — worklog.md satisfies it
+
+Files modified:
+- `.zai/lib/check-emoji.sh` — reads extensions from config.json
+- `worklog.md` — added entries for worklog-check compliance
+- `docs/session/worklog.md` — added detailed session notes
+
+Stage Summary:
+- .zai/ fully integrated into Z-ai-platform
+- Emoji check works in hook (reads config.json)
+- All existing hooks preserved (co-change + worklog + lint-staged)
+- Ready for zai-sandbox-rules skill development
+
+---
+
+Task ID: O-021-zai-skill-creator
+Agent: main
+Task: Next step — build zai-sandbox-rules skill using zai-skill-creator
+
+Work Log:
+- User asked about using `C:\Users\stsgr\Desktop\SKILLSET LIBRARY\zai-skill-creator`
+- Skill creator includes: SKILL.md, scripts/, references/, eval-viewer/, agents/
+- zai-sandbox-rules exists at `C:\Users\stsgr\Desktop\SKILLSET LIBRARY\zai-sandbox-rules\SKILL.md`
+- Need to add YAML frontmatter, create evals, run fact-check, package for distribution
+
+Dependencies:
+- zai-skill-creator: 438 lines, full testing pipeline
+- zai-sandbox-rules: 170 lines (existing draft)
+- Sandbox probing results: `Test/sandbox-capabilities-report.md`
+
+Stage Summary:
+- Worklog updated with integration test results
+- Next: use zai-skill-creator to build/test zai-sandbox-rules skill
+
+---
+
+Task ID: zai-sandbox-rules-fact-check-2026-07-03
+Agent: main
+Task: Implement zai-sandbox-rules skill "по уму" using zai-skill-creator methodology. Fact-check Rules 1-10 against sandbox reality, apply fixes (frontmatter + cold-start), validate, package. Track via worklog + DECISIONS_LOG. Experiments in Test/. Windows-only, GitHub-synced.
+
+Plan (committed BEFORE execution per project convention):
+
+Step 0 — THIS ENTRY: append Plan to both worklogs (root + docs/session).
+
+Step 1 — Setup workspace in Test/zai-sandbox-rules-workspace/:
+  - Copy zai-sandbox-rules/ from Desktop/SKILLSET LIBRARY/ to workspace/skill/
+  - Copy agents/fact-checker.md, scripts/quick_validate.py, scripts/package_skill.py from Desktop/SKILLSET LIBRARY/zai-skill-creator/
+  - Prep fact-check.json output target
+
+Step 2 — Fact-check (GATE per skill-creator line 120):
+  - Read SKILL.md, extract verifiable claims per agents/fact-checker.md protocol
+  - Verify each claim against Test/sandbox-capabilities-report.md (the reality)
+  - Categories: file existence, command behavior, system behavior, version, structural
+  - Output: fact-check.json with confirmed/contradicted/unverifiable verdicts
+  - BLOCKING: contradictions must be fixed before packaging
+
+Step 3 — Apply fixes (depends on Step 2 results):
+  - Frontmatter: `triggers:` -> `trigger:` (HARD fix, fails quick_validate.py)
+  - Cold-start mitigation: extend description with early triggers ("Use at the START of any Z.ai sandbox session, before any other action"); add "If you have already violated Rule 1" recovery section
+  - Fix any contradictions from fact-check
+  - NO `id:` added (deferred per user)
+  - KEEP Stack Signature footer (user decision; DOC-002 reversal is separate task)
+  - KEEP ALL-CAPS in headers (justified for guardrail)
+
+Step 4 — Validate:
+  - python quick_validate.py skill/ -> must PASS
+  - bash check-md.sh on SKILL.md -> must PASS
+  - Manual DOC-002 (Markdown) + DOC-003 (No-Unicode) compliance check
+
+Step 5 — Package:
+  - python -m scripts.package_skill Test/zai-sandbox-rules-workspace/skill/
+  - Output: zai-sandbox-rules.skill (zip) in workspace
+  - Copy back to Desktop/SKILLSET LIBRARY/ if user wants canonical source updated
+
+Step 6 — Documentation + push:
+  - Append Stage Summary to this worklog entry
+  - Add DECISIONS_LOG entries:
+    * D-NNN: Stack Signature policy (stays in skills; DOC-002 v2.3.2 §8 to be revised)
+    * D-NNN: zai-sandbox-rules = behavioral bootstrap layer (orthogonal to .zai/ filesystem enforcement + bootstrap.sh technical setup)
+    * O-NNN: skills-with-ID revision deferred
+  - Add SESSION_NOTES entry if any LESSON-NNN emerges
+  - Commit + push to Z-ai-platform origin/main
+
+Decisions context (from brainstorming session 2026-07-03):
+- User clarified purpose: zai-sandbox-rules is ONE-COMMAND bootstrap for behavioral rules (single skill trigger loads all rules into agent context, instead of repeating a 500-line prompt every session)
+- Three orthogonal sandbox-management layers (no duplication):
+  * zai-sandbox-rules -> consumer: AGENT (behavioral rules in context)
+  * .zai/ -> consumer: GIT (filesystem enforcement via pre-commit)
+  * bootstrap.sh -> consumer: USER (one-time technical setup)
+- My initial "layer overlap" critique (Rules 7/8/10 duplicate bootstrap.sh) was WRONG framing — these are agent behavioral rules that bootstrap.sh implements, not duplications
+
+Methodology extracted from zai-skill-creator (the "по уму" requirements):
+1. Structure: SKILL.md (required) + optional scripts/ references/ agents/ assets/ evals/
+2. YAML frontmatter: name + description required; trigger (SINGULAR) + version + id optional
+3. Progressive disclosure: metadata always in context (~100 words), body <500 lines, resources on demand
+4. Style: imperative, explain WHY, examples > rules, lean
+5. Standards: DOC-002 (Markdown) + DOC-003 (No-Unicode)
+6. Fact-check is GATE (before evals) — verify every claim against reality
+7. Evals OPTIONAL for subjective skills (skill-creator line 54) — guardrail skill qualifies
+8. Validate via quick_validate.py; package via package_skill.py
+
+Issues found in current zai-sandbox-rules/SKILL.md (after user decisions):
+- HARD: frontmatter `triggers:` (plural) — fails quick_validate.py (allows `trigger` singular)
+- DEFER: no `id:` field (separate skills-with-ID revision)
+- KEEP: Stack Signature footer (DOC-002 v2.3.2 reversal is separate task)
+- KEEP: ALL-CAPS in headers (justified for guardrail skill with Rationalization Table)
+- NON-ISSUE: layer overlap (my framing was wrong — orthogonal layers)
+- STRUCTURAL: cold-start chicken/egg — skill reactive (trigger on problem phrases), Rule 1 needs BEFORE action. Mitigation: early triggers + "if already violated" recovery section. Infra-fix (system-prompt injection) outside our control.
+
+Stage Summary (EXECUTED 2026-07-03):
+
+Source: C:\Users\stsgr\Desktop\SKILLSET LIBRARY\zai-sandbox-rules\SKILL.md (v1.1.0)
+Workspace: Test/zai-sandbox-rules-workspace/
+
+Step 0 — Plan appended to both worklogs (committed before execution).
+
+Step 2 — fact-check.json written. 19 claims: 9 confirmed / 10 contradicted / 0 unverifiable.
+Sources: sandbox-guide.md (authoritative, 936 lines), sandbox-capabilities-report.md (probe), live probe (user), user testimony.
+Critical contradictions: C1 (Rule 4 prescribes pkill+reinit, skill forbade killing), C2 (Rule 5 HMR does NOT auto-recover), C3 (15s is post-reinit wait, not auto-reload timer).
+
+Step 3 — SKILL.md v1.2.0 written (189 lines). Changes:
+- Frontmatter: `triggers:` -> `trigger:` (singular, per quick_validate.py allowed keys)
+- Added "Why Dev Servers Are Forbidden" section (explains .zscripts/dev.sh -> bun run dev -> next-server port 3000 stack)
+- Rule 2: filesystem check (PID + log) replaces phantom "status indicator"
+- Rule 3: split by cause (idle timeout wait vs 500 error immediate check)
+- Rule 4: active recovery (pkill + reinit) replaces passive "report and wait"
+- Rule 5: HMR does NOT auto-recover; prescribes pkill + rm .next + reinit
+- Rule 6.4: explicit reinit after dependency install replaces passive "wait for sandbox"
+- Rule 7: clone to /tmp + rsync to root (matches guide §6)
+- Rule 8: added canonical init command
+- Rule 10: /tmp allowed for transient work, prohibition is on persistence
+- Rationalization Table: updated for new Rules 4/5
+- Version bump: 1.1.0 -> 1.2.0
+
+Step 4 — Validation passed:
+- quick_validate.py: "Skill is valid!"
+- ESLint (DOC-002/003): 0 errors, 0 warnings
+
+Step 5 — Package: skill.skill created at Test/zai-sandbox-rules-workspace/skill.skill
+
+Step 6 — THIS ENTRY. Worklogs updated, DECISIONS_LOG entries added.
+
+Test results (Z.ai chat sandbox):
+- Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
+- Rule 1 (dev server refusal): awaiting user report
+- Rule 4 (EADDRINUSE recovery): awaiting user report

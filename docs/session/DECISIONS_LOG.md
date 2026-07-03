@@ -1371,6 +1371,30 @@ recording; resume by executing the variant test plan in
 
 ---
 
+## [D-011] zai-sandbox-rules v1.2.0 fact-check corrections — DECIDED
+
+**Date:** 2026-07-03
+**Context:** zai-sandbox-rules skill (v1.1.0) contained 10 factual contradictions against sandbox-guide.md. 3 were critical (taught agent NOT to recover the sandbox properly).
+
+**Decision:** Rewrite SKILL.md to match sandbox-guide.md reality. Key corrections:
+
+| Rule | Was (wrong) | Now (correct) | Source |
+|------|-------------|---------------|--------|
+| Rule 4 | "Do NOT kill processes" | pkill + reinit | guide §7/§8 |
+| Rule 5.2 | "Wait for auto-recovery" | HMR does NOT auto-recover | guide §9 |
+| Rule 5.3 | "Sandbox reloads after 15s" | 15s is post-reinit wait | guide §9 |
+| Rule 7.1 | "Clone into project dir" | Clone to /tmp, rsync to root | guide §6 |
+| Rule 10.2 | "Do NOT write to /tmp" | /tmp OK for transient work | guide §6 + probe |
+| Rule 2.1 | "Status indicator" | Filesystem check (PID + log) | user testimony |
+| Rule 3.1 | "Wait 10s" universal | Split: idle (wait) vs 500 (immediate) | guide §17.1 + §9 |
+| Rule 6.4 | "Wait for sandbox rebuild" | Explicit reinit after install | guide §11 |
+
+**Rationale:** Skill is a guardrail. If guardrail rules contradict reality, agent learns wrong behavior. Critical rules (4, 5) were teaching agent to be passive when active recovery is required.
+
+**Status:** DECIDED. SKILL.md v1.2.0 written, validated, packaged. Awaiting behavioral test results in Z.ai chat.
+
+---
+
 ## Change History
 
 | Date | Change |
