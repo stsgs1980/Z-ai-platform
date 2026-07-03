@@ -213,3 +213,24 @@ node standards/scripts/verify-skills.js        # 9/9 PASS
 - Node-internal `punycode` (DEP0040) and `url.parse()` (DEP0169) warnings from JS dependencies (harmless, require dependency updates to silence)
 
 ---
+
+### 2026-07-03 01:00
+**Entry:** Disable release-please (semver not meaningful for private monorepo)
+
+**Context:** release-please had auto-created PR #1 "chore(main): release 2.7.0" (version jumped 0.1.0 -> 2.7.0 from accumulated feat: commits). User decided it adds noise without value.
+
+**Rationale for removal:**
+- Repo is `"private": true`, not published -> semantic versions meaningless
+- Version jump 0.1.0 -> 2.7.0 proves versioning is arbitrary
+- Manual worklog.md already documents work in detail
+- release-please created/updated a PR on every feat:/fix: push = ongoing noise
+
+**Work completed:**
+- Deleted `.github/workflows/release-please.yml` (commit `623280f`)
+- Closed PR #1 with explanatory comment, deleted branch `release-please--branches--main--components--z-ai-dense-graph`
+- Removed `autorelease: pending` label from closed PR
+- Verified: no open PRs, only `main` branch remains
+
+**Result:** Active workflows now = verify-id-graph.yml + e2e-verifiers.yml. CHANGELOG.md remains manually maintained.
+
+---
