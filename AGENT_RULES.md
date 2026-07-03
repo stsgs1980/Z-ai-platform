@@ -76,15 +76,14 @@ Full registry: `guard/rules/INDEX.md` (17 entries, machine-parseable table).
 
 ---
 
-## §4. Skill Catalog — `skills/skills/INDEX.md`
+## §4. Skill Catalog — `skills/INDEX.md`
 
-Authoritative catalog of all 36 skills. 25 have ZAI-* IDs (participate
-in ID-graph validation), 11 do not (opt-out per STD-SKILL-001).
+Authoritative catalog of all 14 skills. 11 have ZAI-* IDs (participate
+in ID-graph validation), 3 do not (opt-out per STD-SKILL-001).
 
 ```
-Location:    skills/skills/INDEX.md
-Count:       36 skills (25 with ZAI-* ID, 11 without)
-Companion:   skills/docs/CATALOG.md (machine-generated, authoritative)
+Location:    skills/INDEX.md
+Count:       14 skills (11 with ZAI-* ID, 3 without)
 ```
 
 Skills are capabilities, not contracts. They tell you HOW to do something.

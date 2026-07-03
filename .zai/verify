@@ -101,28 +101,28 @@ if [[ "$CHECK" == "all" ]] || [[ "$CHECK" == "emoji" ]]; then
     run_check "Emoji (STD-DOC-003)" "${LIB_DIR}/check-emoji.sh" $STAGED_FLAG
 fi
 
-# --- Guard verifiers (if available) ---
-GUARD_DIR="$(cd "${SCRIPT_DIR}/.." 2>/dev/null && pwd)/Z-ai-guard"
+# --- Standards verifiers (if available) ---
+STANDARDS_DIR="$(cd "${SCRIPT_DIR}/.." 2>/dev/null && pwd)/standards"
 
 if [[ "$CHECK" == "all" ]]; then
-    if [[ -f "${GUARD_DIR}/scripts/verify-standards.js" ]]; then
-        run_check "verify-standards" "node" "${GUARD_DIR}/scripts/verify-standards.js"
+    if [[ -f "${STANDARDS_DIR}/scripts/verify-standards.js" ]]; then
+        run_check "verify-standards" "node" "${STANDARDS_DIR}/scripts/verify-standards.js"
     else
         echo "[SKIP] verify-standards — not found"
         SKIPPED=$((SKIPPED + 1))
         echo ""
     fi
 
-    if [[ -f "${GUARD_DIR}/scripts/verify-id-graph.js" ]]; then
-        run_check "verify-id-graph" "node" "${GUARD_DIR}/scripts/verify-id-graph.js"
+    if [[ -f "${STANDARDS_DIR}/scripts/verify-id-graph.js" ]]; then
+        run_check "verify-id-graph" "node" "${STANDARDS_DIR}/scripts/verify-id-graph.js"
     else
         echo "[SKIP] verify-id-graph — not found"
         SKIPPED=$((SKIPPED + 1))
         echo ""
     fi
 
-    if [[ -f "${GUARD_DIR}/scripts/verify-skills.js" ]]; then
-        run_check "verify-skills" "node" "${GUARD_DIR}/scripts/verify-skills.js"
+    if [[ -f "${STANDARDS_DIR}/scripts/verify-skills.js" ]]; then
+        run_check "verify-skills" "node" "${STANDARDS_DIR}/scripts/verify-skills.js"
     else
         echo "[SKIP] verify-skills — not found"
         SKIPPED=$((SKIPPED + 1))
