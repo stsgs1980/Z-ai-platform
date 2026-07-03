@@ -5036,5 +5036,5 @@ Step 6 — THIS ENTRY. Worklogs updated, DECISIONS_LOG entries added.
 
 Test results (Z.ai chat sandbox):
 - Rule 2 (filesystem check): PASSED — agent checked .zscripts/dev.pid + dev.log
-- Rule 1 (dev server refusal): awaiting user report
-- Rule 4 (EADDRINUSE recovery): awaiting user report
+- Rule 4 (EADDRINUSE recovery): PARTIAL — agent diagnosed correctly (PID stale, port occupied by new process, HTTP 200), correctly determined sandbox auto-recovered. Did NOT execute pkill+reinit (not needed in this case). Agent needs testing with REAL EADDRINUSE to confirm it follows prescribed recovery.
+- Rule 1 (dev server refusal): NOT YET TESTED
