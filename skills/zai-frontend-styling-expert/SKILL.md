@@ -11,7 +11,7 @@ related:
   - STD-SKILL-001
 ---
 
-# Skill: Frontend Styling Expert v1.0
+# Skill: Zai Frontend Styling Expert v1.0
 
 > ID: ZAI-STS-004
 > Version: 1.0

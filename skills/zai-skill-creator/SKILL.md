@@ -5,7 +5,7 @@ version: 1.0
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, verify skill claims against reality, or optimize a skill's description for better triggering accuracy.
 ---
 
-# Z.ai Skill Creator
+# Skill: Zai Skill Creator v1.0
 
 Create, test, and iterate on opencode skills until they work reliably.
 

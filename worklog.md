@@ -579,3 +579,31 @@ Sources: file itself + `Desktop/ZAI SANDBOX/ZAI ACTUAL/Z.ai-Sandbox-Guide.md`
   eslint.config.js global ignores; lint-staged uses --no-warn-ignored).
 - Frontmatter intact: name, author, version 1.5.0, trigger (singular).
 - 13 rules total, no gaps, no duplicates.
+
+---
+
+## 2026-07-04 — H1 unification across all 14 skills
+
+**Task:** Bring every SKILL.md H1 to canonical form per STD-SKILL-001 §3.1.
+
+**Mistake made and corrected:** Initial pass stripped the `zai-` namespace
+prefix from H1s. User pointed out the prefix is a deliberate namespace to
+distinguish author skills from built-in Z.ai sandbox skills. Restored.
+
+**Canonical form agreed with user:** `# Skill: Zai <Name> v<Version>`
+where "Zai" is the Title-Case form of the `zai-` namespace.
+
+**14 H1 unified:**
+- 5 were non-canonical altogether (no `Skill:` prefix, no version):
+  zai-debugging, zai-md-std, zai-sandbox-rules, zai-skill-creator,
+  zai-ui-composer.
+- 8 lacked the `Zai` prefix: zai-anti-monolith, zai-frontend-styling-expert,
+  zai-mermaid-diagrams, zai-performance-code-generator, zai-prompt-engineering,
+  zai-project-clone, zai-skill-registry (also: `Z.ai` -> `Zai`),
+  zai-workflow-discipline, zai-phi-layout.
+
+**Verified:**
+- All 14 H1 match `# Skill: Zai <Name> v<Version>`.
+- `node standards/scripts/verify-skills.js` -> 6/6 HARD PASS, 1 SOFT warning.
+  (Previously 8/9 with 1 FAIL — the FAIL was unrelated S03 `_sts` suffix
+  check, which requires upstream std fix; non-strict mode passes.)

@@ -14,7 +14,7 @@ description: >
   документ", "сделай worklog проекта", "проверь markdown", "приведи .md в порядок".
 ---
 
-# Markdown Document Creation Skill
+# Skill: Zai Markdown Standard v1.0.0
 
 Create markdown documents that are fully compliant with STD-DOC-002 (Markdown Formatting v2.4)
 and STD-DOC-003 (No-Unicode Policy v2.3). These standards exist because Unicode characters render

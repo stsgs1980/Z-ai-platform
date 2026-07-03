@@ -9,7 +9,7 @@ trigger: skill id, skill registry, zai id, zai-sts, skill domain, id assignment
 aligned_with: STD-SKILL-001
 ---
 
-# Skill: Z.ai Skill Registry v1.2
+# Skill: Zai Skill Registry v1.2
 
 > ID: ZAI-META-002
 > Version: 1.2

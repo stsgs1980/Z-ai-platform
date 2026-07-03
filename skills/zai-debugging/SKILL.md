@@ -5,7 +5,7 @@ version: 1.0.0
 description: Systematic debugging for Z.ai sandbox. Use this skill whenever code fails at runtime, "tests are failing", a build step errors out, or the user says "fix this bug", "debug", "why is this broken", "it doesn't work".
 ---
 
-# Z.ai Debugging
+# Skill: Zai Debugging v1.0.0
 
 Four-phase debugging workflow for Z.ai sandbox.
 

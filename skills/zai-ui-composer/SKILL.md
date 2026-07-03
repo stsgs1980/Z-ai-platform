@@ -62,7 +62,7 @@ related:
   - ZAI-STS-007
 ---
 
-# ZAI UI Composer Skill
+# Skill: Zai UI Composer v1.1.2
 
 > ID: ZAI-STS-006
 > Version: 1.1.2

@@ -12,7 +12,7 @@ related:
   - ZAI-DEV-003
 ---
 
-# Skill: Project Clone v1.0
+# Skill: Zai Project Clone v1.0
 
 > ID: ZAI-DEV-001
 > Version: 1.0

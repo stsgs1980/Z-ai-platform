@@ -12,7 +12,7 @@ related:
   - ZAI-ARCH-001
 ---
 
-# Skill: Anti-Monolith v1.0
+# Skill: Zai Anti-Monolith v1.0
 
 > ID: ZAI-ARCH-002
 > Version: 1.0

@@ -9,7 +9,7 @@ related:
   - STD-SKILL-001
 ---
 
-# Skill: Workflow Discipline v2.0
+# Skill: Zai Workflow Discipline v2.0
 
 > ID: ZAI-STS-007
 > Version: 2.0

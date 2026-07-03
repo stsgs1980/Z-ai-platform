@@ -6,7 +6,7 @@ description: "CRITICAL: Load this skill BEFORE responding to ANY request involvi
 trigger: "bun run dev, npm run dev, next dev, start dev, run dev, запусти dev, dev server, preview not working, EADDRINUSE, HMR crash, port 3000, module not found, init sandbox, restart dev, sandbox broken, white screen, 500 error, sandbox inactive, idle timeout"
 ---
 
-# Z.ai Sandbox Rules
+# Skill: Zai Sandbox Rules v1.5.0
 
 ## Purpose
 

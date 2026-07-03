@@ -10,7 +10,7 @@ related:
   - STD-SKILL-001
 ---
 
-# Skill: Phi Layout v3.0
+# Skill: Zai Phi Layout v3.0
 
 > ID: ZAI-STS-005
 > Version: 3.0

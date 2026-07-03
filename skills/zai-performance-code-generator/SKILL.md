@@ -10,7 +10,7 @@ related:
   - STD-SKILL-001
 ---
 
-# Skill: Performance Code Generator v1.0
+# Skill: Zai Performance Code Generator v1.0
 
 > ID: ZAI-STS-003
 > Version: 1.0

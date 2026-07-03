@@ -11,7 +11,7 @@ related:
 ---
 
 
-# Skill: Mermaid Diagramming v1.0
+# Skill: Zai Mermaid Diagramming v1.0
 
 
 > ID: ZAI-ARCH-001

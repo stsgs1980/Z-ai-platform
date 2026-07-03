@@ -43,7 +43,7 @@ related:
   - STD-SKILL-001
 ---
 
-# Skill: Prompt Engineering v1.1
+# Skill: Zai Prompt Engineering v1.1
 
 > ID: ZAI-STS-001
 > Version: 1.1
