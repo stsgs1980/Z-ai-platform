@@ -34,7 +34,7 @@
       "eslint --max-warnings=0"
     ],
     "*.md": [
-      "eslint --plugin markdown --max-warnings=0"
+      "eslint --plugin markdown --max-warnings=0 --no-warn-ignored"
     ]
   },
   "engines": {

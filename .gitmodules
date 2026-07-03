@@ -4,6 +4,3 @@
 [submodule "guard"]
 	path = guard
 	url = https://github.com/stsgs1980/Z-ai-guard.git
-[submodule "skills"]
-	path = skills
-	url = https://github.com/stsgs1980/Z-ai-skills.git

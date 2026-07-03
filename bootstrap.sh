@@ -7,12 +7,12 @@
 #
 # What it does:
 #   1. Clones (or updates) stsgs1980/Z-ai-platform into /home/z/my-project/Z-ai-platform/
-#      with all submodules (skills, standards, guard).
+#      with all submodules (standards, guard). Skills are in skills/ directly (monorepo).
 #   2. Normalizes git mode-bit handling (core.fileMode=false on platform + all
 #      submodules). Sandbox fs mount sets +x on all files, which git's default
 #      core.fileMode=true flags as 'modified' (17-file noise). See
 #      SESSION_NOTES.md §12 LESSON-002.
-#   3. Symlinks every skill from Z-ai-platform/skills/skills/* into
+#   3. Symlinks every skill from Z-ai-platform/skills/* into
 #      /home/z/my-project/skills/ so the sandbox can find them.
 #   4. Prints a list of available custom skills at the end.
 #
@@ -54,7 +54,7 @@ echo "=== Step 3: Symlink custom skills into sandbox skills dir ==="
 
 mkdir -p "$SANDBOX_SKILLS_DIR"
 
-TOOLKIT_SKILLS_DIR="$PLATFORM_DIR/skills/skills"
+TOOLKIT_SKILLS_DIR="$PLATFORM_DIR/skills"
 LINKED_COUNT=0
 SKIPPED_COUNT=0
 

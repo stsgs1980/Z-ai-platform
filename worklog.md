@@ -451,3 +451,19 @@ triggers: [dev server, preview not working, EADDRINUSE, HMR crash, port 3000, mo
 - Test/zai-sandbox-rules-workspace/fact-check.json (19 claims)
 
 ---
+
+### 2026-07-03
+**Entry:** Skills monorepo conversion — removed submodule, moved skills into Z-ai-platform
+
+Converted skills from separate git submodule (Z-ai-skills) to monorepo structure.
+
+Changes:
+- Removed `skills` git submodule from Z-ai-platform
+- Moved 14 skills directly into `skills/` directory
+- Updated `bootstrap.sh`: changed path from `skills/skills` to `skills`
+- Removed `skills/` from `.gitignore` (now a regular directory)
+- Added `__pycache__/` to `.gitignore`
+
+Skills included: zai-anti-monolith, zai-debugging, zai-frontend-styling-expert, zai-md-std, zai-mermaid-diagrams, zai-performance-code-generator, zai-phi-layout, zai-project-clone, zai-prompt-engineering, zai-sandbox-rules, zai-skill-creator, zai-skill-registry, zai-ui-composer, zai-workflow-discipline.
+
+All skills have consistent frontmatter: name (zai-*), author: StsDev, version.
