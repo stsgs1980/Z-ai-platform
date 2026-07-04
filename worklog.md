@@ -706,3 +706,49 @@ non-strict mode locally; CI keeps running --strict to track the gap.
 
 **Pending:** sandbox test after push -- confirm `git commit` in a fresh
 clone fires all four groups end-to-end.
+
+---
+
+## 2026-07-04 — main recovery + salvage valuable work from sandbox commits
+
+**Task:** Three unknown commits (author `Z User <z@container>`) appeared on
+origin/main overnight (3 Jul, 23:27-23:49 MSK). User confirmed no human
+committed them. They were produced by a sandbox agent. Investigation:
+
+- `4e40468` README/package/.gitignore -- duplicate of work this session did.
+- `acfa86b` dead paths + Unicode + verify orchestrator -- duplicate of work
+  this session did, PLUS two valuable additions: `vitest.config.ts` and an
+  expanded `src/infrastructure.test.ts` (208 lines, 33 test cases).
+- `58ca35f` UUID message -- GARBAGE. Pulled in code from an unrelated
+  scanner project (`src/app/api/scanner/...`), tool-results dumps,
+  `.bak`/`.disabled` files, and a self-referential `Z-ai-platform`
+  submodule pointer that broke bootstrap.sh.
+
+**Recovery plan (executed):**
+
+1. Backup tag `checkpoint-pre-recovery-2026-07-04` pushed to origin.
+   Pointed at 58ca35f (the pre-recovery main tip). Contains all three
+   sandbox commits for full reversibility.
+2. `git push --force-with-lease=main:58ca35f... 23a4460:main` -- reset
+   origin/main to the common ancestor (23a4460). Three sandbox commits
+   removed from main, preserved via tag.
+3. `git push origin main` -- pushed the 8 clean session commits
+   (01ae72d through 01e4e97) onto the reset main.
+
+**Salvage from acfa86b (this commit):**
+- `vitest.config.ts` (new) -- minimal config; documents that the parent
+  sandbox's vitest.setup.ts does not apply here.
+- `src/infrastructure.test.ts` -- replaced the trivial 5-test version
+  with the 33-test version from acfa86b. Adapted the .githooks block to
+  .husky (migrated in 01e4e97); kept all other assertions intact.
+- `guard` submodule pointer bumped to 91b81b9 (upstream "fix: correct 5
+  dead file paths in registry.json"). The registry.json test in the
+  expanded suite caught those 5 dead paths before the bump and passes
+  after it.
+- `.gitignore` -- added `.zscripts/` and `*.tsbuildinfo` (from 4e40468).
+
+**Verified:**
+- `npm test` after guard bump: 33 passed, 0 failed.
+- `git log --oneline origin/main..HEAD` -- empty (everything pushed).
+
+**Rollback:** `git reset --hard checkpoint-pre-recovery-2026-07-04`.

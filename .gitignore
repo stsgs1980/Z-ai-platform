@@ -6,3 +6,9 @@ dist/
 build/
 
 __pycache__/
+
+# Z.ai sandbox runtime artifacts (excluded from version control)
+.zscripts/
+
+# TypeScript incremental build info
+*.tsbuildinfo
