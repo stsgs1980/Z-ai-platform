@@ -40,6 +40,7 @@ Skipping Step 1–4 = you are operating without context. Expect drift.
 - Responses, explanations, error messages — Russian only
 - Code, commands, file paths — English (as-is)
 - Technical terms may remain in English when no established Russian equivalent exists
+- **NO emojis, NO unicode graphics** — text only
 
 ---
 
