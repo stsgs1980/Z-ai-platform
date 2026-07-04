@@ -15,3 +15,5 @@ __pycache__/
 
 # CI-generated graph artifacts
 docs/_graph/
+.zai/.verifier-daemon.lock
+.zai/.verifier-daemon.log
