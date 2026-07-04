@@ -11,6 +11,20 @@ Sections separated by ---
 
 ## Sessions
 
+### 2026-07-04
+
+**Entry:** Fix trailing slash bug in sandbox-integration-test.sh
+
+Test 7 ("Skills are symlinks") had a latent bug: glob pattern `*/` added trailing slash, `[ -L "$skill_dir" ]` followed the symlink to its target directory and returned false. This caused false "0 symlinks" even when 14 symlinks existed.
+
+Fix: changed `"$SANDBOX_SKILLS_DIR"/*/` to `"$SANDBOX_SKILLS_DIR"/*` in two places (Test 7 and Summary function).
+
+Also updated CHANGELOG.md with version 1.1.1 entry.
+
+**Next steps:** Push to GitHub, test in fresh sandbox.
+
+---
+
 ### 2026-07-02
 
 **Entry:** Starting work in Z-ai-platform

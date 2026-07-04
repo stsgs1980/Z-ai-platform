@@ -8,9 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ---
 
+## [1.1.1] - 2026-07-04
+
+### Fixed
+
+- `sandbox-integration-test.sh`: trailing slash from glob pattern `*/` defeated `[ -L ]` symlink check in Test 7 and Summary, causing false "0 symlinks" even when symlinks exist
+
+---
+
 ## [1.1.0] - 2026-07-02
 
 ### Changed
+
 - Renamed ESLint rule `no-unicode-policy` -> `unicode-policy` in `eslint.config.js`
 - All rule names updated: `no-emoji` -> `emoji`, `no-unicode-graphics` -> `unicode-graphics`
 - `.husky/pre-commit`: wired PROC-COCHANGE-003 (`co-change-check.sh --hard`) before lint-staged
@@ -20,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
   - skills: `59b4a89` (Unicode cleanup)
 
 ### Fixed
+
 - `parseBlockquoteHeader` regex: `\r\n` line endings broke blockquote parsing on Windows (2 IDs extracted instead of 66)
 - `parseYAMLFrontmatter` regex: `\r\n` line endings broke YAML frontmatter parsing (RULE-MONOLITH-* not detected)
 - `file-scanner.js`: `path.relative()` returns backslashes on Windows, breaking glob matching for guard/skills repos
@@ -28,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - SUBMODULE_DIRS: platform repo scanned into standards/guard/skills submodules, causing 20+ duplicate IDs (G01)
 
 ### Added
+
 - Workspace boundary rule in `AGENT_RULES.md` section 8
 - `worklog.md` and `CHANGELOG.md`
 
@@ -36,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## [1.0.0] - 2026-07-02
 
 ### Added
+
 - worklog.md and CHANGELOG.md files to all Z-ai modules
 - Compliance with RULE-MONOLITH-002 (maintain worklog)
 - Compliance with RULE-MONOLITH-010 (documentation sync)
@@ -46,5 +58,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ## [0.9.0] - 2026-07-01
 
 ### Added
+
 - Initial Z-ai-platform project as orchestrator
 - Basic change logging structure per Z-ai standards

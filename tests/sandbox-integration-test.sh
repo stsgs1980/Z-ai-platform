@@ -242,7 +242,7 @@ test_skills_are_symlinks() {
     local total=0
     local symlinks=0
     
-    for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
+    for skill_dir in "$SANDBOX_SKILLS_DIR"/*; do
         [ -d "$skill_dir" ] || continue
         local skill_name=$(basename "$skill_dir")
         total=$((total + 1))
@@ -663,7 +663,7 @@ test_summary() {
     echo "Skills loaded: $skill_count"
     
     # List skills
-    for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
+    for skill_dir in "$SANDBOX_SKILLS_DIR"/*; do
         [ -d "$skill_dir" ] || continue
         local skill_name=$(basename "$skill_dir")
         if [ -L "$skill_dir" ]; then
