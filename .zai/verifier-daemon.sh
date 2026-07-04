@@ -96,7 +96,7 @@ runVerifiers() {
   if [[ -f "$REPO_ROOT/standards/scripts/verify-standards.js" ]]; then
     local output
     output=$(cd "$REPO_ROOT" && node standards/scripts/verify-standards.js 2>&1) || true
-    if echo "$output" | grep -q "FAIL"; then
+    if echo "$output" | grep -q "\[FAIL\]"; then
       local fail_count
       fail_count=$(echo "$output" | grep -c "\[FAIL\]" || true)
       violations=$((violations + fail_count))
@@ -127,7 +127,7 @@ runVerifiers() {
   if [[ -f "$REPO_ROOT/standards/scripts/verify-skills.js" ]]; then
     local output
     output=$(cd "$REPO_ROOT" && node standards/scripts/verify-skills.js 2>&1) || true
-    if echo "$output" | grep -q "FAIL"; then
+    if echo "$output" | grep -q "\[FAIL\]"; then
       local fail_count
       fail_count=$(echo "$output" | grep -c "\[FAIL\]" || true)
       violations=$((violations + fail_count))

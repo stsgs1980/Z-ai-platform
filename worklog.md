@@ -29,6 +29,20 @@ Updated AGENT_RULES.md §9 submodule pins to actual HEADs (standards@f945f0a1, g
 
 **Next steps:** Push to GitHub, test in fresh sandbox.
 
+### 2026-07-04 (2)
+
+**Entry:** Fix verifier daemon false VIOLATION logging and .gitignore gap
+
+GLM-5.2 and GLM-5.1 both found the same bugs during sandbox testing:
+
+1. `.zai/verifier-daemon.sh` — grep -q "FAIL" matched summary line "FAIL: 0" even when violations = 0, causing false [VIOLATION] log entries. Fixed by changing to grep -q "\[FAIL\]" (only matches actual failure markers).
+
+2. `.gitignore` — missing .zai/.verifier-daemon.pid (lock and log were covered, pid was not). PID file showed as untracked in git status.
+
+Also updated CHANGELOG.md with these fixes.
+
+**Next steps:** Push to GitHub.
+
 ---
 
 ### 2026-07-02
