@@ -40,6 +40,17 @@ All code passes. Sandbox tests partially run (WSL). Remaining: test in real Linu
 - `standards/scripts/verify-id-graph.js` — G01-G15 checks
 - `standards/scripts/verify-skills.js` — skills checks
 
+## WSL test results (2026-07-04)
+
+| Test                | Result     | Via                |
+| ------------------- | ---------- | ------------------ |
+| verify-standards.js | 14/14 PASS | node.exe Windows   |
+| verify-id-graph.js  | 13/13 PASS | node.exe Windows   |
+| verify-skills.js    | 7/7 PASS   | node.exe Windows   |
+| edge-case-tests.sh  | 15/15 PASS | WSL bash           |
+| verifier-daemon.sh  | PASS       | WSL, polling mode  |
+| bootstrap.sh        | SKIP       | No /home/z/ in WSL |
+
 ## How to continue
 
 ```
@@ -52,4 +63,5 @@ bash .zai/verifier-daemon.sh start
 # Wait 10s, touch a file, check logs
 bash .zai/verifier-daemon.sh status
 bash .zai/verifier-daemon.sh stop
+bash bootstrap.sh
 ```
