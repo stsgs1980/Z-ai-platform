@@ -21,6 +21,8 @@ Fix: changed `"$SANDBOX_SKILLS_DIR"/*/` to `"$SANDBOX_SKILLS_DIR"/*` in two plac
 
 Also updated CHANGELOG.md with version 1.1.1 entry.
 
+Added language setting to AGENT_RULES.md — all agent communication in Russian (Cyrillic).
+
 **Next steps:** Push to GitHub, test in fresh sandbox.
 
 ---

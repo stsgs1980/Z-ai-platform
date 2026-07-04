@@ -1,7 +1,7 @@
 # AGENT_RULES.md — Single Entry Point for Z-ai Agents
 
 > **Owner**: Platform maintainer (this repo's owner)
-> **Target**: Z-ai-platform v2.6.0 (2026-06-22)
+> **Target**: Z-ai-platform v2.7.0 (2026-07-04)
 > **Submodule pins**: standards@b16d154 · guard@8eb6fe1 (skills inline since a3d358b)
 > **Status**: ACTIVE — supersedes bootstrap.sh as the agent onboarding source
 > **Last Updated**: 2026-07-04
@@ -30,6 +30,16 @@ Step 7.  Start background monitor.                         ← see §7.2
 ```
 
 Skipping Step 1–4 = you are operating without context. Expect drift.
+
+---
+
+## §1.1 Language Settings
+
+**All communication with the user MUST be in Russian (Cyrillic).**
+
+- Responses, explanations, error messages — Russian only
+- Code, commands, file paths — English (as-is)
+- Technical terms may remain in English when no established Russian equivalent exists
 
 ---
 

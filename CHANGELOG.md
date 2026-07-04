@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 - `sandbox-integration-test.sh`: trailing slash from glob pattern `*/` defeated `[ -L ]` symlink check in Test 7 and Summary, causing false "0 symlinks" even when symlinks exist
 
+### Added
+
+- `AGENT_RULES.md`: language setting — all agent communication in Russian (Cyrillic)
+
 ---
 
 ## [1.1.0] - 2026-07-02
