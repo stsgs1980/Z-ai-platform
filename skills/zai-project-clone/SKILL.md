@@ -8,8 +8,6 @@ version: 1.0
 trigger: clone, git clone, клонировать, склонировать
 related:
   - STD-SKILL-001
-  - ZAI-DEV-002
-  - ZAI-DEV-003
 ---
 
 # Skill: Zai Project Clone v1.0

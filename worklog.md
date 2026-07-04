@@ -1012,3 +1012,24 @@ Test daemon in sandbox (inotifywait availability).
 
 - Daemon test (inotifywait) needs real sandbox
 - Skills path tests need real sandbox (/home/z/my-project/skills)
+
+### 2026-07-04 (4)
+
+**Entry:** Fix verify-id-graph.js ZAI-* detection, push standards submodule
+
+GLM-5.1 found critical bug: verify-id-graph.js was completely blind to L3 (skills) layer — 0 ZAI-* IDs extracted.
+
+Root causes:
+
+1. `findRepos()` heuristic checked for legacy markers (SKILLS.md, skill-id-system/, skills/skills/INDEX.md) that don't exist in current inline monorepo layout
+2. `REPO_GLOBS` skills pattern was `skills/**/SKILL.md` (double nested) instead of `*/SKILL.md`
+3. `standards` submodule commit 4b0fdf5 was never pushed to remote (broken pin)
+
+Fixes applied:
+
+- `verify-id-graph.js`: updated findRepos() heuristic to check for INDEX.md and zai-* directories
+- `constants.js`: fixed REPO_GLOBS skills pattern to `*/SKILL.md`
+- `skills/zai-project-clone/SKILL.md`: removed broken references to non-existent ZAI-DEV-002 and ZAI-DEV-003
+- Pushed standards@4b0fdf5 to remote
+
+Results: 52 IDs (was 42), 103 edges (was 92), 10 ZAI-* nodes (was 0), 13/13 HARD PASS

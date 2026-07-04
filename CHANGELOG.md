@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 - `.zai/verifier-daemon.sh`: fix false [VIOLATION] logging — grep -q "FAIL" was matching summary line "FAIL: 0", changed to grep -q "\[FAIL\]"
 - `.gitignore`: add `.zai/.verifier-daemon.pid` (was untracked, causing noise in git status)
 - `standards/scripts/graph-deps.sh`: fix path bugs (missing 5 nodes) — skills/skills/ → skills/, add guard/instructions/, guard/scripts/, guard/tools/
+- `standards/scripts/verify-id-graph.js`: fix findRepos() heuristic — now detects inline monorepo skills layout
+- `standards/scripts/lib/constants.js`: fix REPO_GLOBS skills pattern — was skills/**/SKILL.md (double nested), now */SKILL.md
+- `skills/zai-project-clone/SKILL.md`: remove broken references to non-existent ZAI-DEV-002 and ZAI-DEV-003
 
 ### Added
 
