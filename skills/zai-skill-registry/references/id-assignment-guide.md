@@ -26,7 +26,7 @@ Choose the domain that BEST fits the skill's primary purpose:
 | `QA` | Testing: test plans, validation, quality checks |
 | `REQ` | Requirements: PRD, clarity, specifications |
 | `META` | Meta-skills: skill creation, ID system, toolkit itself |
-| `STS` | User-created: any skill created by STS (with `_sts` suffix) |
+| `STS` | User-created: any skill created by STS |
 | `GIT` | (reserved) Git operations: clone, branch, checkpoint |
 | `SDK` | (reserved) API integration: z-ai-web-dev-sdk |
 | `SEC` | (reserved) Security: input validation, sanitization |
@@ -64,25 +64,25 @@ This distinguishes them from toolkit skills and prevents conflicts.
 
 ### Naming Convention
 
-- Folder name MUST have `_sts` suffix: `my-skill_sts/`
+- Folder name: `my-skill/` (no special suffix required)
 - ID uses `STS` domain: `ZAI-STS-XXX`
 
 ### Current STS Registry
 
 | ID | Skill Name | Status |
 |----|------------|--------|
-| ZAI-STS-001 | prompt-engineering_sts | Active |
-| ZAI-STS-002 | sync-toolkit_sts | Active |
-| ZAI-STS-003 | performance-code-generator_sts | Active |
-| ZAI-STS-004 | frontend-styling-expert_sts | Active |
-| ZAI-STS-005 | phi-layout_sts | Active |
-| ZAI-STS-006 | zai-ui-composer_sts | Active |
-| ZAI-STS-007 | workflow-discipline_sts | Active |
+| ZAI-STS-001 | prompt-engineering | Active |
+| ZAI-STS-002 | sync-toolkit | Active |
+| ZAI-STS-003 | performance-code-generator | Active |
+| ZAI-STS-004 | frontend-styling-expert | Active |
+| ZAI-STS-005 | phi-layout | Active |
+| ZAI-STS-006 | zai-ui-composer | Active |
+| ZAI-STS-007 | workflow-discipline | Active |
 
 When creating a user skill:
 1. Find first available ZAI-STS-XXX
 2. Assign to new skill
-3. Add `_sts` suffix to folder name
+3. Create folder with skill name
 4. Update registry with skill name
 
 ---
@@ -142,7 +142,7 @@ After creating a skill with an ID:
 
 **Decision:** STS (user-created takes priority for custom skills)
 
-**ID:** ZAI-STS-008, folder: `weekly-report_sts/`
+**ID:** ZAI-STS-008, folder: `weekly-report/`
 
 ### Example 3: Memory Backup Skill
 

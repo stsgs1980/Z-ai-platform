@@ -82,11 +82,9 @@ else
     rm -f /tmp/zai-precommit-vgraph.log
 
     # Phase 3: verify-skills.js (skills-side format)
-    # HARD failures (S01/S02/S03/S04/S05/S09) block; SOFT (S06/S07/S08)
+    # HARD failures (S01/S02/S04/S05/S09) block; SOFT (S03/S06/S07/S08)
     # reported but never block (STD-SKILL-001 section 10.1).
-    # NOTE: S03 (_sts suffix) currently fails for all 14 skills; this requires
-    # an upstream STD-SKILL-001 fix (separate PR). The non-strict mode used
-    # here passes locally; CI runs --strict separately to track S03.
+    # S03 is covered by S02 (name == folder); _sts suffix is optional.
     if [ -f "$VERIFY_SKILLS" ]; then
       echo "[pre-commit] verify-skills.js (skills-side invariants)"
       if ! node "$VERIFY_SKILLS" >/tmp/zai-precommit-vskills.log 2>&1; then

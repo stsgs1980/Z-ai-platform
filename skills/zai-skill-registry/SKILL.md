@@ -96,11 +96,10 @@ Ask the user:
 **For user-created skills:**
 - Always use `ZAI-STS-XXX` domain (STS = your signature)
 - Current range: ZAI-STS-001 through ZAI-STS-007 assigned, next is ZAI-STS-008
-- **IMPORTANT:** Add `_sts` suffix to folder name
 
 | Type | Format | Example |
 |------|--------|---------|
-| Folder name | `<skill-name>_sts` | `prompt-engineering_sts` |
+| Folder name | `<skill-name>` | `prompt-engineering` |
 | ID | `ZAI-STS-XXX` | `ZAI-STS-001` |
 
 ### Step 3: Write SKILL.md
@@ -170,12 +169,12 @@ After creating the skill, update the registry in skill-id-system (ZAI-META-001):
 1. **Determine domain:** DOC (documentation)
 2. **Check registry:** Next available STS is ZAI-STS-008
 3. **Assign ID:** ZAI-STS-008
-4. **Create folder with _sts suffix:** `weekly-report_sts/`
+4. **Create folder:** `weekly-report/`
 5. **Write skill:**
 
 ```markdown
 ---
-name: weekly-report_sts
+name: weekly-report
 author: StsDev
 description: Generate weekly progress reports from git commits and task tracking
 id: ZAI-STS-008
@@ -237,7 +236,7 @@ description: "Use this skill when user asks for X, mentions Y, or needs Z.
 Also activate on: 'keyword1', 'keyword2', 'phrase example'."
 ```
 
-**Example from performance-code-generator_sts:**
+**Example from performance-code-generator:**
 ```yaml
 description: "Generate high-performance code with optimization for algorithmic
 complexity, cache locality, memory allocations, and parallelism. Use this skill
@@ -265,9 +264,9 @@ Hot commands are short phrases user can type to quickly invoke a skill:
 
 | Skill | Hot Commands |
 |-------|--------------|
-| prompt-engineering_sts | "score prompt", "improve prompt", "prompt review" |
-| performance-code-generator_sts | "optimize", "performance", "slow code" |
-| sync-toolkit_sts | "sync toolkit", "obnovit" |
+| prompt-engineering | "score prompt", "improve prompt", "prompt review" |
+| performance-code-generator | "optimize", "performance", "slow code" |
+| sync-toolkit | "sync toolkit", "obnovit" |
 
 **Document hot commands in the skill's "When to Use" section.**
 
