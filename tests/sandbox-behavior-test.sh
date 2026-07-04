@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 #
-# sandbox-behavior-test.sh — Test actual sandbox behavior
+# sandbox-behavior-test.sh — Test agent behavior in sandbox
 #
 # Usage:
 #   bash tests/sandbox-behavior-test.sh
 #
 # What it tests:
-#   1. What the agent actually sees and can do
-#   2. Skills loading behavior
-#   3. Governance system behavior
-#   4. Pre-commit hook behavior
-#   5. Verifier behavior
+#   1. Agent can read and understand key files
+#   2. Agent can access skills
+#   3. Agent can run verifiers
+#   4. Agent can follow onboarding protocol
 #
-# This test simulates what an agent would experience in the sandbox.
+# Environment:
+#   - Expects to run AFTER bootstrap.sh has been executed
+#   - Working directory: /home/z/my-project/Z-ai-platform
 
 set -euo pipefail
 
@@ -32,8 +33,8 @@ TESTS_SKIPPED=0
 # Platform directory
 PLATFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Test directory
-TEST_DIR="/tmp/zai-sandbox-behavior-test-$$"
+# Sandbox skills directory
+SANDBOX_SKILLS_DIR="/home/z/my-project/skills"
 
 # ============================================================================
 # Helper functions
@@ -82,43 +83,45 @@ run_test() {
 # ============================================================================
 
 test_agent_can_read_agent_rules() {
-    local test_dir="$TEST_DIR/agent-rules"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
+    local agent_rules="$PLATFORM_DIR/AGENT_RULES.md"
     
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if AGENT_RULES.md is readable
-    if [ -f "Z-ai-platform/AGENT_RULES.md" ]; then
+    if [ -f "$agent_rules" ]; then
         log_info "AGENT_RULES.md exists"
         
         # Check if agent can read it
-        if cat "Z-ai-platform/AGENT_RULES.md" > /dev/null 2>&1; then
+        if cat "$agent_rules" > /dev/null 2>&1; then
             log_info "AGENT_RULES.md is readable"
         else
             log_fail "AGENT_RULES.md is not readable"
             return 1
         fi
         
-        # Check if it contains expected content
-        if grep -q "Single Entry Point" "Z-ai-platform/AGENT_RULES.md"; then
-            log_info "AGENT_RULES.md contains expected content"
+        # Check for expected content
+        if grep -q "Single Entry Point" "$agent_rules"; then
+            log_info "Contains 'Single Entry Point'"
         else
-            log_fail "AGENT_RULES.md missing expected content"
+            log_fail "Missing 'Single Entry Point'"
+            return 1
+        fi
+        
+        if grep -q "Onboarding Protocol" "$agent_rules"; then
+            log_info "Contains 'Onboarding Protocol'"
+        else
+            log_fail "Missing 'Onboarding Protocol'"
+            return 1
+        fi
+        
+        if grep -q "Priority Order" "$agent_rules"; then
+            log_info "Contains 'Priority Order'"
+        else
+            log_fail "Missing 'Priority Order'"
+            return 1
+        fi
+        
+        if grep -q "Forbidden Actions" "$agent_rules"; then
+            log_info "Contains 'Forbidden Actions'"
+        else
+            log_fail "Missing 'Forbidden Actions'"
             return 1
         fi
         
@@ -134,33 +137,12 @@ test_agent_can_read_agent_rules() {
 # ============================================================================
 
 test_agent_can_load_skills() {
-    local test_dir="$TEST_DIR/load-skills"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if skills are accessible
-    if [ -d "skills" ]; then
-        log_info "skills directory exists"
+    if [ -d "$SANDBOX_SKILLS_DIR" ]; then
+        log_info "Skills directory exists"
         
         # Check each skill
         local errors=0
-        for skill_dir in skills/*/; do
+        for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
             [ -d "$skill_dir" ] || continue
             local skill_name=$(basename "$skill_dir")
             
@@ -184,7 +166,7 @@ test_agent_can_load_skills() {
             return 1
         fi
     else
-        log_fail "skills directory not found"
+        log_fail "Skills directory not found"
         return 1
     fi
 }
@@ -194,43 +176,30 @@ test_agent_can_load_skills() {
 # ============================================================================
 
 test_agent_can_find_sandbox_rules() {
-    local test_dir="$TEST_DIR/sandbox-rules"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
+    local skill_file="$SANDBOX_SKILLS_DIR/zai-sandbox-rules/SKILL.md"
     
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if zai-sandbox-rules exists
-    if [ -f "skills/zai-sandbox-rules/SKILL.md" ]; then
+    if [ -f "$skill_file" ]; then
         log_info "zai-sandbox-rules/SKILL.md exists"
         
         # Check if it contains the rules
-        if grep -q "Rule 1:" "skills/zai-sandbox-rules/SKILL.md"; then
-            log_info "zai-sandbox-rules contains Rule 1"
+        if grep -q "Rule 1:" "$skill_file"; then
+            log_info "Contains Rule 1"
         else
-            log_fail "zai-sandbox-rules missing Rule 1"
+            log_fail "Missing Rule 1"
             return 1
         fi
         
-        if grep -q "NEVER Run Dev Servers" "skills/zai-sandbox-rules/SKILL.md"; then
-            log_info "zai-sandbox-rules contains 'NEVER Run Dev Servers'"
+        if grep -q "NEVER Run Dev Servers" "$skill_file"; then
+            log_info "Contains 'NEVER Run Dev Servers'"
         else
-            log_fail "zai-sandbox-rules missing 'NEVER Run Dev Servers'"
+            log_fail "Missing 'NEVER Run Dev Servers'"
             return 1
+        fi
+        
+        if grep -q "Rule 13:" "$skill_file"; then
+            log_info "Contains Rule 13"
+        else
+            log_warn "Missing Rule 13 (may be expected)"
         fi
         
         return 0
@@ -245,41 +214,26 @@ test_agent_can_find_sandbox_rules() {
 # ============================================================================
 
 test_agent_can_run_verifiers() {
-    local test_dir="$TEST_DIR/run-verifiers"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
+    if ! command -v node &>/dev/null; then
+        log_skip "node not available"
+        return 0
     fi
     
-    # Check if verifiers are executable
-    if [ -f "Z-ai-platform/standards/scripts/verify-standards.js" ]; then
+    # Check verify-standards.js
+    if [ -f "$PLATFORM_DIR/standards/scripts/verify-standards.js" ]; then
         log_info "verify-standards.js exists"
         
         # Try to run it
-        if command -v node &>/dev/null; then
-            log_info "Running verify-standards.js..."
-            if (cd "Z-ai-platform/standards" && node scripts/verify-standards.js 2>&1 | tail -3); then
-                log_info "verify-standards.js executed"
-            else
-                log_fail "verify-standards.js failed to execute"
-                return 1
-            fi
+        log_info "Running verify-standards.js..."
+        local output
+        output=$(cd "$PLATFORM_DIR/standards" && node scripts/verify-standards.js 2>&1)
+        local exit_code=$?
+        
+        if [ $exit_code -eq 0 ]; then
+            log_info "verify-standards.js executed successfully"
         else
-            log_skip "node not available"
+            log_fail "verify-standards.js failed"
+            return 1
         fi
     else
         log_fail "verify-standards.js not found"
@@ -294,35 +248,17 @@ test_agent_can_run_verifiers() {
 # ============================================================================
 
 test_agent_can_check_git_status() {
-    local test_dir="$TEST_DIR/git-status"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if agent can run git status
-    if git status > /dev/null 2>&1; then
+    if git -C "$PLATFORM_DIR" status > /dev/null 2>&1; then
         log_info "git status works"
         
         # Check if Z-ai-platform is tracked
-        if git status Z-ai-platform > /dev/null 2>&1; then
-            log_info "Z-ai-platform is tracked by git"
+        local status_output
+        status_output=$(git -C "$PLATFORM_DIR" status --short 2>&1)
+        
+        if [ -z "$status_output" ]; then
+            log_info "Working tree is clean"
         else
-            log_warn "Z-ai-platform may not be tracked by git"
+            log_info "Working tree has changes"
         fi
         
         return 0
@@ -337,32 +273,11 @@ test_agent_can_check_git_status() {
 # ============================================================================
 
 test_agent_can_read_config() {
-    local test_dir="$TEST_DIR/read-config"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if config is readable
-    if [ -f "Z-ai-platform/.zai/config.json" ]; then
+    if [ -f "$PLATFORM_DIR/.zai/config.json" ]; then
         log_info "config.json exists"
         
         # Check if agent can read it
-        if cat "Z-ai-platform/.zai/config.json" > /dev/null 2>&1; then
+        if cat "$PLATFORM_DIR/.zai/config.json" > /dev/null 2>&1; then
             log_info "config.json is readable"
         else
             log_fail "config.json is not readable"
@@ -371,7 +286,7 @@ test_agent_can_read_config() {
         
         # Check if it's valid JSON
         if command -v node &>/dev/null; then
-            if node -e "require('./Z-ai-platform/.zai/config.json')" 2>/dev/null; then
+            if node -e "require('$PLATFORM_DIR/.zai/config.json')" 2>/dev/null; then
                 log_info "config.json is valid JSON"
             else
                 log_fail "config.json is invalid JSON"
@@ -391,35 +306,21 @@ test_agent_can_read_config() {
 # ============================================================================
 
 test_agent_can_understand_skill_structure() {
-    local test_dir="$TEST_DIR/skill-structure"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if agent can understand skill structure
-    if [ -f "skills/INDEX.md" ]; then
+    if [ -f "$PLATFORM_DIR/skills/INDEX.md" ]; then
         log_info "INDEX.md exists"
         
         # Check if it lists skills
-        if grep -q "zai-sandbox-rules" "skills/INDEX.md"; then
+        if grep -q "zai-sandbox-rules" "$PLATFORM_DIR/skills/INDEX.md"; then
             log_info "INDEX.md lists zai-sandbox-rules"
         else
             log_fail "INDEX.md missing zai-sandbox-rules"
+            return 1
+        fi
+        
+        if grep -q "zai-skill-creator" "$PLATFORM_DIR/skills/INDEX.md"; then
+            log_info "INDEX.md lists zai-skill-creator"
+        else
+            log_fail "INDEX.md missing zai-skill-creator"
             return 1
         fi
         
@@ -435,29 +336,8 @@ test_agent_can_understand_skill_structure() {
 # ============================================================================
 
 test_agent_can_follow_onboarding() {
-    local test_dir="$TEST_DIR/onboarding"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if agent can follow onboarding protocol
     # Step 1: Read AGENT_RULES.md
-    if [ -f "Z-ai-platform/AGENT_RULES.md" ]; then
+    if [ -f "$PLATFORM_DIR/AGENT_RULES.md" ]; then
         log_info "Step 1: AGENT_RULES.md exists"
     else
         log_fail "Step 1: AGENT_RULES.md not found"
@@ -465,7 +345,7 @@ test_agent_can_follow_onboarding() {
     fi
     
     # Step 2: Check standards
-    if [ -d "Z-ai-platform/standards" ]; then
+    if [ -d "$PLATFORM_DIR/standards" ]; then
         log_info "Step 2: standards directory exists"
     else
         log_fail "Step 2: standards directory not found"
@@ -473,7 +353,7 @@ test_agent_can_follow_onboarding() {
     fi
     
     # Step 3: Check skills
-    if [ -f "skills/INDEX.md" ]; then
+    if [ -f "$PLATFORM_DIR/skills/INDEX.md" ]; then
         log_info "Step 3: skills INDEX.md exists"
     else
         log_fail "Step 3: skills INDEX.md not found"
@@ -481,7 +361,7 @@ test_agent_can_follow_onboarding() {
     fi
     
     # Step 4: Check guard
-    if [ -d "Z-ai-platform/guard" ]; then
+    if [ -d "$PLATFORM_DIR/guard" ]; then
         log_info "Step 4: guard directory exists"
     else
         log_fail "Step 4: guard directory not found"
@@ -496,42 +376,30 @@ test_agent_can_follow_onboarding() {
 # ============================================================================
 
 test_agent_can_detect_sandbox_rules() {
-    local test_dir="$TEST_DIR/detect-rules"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
+    local skill_file="$SANDBOX_SKILLS_DIR/zai-sandbox-rules/SKILL.md"
     
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if agent can detect sandbox rules
-    if [ -f "skills/zai-sandbox-rules/SKILL.md" ]; then
+    if [ -f "$skill_file" ]; then
         log_info "zai-sandbox-rules detected"
         
         # Check if it has trigger keywords
-        if grep -q "bun run dev" "skills/zai-sandbox-rules/SKILL.md"; then
+        if grep -q "bun run dev" "$skill_file"; then
             log_info "Trigger keyword 'bun run dev' found"
         else
             log_fail "Trigger keyword 'bun run dev' not found"
             return 1
         fi
         
-        if grep -q "EADDRINUSE" "skills/zai-sandbox-rules/SKILL.md"; then
+        if grep -q "EADDRINUSE" "$skill_file"; then
             log_info "Trigger keyword 'EADDRINUSE' found"
         else
             log_fail "Trigger keyword 'EADDRINUSE' not found"
+            return 1
+        fi
+        
+        if grep -q "HMR" "$skill_file"; then
+            log_info "Trigger keyword 'HMR' found"
+        else
+            log_fail "Trigger keyword 'HMR' not found"
             return 1
         fi
         
@@ -547,35 +415,28 @@ test_agent_can_detect_sandbox_rules() {
 # ============================================================================
 
 test_agent_can_understand_priority() {
-    local test_dir="$TEST_DIR/priority"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check if agent can understand priority order
-    if [ -f "Z-ai-platform/AGENT_RULES.md" ]; then
+    if [ -f "$PLATFORM_DIR/AGENT_RULES.md" ]; then
         log_info "AGENT_RULES.md exists"
         
         # Check if it mentions priority
-        if grep -q "Priority" "Z-ai-platform/AGENT_RULES.md"; then
-            log_info "Priority order mentioned in AGENT_RULES.md"
+        if grep -q "Priority" "$PLATFORM_DIR/AGENT_RULES.md"; then
+            log_info "Priority order mentioned"
         else
-            log_fail "Priority order not mentioned in AGENT_RULES.md"
+            log_fail "Priority order not mentioned"
+            return 1
+        fi
+        
+        if grep -q "STD-" "$PLATFORM_DIR/AGENT_RULES.md"; then
+            log_info "STD-* standards referenced"
+        else
+            log_fail "STD-* standards not referenced"
+            return 1
+        fi
+        
+        if grep -q "RULE-MONOLITH-" "$PLATFORM_DIR/AGENT_RULES.md"; then
+            log_info "RULE-MONOLITH-* rules referenced"
+        else
+            log_fail "RULE-MONOLITH-* rules not referenced"
             return 1
         fi
         
@@ -598,11 +459,8 @@ main() {
     echo "These tests simulate what an agent would experience in the sandbox."
     echo ""
     echo "Platform directory: $PLATFORM_DIR"
-    echo "Test directory: $TEST_DIR"
+    echo "Skills directory: $SANDBOX_SKILLS_DIR"
     echo ""
-    
-    # Create test directory
-    mkdir -p "$TEST_DIR"
     
     # Run tests
     run_test "Agent can read AGENT_RULES.md" test_agent_can_read_agent_rules

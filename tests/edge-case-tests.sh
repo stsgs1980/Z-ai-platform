@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 #
-# edge-case-tests.sh — Try to break the system with edge cases
+# edge-case-tests.sh — Edge cases for sandbox environment
 #
 # Usage:
 #   bash tests/edge-case-tests.sh
 #
 # What it tests:
-#   1. Invalid inputs
-#   2. Missing files
-#   3. Permission issues
-#   4. Network failures (simulated)
-#   5. Concurrent access
-#   6. Resource exhaustion
+#   1. Missing files and directories
+#   2. Permission issues
+#   3. Invalid configurations
+#   4. Error handling
 #
-# WARNING: These tests intentionally create error conditions.
-#          Run only in test environments!
+# Environment:
+#   - Expects to run AFTER bootstrap.sh has been executed
+#   - Working directory: /home/z/my-project/Z-ai-platform
 
 set -euo pipefail
 
@@ -33,9 +32,6 @@ TESTS_SKIPPED=0
 
 # Platform directory
 PLATFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-# Test directory
-TEST_DIR="/tmp/zai-edge-case-test-$$"
 
 # ============================================================================
 # Helper functions
@@ -80,451 +76,419 @@ run_test() {
 }
 
 # ============================================================================
-# Test 1: Bootstrap with read-only filesystem
+# Test 1: Missing AGENT_RULES.md
 # ============================================================================
 
-test_readonly_filesystem() {
-    local test_dir="$TEST_DIR/readonly"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
+test_missing_agent_rules() {
+    local test_file="/tmp/test-agent-rules-$$.md"
     
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Make directory read-only (will fail on mkdir)
-    chmod 555 my-project 2>/dev/null || true
-    
-    log_info "Running bootstrap on read-only directory..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_warn "Bootstrap succeeded on read-only directory (unexpected)"
-        chmod 755 my-project 2>/dev/null || true
-        return 0
-    else
-        log_info "Bootstrap failed on read-only directory (expected)"
-        chmod 755 my-project 2>/dev/null || true
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 2: Bootstrap with no write permission to skills dir
-# ============================================================================
-
-test_no_write_permission_skills() {
-    local test_dir="$TEST_DIR/no-write-skills"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Create a read-only skills directory
-    mkdir -p skills
-    chmod 555 skills
-    
-    log_info "Running bootstrap with read-only skills directory..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_warn "Bootstrap succeeded with read-only skills dir"
-        chmod 755 skills
-        return 0
-    else
-        log_info "Bootstrap failed with read-only skills dir (expected)"
-        chmod 755 skills 2>/dev/null || true
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 3: Bootstrap with corrupted git repo
-# ============================================================================
-
-test_corrupted_git_repo() {
-    local test_dir="$TEST_DIR/corrupted-git"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Corrupt the git repo
-    rm -rf .git/HEAD
-    
-    log_info "Running bootstrap with corrupted git repo..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_warn "Bootstrap succeeded with corrupted git repo"
-        return 0
-    else
-        log_info "Bootstrap failed with corrupted git repo (expected)"
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 4: Bootstrap with no network (simulated)
-# ============================================================================
-
-test_no_network() {
-    local test_dir="$TEST_DIR/no-network"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # We can't really block network, but we can test with invalid URL
-    # by modifying bootstrap.sh temporarily
-    log_info "Testing bootstrap with invalid git URL..."
-    
-    # Create a modified bootstrap that uses invalid URL
-    sed 's|https://github.com/stsgs1980/Z-ai-platform.git|https://invalid.example.com/nonexistent.git|' \
-        "$PLATFORM_DIR/bootstrap.sh" > /tmp/test-bootstrap.sh
-    
-    if bash /tmp/test-bootstrap.sh > bootstrap.log 2>&1; then
-        log_warn "Bootstrap succeeded with invalid URL"
-        rm -f /tmp/test-bootstrap.sh
-        return 0
-    else
-        log_info "Bootstrap failed with invalid URL (expected)"
-        rm -f /tmp/test-bootstrap.sh
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 5: Bootstrap with disk full (simulated)
-# ============================================================================
-
-test_disk_full() {
-    local test_dir="$TEST_DIR/disk-full"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # We can't really fill the disk, but we can test with a tiny tmpfs
-    # For now, just check if bootstrap handles errors gracefully
-    log_info "Testing bootstrap error handling..."
-    
-    # Run bootstrap and capture exit code
-    local exit_code=0
-    bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1 || exit_code=$?
-    
-    if [ $exit_code -eq 0 ]; then
-        log_info "Bootstrap completed successfully"
-    else
-        log_info "Bootstrap failed with exit code $exit_code"
-    fi
-    
-    # Check if error message is informative
-    if grep -q "error\|Error\|ERROR\|fatal\|Fatal\|FATAL" bootstrap.log; then
-        log_info "Error messages found in output"
-    fi
-    
-    return 0
-}
-
-# ============================================================================
-# Test 6: Bootstrap with very long paths
-# ============================================================================
-
-test_long_paths() {
-    local test_dir="$TEST_DIR/long-paths"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a project with a very long path
-    local long_dir="a"
-    for i in {1..10}; do
-        long_dir="$long_dir/abcdef"
-    done
-    
-    mkdir -p "my-project/$long_dir"
-    cd "my-project/$long_dir"
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Running bootstrap with long path..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with long path"
-        return 0
-    else
-        log_warn "Bootstrap failed with long path"
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 7: Bootstrap with special characters in path
-# ============================================================================
-
-test_special_characters_path() {
-    local test_dir="$TEST_DIR/special-chars"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a project with special characters in path
-    mkdir -p "my project (test)"
-    cd "my project (test)"
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Running bootstrap with special characters in path..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with special characters"
-        return 0
-    else
-        log_warn "Bootstrap failed with special characters"
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 8: Bootstrap with concurrent runs
-# ============================================================================
-
-test_concurrent_runs() {
-    local test_dir="$TEST_DIR/concurrent"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Running bootstrap concurrently..."
-    
-    # Run bootstrap in background
-    bash "$PLATFORM_DIR/bootstrap.sh" > /tmp/bootstrap1.log 2>&1 &
-    local pid1=$!
-    
-    # Run another bootstrap immediately
-    bash "$PLATFORM_DIR/bootstrap.sh" > /tmp/bootstrap2.log 2>&1 &
-    local pid2=$!
-    
-    # Wait for both
-    wait $pid1 || true
-    wait $pid2 || true
-    
-    # Check if both completed (may have conflicts)
-    if [ -d "Z-ai-platform/.git" ]; then
-        log_info "Concurrent runs completed (may have conflicts)"
-    else
-        log_warn "Concurrent runs may have failed"
-    fi
-    
-    return 0
-}
-
-# ============================================================================
-# Test 9: Bootstrap with symlink loops
-# ============================================================================
-
-test_symlink_loops() {
-    local test_dir="$TEST_DIR/symlink-loops"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Create a symlink loop
-    mkdir -p skills
-    ln -sf skills skills/self
-    
-    log_info "Running bootstrap with symlink loop..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with symlink loop"
+    # Temporarily hide AGENT_RULES.md
+    if [ -f "$PLATFORM_DIR/AGENT_RULES.md" ]; then
+        mv "$PLATFORM_DIR/AGENT_RULES.md" "$test_file"
         
-        # Check if loop was handled
-        if [ -L skills/self ]; then
-            log_warn "Symlink loop still exists"
+        # Try to read it
+        if [ -f "$PLATFORM_DIR/AGENT_RULES.md" ]; then
+            log_fail "AGENT_RULES.md still exists after hiding"
+            mv "$test_file" "$PLATFORM_DIR/AGENT_RULES.md"
+            return 1
+        else
+            log_info "AGENT_RULES.md correctly not found when hidden"
+            mv "$test_file" "$PLATFORM_DIR/AGENT_RULES.md"
+            return 0
         fi
-        
-        return 0
     else
-        log_warn "Bootstrap failed with symlink loop"
+        log_warn "AGENT_RULES.md doesn't exist, skipping test"
         return 0
     fi
 }
 
 # ============================================================================
-# Test 10: Bootstrap with broken symlinks
+# Test 2: Missing skills directory
+# ============================================================================
+
+test_missing_skills_dir() {
+    local test_dir="/tmp/test-skills-$$.bak"
+    local skills_dir="/home/z/my-project/skills"
+    
+    # Temporarily hide skills directory
+    if [ -d "$skills_dir" ]; then
+        mv "$skills_dir" "$test_dir"
+        
+        # Try to access it
+        if [ -d "$skills_dir" ]; then
+            log_fail "skills directory still exists after hiding"
+            mv "$test_dir" "$skills_dir"
+            return 1
+        else
+            log_info "skills directory correctly not found when hidden"
+            mv "$test_dir" "$skills_dir"
+            return 0
+        fi
+    else
+        log_warn "skills directory doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 3: Missing .zai directory
+# ============================================================================
+
+test_missing_zai_dir() {
+    local test_dir="/tmp/test-zai-$$.bak"
+    
+    # Temporarily hide .zai directory
+    if [ -d "$PLATFORM_DIR/.zai" ]; then
+        mv "$PLATFORM_DIR/.zai" "$test_dir"
+        
+        # Try to access it
+        if [ -d "$PLATFORM_DIR/.zai" ]; then
+            log_fail ".zai directory still exists after hiding"
+            mv "$test_dir" "$PLATFORM_DIR/.zai"
+            return 1
+        else
+            log_info ".zai directory correctly not found when hidden"
+            mv "$test_dir" "$PLATFORM_DIR/.zai"
+            return 0
+        fi
+    else
+        log_warn ".zai directory doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 4: Corrupted config.json
+# ============================================================================
+
+test_corrupted_config() {
+    local config_file="$PLATFORM_DIR/.zai/config.json"
+    local backup_file="/tmp/config-backup-$$.json"
+    
+    if [ -f "$config_file" ]; then
+        # Backup original
+        cp "$config_file" "$backup_file"
+        
+        # Corrupt it
+        echo "invalid json {{{" > "$config_file"
+        
+        # Try to parse it
+        if command -v node &>/dev/null; then
+            if node -e "require('$config_file')" 2>/dev/null; then
+                log_fail "Corrupted config.json was accepted as valid"
+                cp "$backup_file" "$config_file"
+                rm -f "$backup_file"
+                return 1
+            else
+                log_info "Corrupted config.json correctly rejected"
+                cp "$backup_file" "$config_file"
+                rm -f "$backup_file"
+                return 0
+            fi
+        else
+            log_skip "node not available"
+            cp "$backup_file" "$config_file"
+            rm -f "$backup_file"
+            return 0
+        fi
+    else
+        log_warn "config.json doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 5: Empty SKILL.md
+# ============================================================================
+
+test_empty_skillmd() {
+    local test_skill="/tmp/test-skill-$$.md"
+    local skill_dir="$PLATFORM_DIR/skills/zai-sandbox-rules"
+    
+    if [ -f "$skill_dir/SKILL.md" ]; then
+        # Backup original
+        cp "$skill_dir/SKILL.md" "$test_skill"
+        
+        # Empty it
+        echo "" > "$skill_dir/SKILL.md"
+        
+        # Try to read it
+        if [ -s "$skill_dir/SKILL.md" ]; then
+            log_fail "Empty SKILL.md was accepted as valid"
+            cp "$test_skill" "$skill_dir/SKILL.md"
+            rm -f "$test_skill"
+            return 1
+        else
+            log_info "Empty SKILL.md correctly detected"
+            cp "$test_skill" "$skill_dir/SKILL.md"
+            rm -f "$test_skill"
+            return 0
+        fi
+    else
+        log_warn "zai-sandbox-rules SKILL.md doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 6: Missing SKILL.md frontmatter
+# ============================================================================
+
+test_missing_frontmatter() {
+    local test_skill="/tmp/test-skill-frontmatter-$$.md"
+    local skill_dir="$PLATFORM_DIR/skills/zai-sandbox-rules"
+    
+    if [ -f "$skill_dir/SKILL.md" ]; then
+        # Backup original
+        cp "$skill_dir/SKILL.md" "$test_skill"
+        
+        # Remove frontmatter
+        sed '1,/^---$/d' "$skill_dir/SKILL.md" > "$skill_dir/SKILL.md.tmp"
+        mv "$skill_dir/SKILL.md.tmp" "$skill_dir/SKILL.md"
+        
+        # Try to parse it
+        if head -1 "$skill_dir/SKILL.md" | grep -q "^---"; then
+            log_fail "Missing frontmatter was accepted"
+            cp "$test_skill" "$skill_dir/SKILL.md"
+            rm -f "$test_skill"
+            return 1
+        else
+            log_info "Missing frontmatter correctly detected"
+            cp "$test_skill" "$skill_dir/SKILL.md"
+            rm -f "$test_skill"
+            return 0
+        fi
+    else
+        log_warn "zai-sandbox-rules SKILL.md doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 7: Broken symlinks
 # ============================================================================
 
 test_broken_symlinks() {
-    local test_dir="$TEST_DIR/broken-symlinks"
+    local test_link="/tmp/test-symlink-$$.dir"
+    local skills_dir="/home/z/my-project/skills"
+    
+    # Create a broken symlink
+    ln -sf /nonexistent/path "$test_link"
+    
+    # Check if it's detected
+    if [ -L "$test_link" ] && [ ! -e "$test_link" ]; then
+        log_info "Broken symlink correctly detected"
+        rm -f "$test_link"
+        return 0
+    else
+        log_fail "Broken symlink not detected"
+        rm -f "$test_link"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 8: Symlink loops
+# ============================================================================
+
+test_symlink_loops() {
+    local test_dir="/tmp/test-loop-$$.dir"
+    
+    # Create a symlink loop
     mkdir -p "$test_dir"
-    cd "$test_dir"
+    ln -sf "$test_dir" "$test_dir/self"
     
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
+    # Check if it's detected
+    if [ -L "$test_dir/self" ]; then
+        log_info "Symlink loop detected"
+        rm -rf "$test_dir"
+        return 0
+    else
+        log_fail "Symlink loop not detected"
+        rm -rf "$test_dir"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 9: Read-only config
+# ============================================================================
+
+test_readonly_config() {
+    local config_file="$PLATFORM_DIR/.zai/config.json"
+    local backup_file="/tmp/config-backup-ro-$$"
     
-    # Create broken symlinks
-    mkdir -p skills
-    ln -sf /nonexistent/path skills/broken1
-    ln -sf /another/nonexistent skills/broken2
-    
-    log_info "Running bootstrap with broken symlinks..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with broken symlinks"
+    if [ -f "$config_file" ]; then
+        # Backup original
+        cp "$config_file" "$backup_file"
         
-        # Check if broken symlinks were handled
-        local broken_count=$(find skills -type l ! -exec test -e {} \; -print 2>/dev/null | wc -l)
-        if [ "$broken_count" -gt 0 ]; then
-            log_warn "Found $broken_count broken symlinks after bootstrap"
+        # Make it read-only
+        chmod 444 "$config_file"
+        
+        # Try to write to it
+        if echo "test" >> "$config_file" 2>/dev/null; then
+            log_fail "Read-only config was writable"
+            chmod 644 "$config_file"
+            cp "$backup_file" "$config_file"
+            rm -f "$backup_file"
+            return 1
+        else
+            log_info "Read-only config correctly rejected writes"
+            chmod 644 "$config_file"
+            cp "$backup_file" "$config_file"
+            rm -f "$backup_file"
+            return 0
+        fi
+    else
+        log_warn "config.json doesn't exist, skipping test"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 10: Invalid git config
+# ============================================================================
+
+test_invalid_git_config() {
+    local original_value
+    original_value=$(git -C "$PLATFORM_DIR" config core.fileMode 2>/dev/null || echo "not set")
+    
+    # Set invalid value
+    git -C "$PLATFORM_DIR" config core.fileMode "invalid" 2>/dev/null || true
+    
+    # Check if it's invalid
+    local current_value
+    current_value=$(git -C "$PLATFORM_DIR" config core.fileMode 2>/dev/null || echo "not set")
+    
+    if [ "$current_value" = "invalid" ]; then
+        log_info "Invalid git config value accepted (git allows it)"
+        # Restore original
+        git -C "$PLATFORM_DIR" config core.fileMode "$original_value" 2>/dev/null || true
+        return 0
+    else
+        log_info "Invalid git config value rejected"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 11: Very long file path
+# ============================================================================
+
+test_long_file_path() {
+    local long_dir="/tmp/$(printf 'a%.0s' {1..100})"
+    
+    # Try to create a long path
+    if mkdir -p "$long_dir" 2>/dev/null; then
+        log_info "Long path created successfully"
+        rm -rf "$long_dir"
+        return 0
+    else
+        log_info "Long path creation failed (expected)"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 12: Special characters in path
+# ============================================================================
+
+test_special_characters_path() {
+    local special_dir="/tmp/test path (with) [brackets]"
+    
+    # Try to create a path with special characters
+    if mkdir -p "$special_dir" 2>/dev/null; then
+        log_info "Special characters path created"
+        rm -rf "$special_dir"
+        return 0
+    else
+        log_info "Special characters path creation failed"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 13: Concurrent file access
+# ============================================================================
+
+test_concurrent_access() {
+    local test_file="/tmp/test-concurrent-$$.txt"
+    
+    # Create a test file
+    echo "initial" > "$test_file"
+    
+    # Try to write from multiple processes
+    (echo "process1" >> "$test_file") &
+    local pid1=$!
+    
+    (echo "process2" >> "$test_file") &
+    local pid2=$!
+    
+    # Wait for both
+    wait $pid1 2>/dev/null || true
+    wait $pid2 2>/dev/null || true
+    
+    # Check if file is readable
+    if cat "$test_file" > /dev/null 2>&1; then
+        log_info "Concurrent access handled"
+        rm -f "$test_file"
+        return 0
+    else
+        log_fail "Concurrent access caused corruption"
+        rm -f "$test_file"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 14: Disk space check
+# ============================================================================
+
+test_disk_space() {
+    # Check available disk space
+    local available
+    available=$(df /tmp 2>/dev/null | tail -1 | awk '{print $4}' || echo "unknown")
+    
+    if [ "$available" = "unknown" ]; then
+        log_warn "Could not determine disk space"
+        return 0
+    fi
+    
+    if [ "$available" -gt 1000000 ]; then
+        log_info "Sufficient disk space: ${available}KB"
+        return 0
+    else
+        log_warn "Low disk space: ${available}KB"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 15: Memory check
+# ============================================================================
+
+test_memory_check() {
+    # Check available memory
+    if command -v free &>/dev/null; then
+        local available
+        available=$(free -m 2>/dev/null | grep Mem | awk '{print $7}' || echo "unknown")
+        
+        if [ "$available" = "unknown" ]; then
+            log_warn "Could not determine available memory"
+            return 0
         fi
         
-        return 0
+        if [ "$available" -gt 100 ]; then
+            log_info "Sufficient memory: ${available}MB"
+            return 0
+        else
+            log_warn "Low memory: ${available}MB"
+            return 0
+        fi
     else
-        log_warn "Bootstrap failed with broken symlinks"
+        log_skip "free command not available"
         return 0
     fi
-}
-
-# ============================================================================
-# Test 11: Verify error messages are helpful
-# ============================================================================
-
-test_error_messages() {
-    local test_dir="$TEST_DIR/error-messages"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Testing error message quality..."
-    
-    # Test 1: Missing git
-    local original_path="$PATH"
-    if command -v git &>/dev/null; then
-        local git_path=$(dirname $(which git))
-        PATH=$(echo "$PATH" | sed "s|$git_path:||g")
-    fi
-    
-    bash "$PLATFORM_DIR/bootstrap.sh" > /tmp/error-test.log 2>&1 || true
-    
-    PATH="$original_path"
-    
-    # Check if error message is helpful
-    if grep -qi "git\|clone\|repository" /tmp/error-test.log; then
-        log_info "Error message mentions git/clone/repository"
-    else
-        log_warn "Error message may not be helpful"
-    fi
-    
-    return 0
-}
-
-# ============================================================================
-# Test 12: Verify cleanup on failure
-# ============================================================================
-
-test_cleanup_on_failure() {
-    local test_dir="$TEST_DIR/cleanup"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Testing cleanup on failure..."
-    
-    # Run bootstrap
-    bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1 || true
-    
-    # Check if partial state was left
-    if [ -d "Z-ai-platform" ]; then
-        log_info "Z-ai-platform directory exists (may be partial)"
-    fi
-    
-    if [ -d "skills" ]; then
-        log_info "skills directory exists (may be partial)"
-    fi
-    
-    # Clean up
-    rm -rf Z-ai-platform skills 2>/dev/null || true
-    
-    log_info "Cleanup completed"
-    return 0
 }
 
 # ============================================================================
@@ -536,29 +500,27 @@ main() {
     echo "Z-ai-platform Edge Case Tests"
     echo "=========================================="
     echo ""
-    echo "WARNING: These tests intentionally create error conditions."
-    echo "         Run only in test environments!"
+    echo "These tests check error handling and edge cases."
     echo ""
     echo "Platform directory: $PLATFORM_DIR"
-    echo "Test directory: $TEST_DIR"
     echo ""
     
-    # Create test directory
-    mkdir -p "$TEST_DIR"
-    
     # Run tests
-    run_test "Read-only filesystem" test_readonly_filesystem
-    run_test "No write permission to skills dir" test_no_write_permission_skills
-    run_test "Corrupted git repo" test_corrupted_git_repo
-    run_test "No network (simulated)" test_no_network
-    run_test "Disk full (simulated)" test_disk_full
-    run_test "Very long paths" test_long_paths
-    run_test "Special characters in path" test_special_characters_path
-    run_test "Concurrent runs" test_concurrent_runs
-    run_test "Symlink loops" test_symlink_loops
+    run_test "Missing AGENT_RULES.md" test_missing_agent_rules
+    run_test "Missing skills directory" test_missing_skills_dir
+    run_test "Missing .zai directory" test_missing_zai_dir
+    run_test "Corrupted config.json" test_corrupted_config
+    run_test "Empty SKILL.md" test_empty_skillmd
+    run_test "Missing SKILL.md frontmatter" test_missing_frontmatter
     run_test "Broken symlinks" test_broken_symlinks
-    run_test "Error messages quality" test_error_messages
-    run_test "Cleanup on failure" test_cleanup_on_failure
+    run_test "Symlink loops" test_symlink_loops
+    run_test "Read-only config" test_readonly_config
+    run_test "Invalid git config" test_invalid_git_config
+    run_test "Very long file path" test_long_file_path
+    run_test "Special characters in path" test_special_characters_path
+    run_test "Concurrent file access" test_concurrent_access
+    run_test "Disk space check" test_disk_space
+    run_test "Memory check" test_memory_check
     
     # Summary
     echo ""

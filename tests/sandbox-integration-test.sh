@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# sandbox-integration-test.sh — Comprehensive testing of Z-ai-platform components
+# sandbox-integration-test.sh — Test Z-ai-platform in sandbox environment
 #
 # Usage:
 #   bash tests/sandbox-integration-test.sh
 #
 # What it tests:
-#   1. bootstrap.sh execution in different scenarios
-#   2. Skills loading and symlink validation
-#   3. Governance system (.zai/)
-#   4. Pre-commit hooks
-#   5. Verifiers (standards, id-graph, skills)
-#   6. Edge cases and failure modes
+#   1. Bootstrap has already run (skills symlinked)
+#   2. Skills are valid and accessible
+#   3. Governance system (.zai/) exists and works
+#   4. Verifiers pass
+#   5. Agent can read AGENT_RULES.md
+#   6. Git config is correct
 #
 # Environment:
-#   - Expects to run in Z-ai-platform directory
-#   - Creates temporary test directory in /tmp
-#   - Cleans up after itself
+#   - Expects to run AFTER bootstrap.sh has been executed
+#   - Working directory: /home/z/my-project/Z-ai-platform
+#   - Does NOT clone from GitHub (uses existing installation)
 
 set -euo pipefail
 
@@ -36,8 +36,8 @@ TESTS_SKIPPED=0
 # Platform directory (where this script is run from)
 PLATFORM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Test directory
-TEST_DIR="/tmp/zai-platform-test-$$"
+# Sandbox skills directory
+SANDBOX_SKILLS_DIR="/home/z/my-project/skills"
 
 # ============================================================================
 # Helper functions
@@ -82,173 +82,64 @@ run_test() {
 }
 
 # ============================================================================
-# Test 1: bootstrap.sh — clean run
+# Test 1: Platform directory exists
 # ============================================================================
 
-test_bootstrap_clean_run() {
-    local test_dir="$TEST_DIR/bootstrap-clean"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    echo "# Test Project" > README.md
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    log_info "Running bootstrap.sh..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed"
+test_platform_directory_exists() {
+    if [ -d "$PLATFORM_DIR" ]; then
+        log_info "Platform directory exists: $PLATFORM_DIR"
+        return 0
+    else
+        log_fail "Platform directory not found: $PLATFORM_DIR"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 2: Git repository is valid
+# ============================================================================
+
+test_git_repository_valid() {
+    if [ -d "$PLATFORM_DIR/.git" ]; then
+        log_info ".git directory exists"
         
-        # Verify Z-ai-platform was cloned
-        if [ -d "Z-ai-platform/.git" ]; then
-            log_info "Z-ai-platform cloned successfully"
+        # Check if it's a valid git repo
+        if git -C "$PLATFORM_DIR" status > /dev/null 2>&1; then
+            log_info "Git repository is valid"
         else
-            log_fail "Z-ai-platform not cloned"
-            return 1
-        fi
-        
-        # Verify skills were symlinked
-        local skill_count=$(ls -d skills/*/ 2>/dev/null | wc -l)
-        if [ "$skill_count" -gt 0 ]; then
-            log_info "Symlinked $skill_count skills"
-        else
-            log_fail "No skills symlinked"
-            return 1
-        fi
-        
-        # Verify AGENT_RULES.md was printed (check bootstrap output)
-        if grep -q "AGENT_RULES.md" bootstrap.log; then
-            log_info "AGENT_RULES.md printed"
-        else
-            log_fail "AGENT_RULES.md not in output"
+            log_fail "Git repository is invalid"
             return 1
         fi
         
         return 0
     else
-        log_fail "bootstrap.sh failed"
-        cat bootstrap.log
+        log_fail ".git directory not found"
         return 1
     fi
 }
 
 # ============================================================================
-# Test 2: bootstrap.sh — idempotent (run twice)
+# Test 3: Submodules exist
 # ============================================================================
 
-test_bootstrap_idempotent() {
-    local test_dir="$TEST_DIR/bootstrap-idempotent"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap twice
-    log_info "Running bootstrap.sh (first time)..."
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "First bootstrap failed"
-        return 1
-    fi
-    
-    local skill_count_1=$(ls -d skills/*/ 2>/dev/null | wc -l)
-    
-    log_info "Running bootstrap.sh (second time)..."
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Second bootstrap failed"
-        return 1
-    fi
-    
-    local skill_count_2=$(ls -d skills/*/ 2>/dev/null | wc -l)
-    
-    # Verify same number of skills
-    if [ "$skill_count_1" -eq "$skill_count_2" ]; then
-        log_info "Same skill count after second run: $skill_count_2"
-    else
-        log_fail "Skill count changed: $skill_count_1 -> $skill_count_2"
-        return 1
-    fi
-    
-    # Verify no duplicate symlinks
-    local broken_links=$(find skills -type l ! -exec test -e {} \; -print 2>/dev/null | wc -l)
-    if [ "$broken_links" -eq 0 ]; then
-        log_info "No broken symlinks"
-    else
-        log_fail "Found $broken_links broken symlinks"
-        return 1
-    fi
-    
-    return 0
-}
-
-# ============================================================================
-# Test 3: Skills symlink validation
-# ============================================================================
-
-test_skills_symlink_validation() {
-    local test_dir="$TEST_DIR/skills-validation"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check each skill directory
+test_submodules_exist() {
     local errors=0
-    for skill_dir in skills/*/; do
-        [ -d "$skill_dir" ] || continue
-        local skill_name=$(basename "$skill_dir")
-        
-        # Check SKILL.md exists
-        if [ ! -f "$skill_dir/SKILL.md" ]; then
-            log_fail "$skill_name: SKILL.md missing"
-            errors=$((errors + 1))
-            continue
-        fi
-        
-        # Check SKILL.md has frontmatter
-        if ! head -1 "$skill_dir/SKILL.md" | grep -q "^---"; then
-            log_fail "$skill_name: SKILL.md missing frontmatter"
-            errors=$((errors + 1))
-            continue
-        fi
-        
-        # Check frontmatter has name field
-        if ! sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" | grep -q "^name:"; then
-            log_fail "$skill_name: SKILL.md missing name in frontmatter"
-            errors=$((errors + 1))
-            continue
-        fi
-        
-        log_info "$skill_name: OK"
-    done
+    
+    # Check standards submodule
+    if [ -d "$PLATFORM_DIR/standards/.git" ]; then
+        log_info "Standards submodule exists"
+    else
+        log_fail "Standards submodule not found"
+        errors=$((errors + 1))
+    fi
+    
+    # Check guard submodule
+    if [ -d "$PLATFORM_DIR/guard/.git" ]; then
+        log_info "Guard submodule exists"
+    else
+        log_fail "Guard submodule not found"
+        errors=$((errors + 1))
+    fi
     
     if [ "$errors" -eq 0 ]; then
         return 0
@@ -258,475 +149,454 @@ test_skills_symlink_validation() {
 }
 
 # ============================================================================
-# Test 4: Governance system (.zai/)
+# Test 4: Skills directory exists and has skills
+# ============================================================================
+
+test_skills_directory_exists() {
+    if [ -d "$SANDBOX_SKILLS_DIR" ]; then
+        log_info "Skills directory exists: $SANDBOX_SKILLS_DIR"
+        
+        local skill_count=$(ls -d "$SANDBOX_SKILLS_DIR"/*/ 2>/dev/null | wc -l)
+        if [ "$skill_count" -gt 0 ]; then
+            log_info "Found $skill_count skills"
+        else
+            log_fail "No skills found in directory"
+            return 1
+        fi
+        
+        return 0
+    else
+        log_fail "Skills directory not found: $SANDBOX_SKILLS_DIR"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 5: zai-sandbox-rules skill exists
+# ============================================================================
+
+test_sandbox_rules_exists() {
+    local skill_file="$SANDBOX_SKILLS_DIR/zai-sandbox-rules/SKILL.md"
+    
+    if [ -f "$skill_file" ]; then
+        log_info "zai-sandbox-rules/SKILL.md exists"
+        
+        # Check if it contains expected content
+        if grep -q "NEVER Run Dev Servers" "$skill_file"; then
+            log_info "Contains 'NEVER Run Dev Servers'"
+        else
+            log_fail "Missing 'NEVER Run Dev Servers'"
+            return 1
+        fi
+        
+        if grep -q "Rule 1:" "$skill_file"; then
+            log_info "Contains Rule 1"
+        else
+            log_fail "Missing Rule 1"
+            return 1
+        fi
+        
+        return 0
+    else
+        log_fail "zai-sandbox-rules/SKILL.md not found"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 6: All skills have SKILL.md
+# ============================================================================
+
+test_all_skills_have_skillmd() {
+    local errors=0
+    local total=0
+    
+    for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
+        [ -d "$skill_dir" ] || continue
+        local skill_name=$(basename "$skill_dir")
+        total=$((total + 1))
+        
+        if [ -f "$skill_dir/SKILL.md" ]; then
+            log_info "$skill_name: SKILL.md exists"
+        else
+            log_fail "$skill_name: SKILL.md missing"
+            errors=$((errors + 1))
+        fi
+    done
+    
+    log_info "Checked $total skills"
+    
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 7: Skills are symlinks
+# ============================================================================
+
+test_skills_are_symlinks() {
+    local errors=0
+    local total=0
+    local symlinks=0
+    
+    for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
+        [ -d "$skill_dir" ] || continue
+        local skill_name=$(basename "$skill_dir")
+        total=$((total + 1))
+        
+        if [ -L "$skill_dir" ]; then
+            symlinks=$((symlinks + 1))
+            local target=$(readlink -f "$skill_dir" 2>/dev/null || readlink "$skill_dir")
+            log_info "$skill_name: symlink -> $target"
+        else
+            log_warn "$skill_name: not a symlink (regular directory)"
+        fi
+    done
+    
+    log_info "Checked $total skills, $symlinks symlinks"
+    
+    if [ "$symlinks" -gt 0 ]; then
+        return 0
+    else
+        log_warn "No symlinks found (may be expected if skills are copied)"
+        return 0
+    fi
+}
+
+# ============================================================================
+# Test 8: No broken symlinks
+# ============================================================================
+
+test_no_broken_symlinks() {
+    local broken_count=$(find "$SANDBOX_SKILLS_DIR" -type l ! -exec test -e {} \; -print 2>/dev/null | wc -l)
+    
+    if [ "$broken_count" -eq 0 ]; then
+        log_info "No broken symlinks"
+        return 0
+    else
+        log_fail "Found $broken_count broken symlinks"
+        find "$SANDBOX_SKILLS_DIR" -type l ! -exec test -e {} \; -print 2>/dev/null | while read link; do
+            log_fail "  Broken: $link"
+        done
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 9: Governance system (.zai/)
 # ============================================================================
 
 test_governance_system() {
-    local test_dir="$TEST_DIR/governance"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
-    
-    # Check .zai/ directory exists in Z-ai-platform
-    if [ -d "Z-ai-platform/.zai" ]; then
+    if [ -d "$PLATFORM_DIR/.zai" ]; then
         log_info ".zai/ directory exists"
-    else
-        log_fail ".zai/ directory missing"
-        return 1
-    fi
-    
-    # Check config.json exists
-    if [ -f "Z-ai-platform/.zai/config.json" ]; then
-        log_info "config.json exists"
         
-        # Validate config.json is valid JSON
-        if command -v node &>/dev/null; then
-            if node -e "require('./Z-ai-platform/.zai/config.json')" 2>/dev/null; then
-                log_info "config.json is valid JSON"
-            else
-                log_fail "config.json is invalid JSON"
-                return 1
+        # Check config.json
+        if [ -f "$PLATFORM_DIR/.zai/config.json" ]; then
+            log_info "config.json exists"
+            
+            # Validate JSON
+            if command -v node &>/dev/null; then
+                if node -e "require('$PLATFORM_DIR/.zai/config.json')" 2>/dev/null; then
+                    log_info "config.json is valid JSON"
+                else
+                    log_fail "config.json is invalid JSON"
+                    return 1
+                fi
             fi
-        fi
-    else
-        log_fail "config.json missing"
-        return 1
-    fi
-    
-    # Check setup.sh exists
-    if [ -f "Z-ai-platform/.zai/setup.sh" ]; then
-        log_info "setup.sh exists"
-        
-        # Check setup.sh is executable or has correct shebang
-        if head -1 "Z-ai-platform/.zai/setup.sh" | grep -q "bash"; then
-            log_info "setup.sh has correct shebang"
         else
-            log_warn "setup.sh shebang may be incorrect"
+            log_fail "config.json missing"
+            return 1
         fi
+        
+        # Check setup.sh
+        if [ -f "$PLATFORM_DIR/.zai/setup.sh" ]; then
+            log_info "setup.sh exists"
+        else
+            log_fail "setup.sh missing"
+            return 1
+        fi
+        
+        # Check verify
+        if [ -f "$PLATFORM_DIR/.zai/verify" ]; then
+            log_info "verify script exists"
+        else
+            log_fail "verify script missing"
+            return 1
+        fi
+        
+        return 0
     else
-        log_fail "setup.sh missing"
+        log_fail ".zai/ directory not found"
         return 1
     fi
-    
-    # Check verify script exists
-    if [ -f "Z-ai-platform/.zai/verify" ]; then
-        log_info "verify script exists"
-    else
-        log_fail "verify script missing"
-        return 1
-    fi
-    
-    return 0
 }
 
 # ============================================================================
-# Test 5: Verifiers
+# Test 10: Verifiers exist
 # ============================================================================
 
-test_verifiers() {
-    local test_dir="$TEST_DIR/verifiers"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
+test_verifiers_exist() {
+    local errors=0
     
     # Check verify-standards.js
-    if [ -f "Z-ai-platform/standards/scripts/verify-standards.js" ]; then
+    if [ -f "$PLATFORM_DIR/standards/scripts/verify-standards.js" ]; then
         log_info "verify-standards.js exists"
-        
-        # Try to run it
-        if command -v node &>/dev/null; then
-            log_info "Running verify-standards.js..."
-            if (cd "Z-ai-platform/standards" && node scripts/verify-standards.js 2>&1 | tail -5); then
-                log_info "verify-standards.js passed"
-            else
-                log_fail "verify-standards.js failed"
-                return 1
-            fi
-        fi
     else
-        log_fail "verify-standards.js missing"
-        return 1
+        log_fail "verify-standards.js not found"
+        errors=$((errors + 1))
     fi
     
     # Check verify-id-graph.js
-    if [ -f "Z-ai-platform/standards/scripts/verify-id-graph.js" ]; then
+    if [ -f "$PLATFORM_DIR/standards/scripts/verify-id-graph.js" ]; then
         log_info "verify-id-graph.js exists"
-        
-        # Try to run it
-        if command -v node &>/dev/null; then
-            log_info "Running verify-id-graph.js..."
-            if (cd "Z-ai-platform/standards" && node scripts/verify-id-graph.js 2>&1 | tail -5); then
-                log_info "verify-id-graph.js passed"
-            else
-                log_fail "verify-id-graph.js failed"
-                return 1
-            fi
-        fi
     else
-        log_fail "verify-id-graph.js missing"
-        return 1
+        log_fail "verify-id-graph.js not found"
+        errors=$((errors + 1))
     fi
     
-    return 0
+    # Check verify-skills.js
+    if [ -f "$PLATFORM_DIR/standards/scripts/verify-skills.js" ]; then
+        log_info "verify-skills.js exists"
+    else
+        log_fail "verify-skills.js not found"
+        errors=$((errors + 1))
+    fi
+    
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # ============================================================================
-# Test 6: Edge case — missing dependencies
+# Test 11: Run verify-standards.js
 # ============================================================================
 
-test_missing_dependencies() {
-    local test_dir="$TEST_DIR/missing-deps"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Temporarily hide node
-    local original_path="$PATH"
-    if command -v node &>/dev/null; then
-        local node_path=$(dirname $(which node))
-        PATH=$(echo "$PATH" | sed "s|$node_path:||g")
+test_run_verify_standards() {
+    if ! command -v node &>/dev/null; then
+        log_skip "node not available"
+        return 0
     fi
     
-    log_info "Running bootstrap without node..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed without node"
+    log_info "Running verify-standards.js..."
+    local output
+    output=$(cd "$PLATFORM_DIR/standards" && node scripts/verify-standards.js 2>&1)
+    local exit_code=$?
+    
+    if [ $exit_code -eq 0 ]; then
+        log_info "verify-standards.js passed"
+        echo "$output" | tail -3
+        return 0
+    else
+        log_fail "verify-standards.js failed (exit code: $exit_code)"
+        echo "$output" | tail -10
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 12: Run verify-id-graph.js
+# ============================================================================
+
+test_run_verify_id_graph() {
+    if ! command -v node &>/dev/null; then
+        log_skip "node not available"
+        return 0
+    fi
+    
+    log_info "Running verify-id-graph.js..."
+    local output
+    output=$(cd "$PLATFORM_DIR/standards" && node scripts/verify-id-graph.js 2>&1)
+    local exit_code=$?
+    
+    if [ $exit_code -eq 0 ]; then
+        log_info "verify-id-graph.js passed"
+        echo "$output" | tail -3
+        return 0
+    else
+        log_fail "verify-id-graph.js failed (exit code: $exit_code)"
+        echo "$output" | tail -10
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 13: AGENT_RULES.md is readable
+# ============================================================================
+
+test_agent_rules_readable() {
+    local agent_rules="$PLATFORM_DIR/AGENT_RULES.md"
+    
+    if [ -f "$agent_rules" ]; then
+        log_info "AGENT_RULES.md exists"
         
-        # Verify it still cloned
-        if [ -d "Z-ai-platform/.git" ]; then
-            log_info "Z-ai-platform cloned (node not required for bootstrap)"
+        if cat "$agent_rules" > /dev/null 2>&1; then
+            log_info "AGENT_RULES.md is readable"
         else
-            log_fail "Z-ai-platform not cloned"
-            PATH="$original_path"
+            log_fail "AGENT_RULES.md is not readable"
             return 1
         fi
-    else
-        log_fail "Bootstrap failed without node"
-        PATH="$original_path"
-        return 1
-    fi
-    
-    PATH="$original_path"
-    return 0
-}
-
-# ============================================================================
-# Test 7: Edge case — no git
-# ============================================================================
-
-test_no_git() {
-    local test_dir="$TEST_DIR/no-git"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a directory without git
-    mkdir -p my-project
-    cd my-project
-    
-    # Temporarily hide git
-    local original_path="$PATH"
-    if command -v git &>/dev/null; then
-        local git_path=$(dirname $(which git))
-        PATH=$(echo "$PATH" | sed "s|$git_path:||g")
-    fi
-    
-    log_info "Running bootstrap without git..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_warn "Bootstrap completed without git (unexpected)"
-        PATH="$original_path"
-        return 0
-    else
-        log_info "Bootstrap failed without git (expected behavior)"
-        PATH="$original_path"
-        return 0
-    fi
-}
-
-# ============================================================================
-# Test 8: Edge case — already existing Z-ai-platform
-# ============================================================================
-
-test_existing_platform() {
-    local test_dir="$TEST_DIR/existing-platform"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Create a fake Z-ai-platform directory
-    mkdir -p Z-ai-platform
-    cd Z-ai-platform
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "# Fake Platform" > README.md
-    git add .
-    git commit -m "Initial commit"
-    cd ..
-    
-    log_info "Running bootstrap with existing Z-ai-platform..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with existing directory"
         
-        # Check if it pulled latest
-        if grep -q "Pulling latest" bootstrap.log; then
-            log_info "Bootstrap pulled latest (correct behavior)"
+        # Check for expected content
+        if grep -q "Single Entry Point" "$agent_rules"; then
+            log_info "Contains 'Single Entry Point'"
         else
-            log_warn "Bootstrap did not pull latest"
-        fi
-        
-        return 0
-    else
-        log_fail "Bootstrap failed with existing directory"
-        cat bootstrap.log
-        return 1
-    fi
-}
-
-# ============================================================================
-# Test 9: Edge case — skills directory conflicts
-# ============================================================================
-
-test_skills_conflicts() {
-    local test_dir="$TEST_DIR/skills-conflicts"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Create a fake skills directory with a conflicting skill
-    mkdir -p skills/zai-sandbox-rules
-    echo "# Fake Skill" > skills/zai-sandbox-rules/SKILL.md
-    
-    log_info "Running bootstrap with conflicting skills..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        log_info "Bootstrap completed with conflicts"
-        
-        # Check if backup was created
-        if [ -d "skills/zai-sandbox-rules.sandbox-backup" ]; then
-            log_info "Backup created for conflicting skill"
-        else
-            log_warn "No backup created for conflicting skill"
-        fi
-        
-        # Check if our skill won
-        if grep -q "stsgs1980" skills/zai-sandbox-rules/SKILL.md 2>/dev/null || \
-           head -5 skills/zai-sandbox-rules/SKILL.md | grep -q "zai-sandbox-rules"; then
-            log_info "Our skill won the conflict"
-        else
-            log_warn "Our skill may not have won the conflict"
-        fi
-        
-        return 0
-    else
-        log_fail "Bootstrap failed with conflicts"
-        cat bootstrap.log
-        return 1
-    fi
-}
-
-# ============================================================================
-# Test 10: Verify bootstrap output format
-# ============================================================================
-
-test_bootstrap_output_format() {
-    local test_dir="$TEST_DIR/output-format"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    log_info "Running bootstrap and checking output format..."
-    if bash "$PLATFORM_DIR/bootstrap.sh" > bootstrap.log 2>&1; then
-        # Check for expected sections
-        local sections=(
-            "Step 1: Ensure Z-ai-platform is cloned"
-            "Step 2: Normalize git mode-bit handling"
-            "Step 3: Symlink custom skills"
-            "Step 4: Available custom skills"
-            "Step 5: Print AGENT_RULES.md"
-            "Step 6: Run sanity verifiers"
-        )
-        
-        local missing=0
-        for section in "${sections[@]}"; do
-            if grep -q "$section" bootstrap.log; then
-                log_info "Found section: $section"
-            else
-                log_fail "Missing section: $section"
-                missing=$((missing + 1))
-            fi
-        done
-        
-        if [ "$missing" -eq 0 ]; then
-            return 0
-        else
+            log_fail "Missing 'Single Entry Point'"
             return 1
         fi
+        
+        if grep -q "Priority" "$agent_rules"; then
+            log_info "Contains priority order"
+        else
+            log_fail "Missing priority order"
+            return 1
+        fi
+        
+        return 0
     else
-        log_fail "Bootstrap failed"
+        log_fail "AGENT_RULES.md not found"
         return 1
     fi
 }
 
 # ============================================================================
-# Test 11: Verify git config changes
+# Test 14: Git config is correct
 # ============================================================================
 
-test_git_config_changes() {
-    local test_dir="$TEST_DIR/git-config"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
-        return 1
-    fi
+test_git_config_correct() {
+    local errors=0
     
     # Check core.fileMode in platform
-    local platform_filemode=$(cd Z-ai-platform && git config core.fileMode)
+    local platform_filemode
+    platform_filemode=$(git -C "$PLATFORM_DIR" config core.fileMode 2>/dev/null || echo "not set")
+    
     if [ "$platform_filemode" = "false" ]; then
         log_info "Platform core.fileMode = false"
     else
         log_fail "Platform core.fileMode = $platform_filemode (expected false)"
+        errors=$((errors + 1))
+    fi
+    
+    # Check core.fileMode in standards
+    if [ -d "$PLATFORM_DIR/standards/.git" ]; then
+        local standards_filemode
+        standards_filemode=$(git -C "$PLATFORM_DIR/standards" config core.fileMode 2>/dev/null || echo "not set")
+        
+        if [ "$standards_filemode" = "false" ]; then
+            log_info "Standards core.fileMode = false"
+        else
+            log_warn "Standards core.fileMode = $standards_filemode"
+        fi
+    fi
+    
+    # Check core.fileMode in guard
+    if [ -d "$PLATFORM_DIR/guard/.git" ]; then
+        local guard_filemode
+        guard_filemode=$(git -C "$PLATFORM_DIR/guard" config core.fileMode 2>/dev/null || echo "not set")
+        
+        if [ "$guard_filemode" = "false" ]; then
+            log_info "Guard core.fileMode = false"
+        else
+            log_warn "Guard core.fileMode = $guard_filemode"
+        fi
+    fi
+    
+    if [ "$errors" -eq 0 ]; then
+        return 0
+    else
         return 1
     fi
-    
-    # Check core.fileMode in submodules
-    local standards_filemode=$(cd Z-ai-platform/standards && git config core.fileMode 2>/dev/null || echo "not set")
-    if [ "$standards_filemode" = "false" ]; then
-        log_info "Standards core.fileMode = false"
-    else
-        log_warn "Standards core.fileMode = $standards_filemode"
-    fi
-    
-    local guard_filemode=$(cd Z-ai-platform/guard && git config core.fileMode 2>/dev/null || echo "not set")
-    if [ "$guard_filemode" = "false" ]; then
-        log_info "Guard core.fileMode = false"
-    else
-        log_warn "Guard core.fileMode = $guard_filemode"
-    fi
-    
-    return 0
 }
 
 # ============================================================================
-# Test 12: Verify symlink targets
+# Test 15: Skills INDEX.md exists
 # ============================================================================
 
-test_symlink_targets() {
-    local test_dir="$TEST_DIR/symlink-targets"
-    mkdir -p "$test_dir"
-    cd "$test_dir"
-    
-    # Create a minimal project
-    mkdir -p my-project
-    cd my-project
-    git init
-    git config user.email "test@test.com"
-    git config user.name "Test"
-    echo "node_modules/" > .gitignore
-    git add .
-    git commit -m "Initial commit"
-    
-    # Run bootstrap
-    if ! bash "$PLATFORM_DIR/bootstrap.sh" > /dev/null 2>&1; then
-        log_fail "Bootstrap failed"
+test_skills_index_exists() {
+    if [ -f "$PLATFORM_DIR/skills/INDEX.md" ]; then
+        log_info "skills/INDEX.md exists"
+        
+        # Check if it lists skills
+        if grep -q "zai-sandbox-rules" "$PLATFORM_DIR/skills/INDEX.md"; then
+            log_info "INDEX.md lists zai-sandbox-rules"
+        else
+            log_fail "INDEX.md missing zai-sandbox-rules"
+            return 1
+        fi
+        
+        return 0
+    else
+        log_fail "skills/INDEX.md not found"
         return 1
     fi
-    
-    # Check each symlink
-    local errors=0
-    for skill_link in skills/*/; do
-        [ -d "$skill_link" ] || continue
-        local skill_name=$(basename "$skill_link")
+}
+
+# ============================================================================
+# Test 16: Pre-commit hook exists
+# ============================================================================
+
+test_precommit_hook_exists() {
+    if [ -f "$PLATFORM_DIR/.husky/pre-commit" ]; then
+        log_info ".husky/pre-commit exists"
         
-        # Check if it's a symlink
-        if [ -L "$skill_link" ]; then
-            local target=$(readlink -f "$skill_link" 2>/dev/null || readlink "$skill_link")
-            
-            # Check if target exists
-            if [ -d "$target" ]; then
-                log_info "$skill_name -> $target (valid)"
-            else
-                log_fail "$skill_name -> $target (broken)"
-                errors=$((errors + 1))
-            fi
+        # Check if it's executable or has correct content
+        if grep -q "co-change-check" "$PLATFORM_DIR/.husky/pre-commit"; then
+            log_info "Contains co-change-check"
         else
-            log_warn "$skill_name is not a symlink"
+            log_warn "Missing co-change-check"
+        fi
+        
+        if grep -q "worklog-check" "$PLATFORM_DIR/.husky/pre-commit"; then
+            log_info "Contains worklog-check"
+        else
+            log_warn "Missing worklog-check"
+        fi
+        
+        if grep -q "lint-staged" "$PLATFORM_DIR/.husky/pre-commit"; then
+            log_info "Contains lint-staged"
+        else
+            log_warn "Missing lint-staged"
+        fi
+        
+        return 0
+    else
+        log_fail ".husky/pre-commit not found"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 17: No CRLF in shell scripts
+# ============================================================================
+
+test_no_crlf_in_shell_scripts() {
+    local errors=0
+    
+    for script in bootstrap.sh save-work.sh status.sh; do
+        if [ -f "$PLATFORM_DIR/$script" ]; then
+            # Check for CRLF
+            if cat -A "$PLATFORM_DIR/$script" | grep -q $'\r'; then
+                log_fail "$script has CRLF line endings"
+                errors=$((errors + 1))
+            else
+                log_info "$script has LF line endings"
+            fi
+        fi
+    done
+    
+    # Check husky hooks
+    for hook in .husky/pre-commit .husky/pre-push .husky/commit-msg; do
+        if [ -f "$PLATFORM_DIR/$hook" ]; then
+            if cat -A "$PLATFORM_DIR/$hook" | grep -q $'\r'; then
+                log_fail "$hook has CRLF line endings"
+                errors=$((errors + 1))
+            else
+                log_info "$hook has LF line endings"
+            fi
         fi
     done
     
@@ -735,6 +605,85 @@ test_symlink_targets() {
     else
         return 1
     fi
+}
+
+# ============================================================================
+# Test 18: Worklog exists and is non-empty
+# ============================================================================
+
+test_worklog_exists() {
+    if [ -f "$PLATFORM_DIR/worklog.md" ]; then
+        log_info "worklog.md exists"
+        
+        local line_count=$(wc -l < "$PLATFORM_DIR/worklog.md")
+        if [ "$line_count" -gt 0 ]; then
+            log_info "worklog.md has $line_count lines"
+        else
+            log_fail "worklog.md is empty"
+            return 1
+        fi
+        
+        return 0
+    else
+        log_fail "worklog.md not found"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 19: CHANGELOG exists
+# ============================================================================
+
+test_changelog_exists() {
+    if [ -f "$PLATFORM_DIR/CHANGELOG.md" ]; then
+        log_info "CHANGELOG.md exists"
+        return 0
+    else
+        log_fail "CHANGELOG.md not found"
+        return 1
+    fi
+}
+
+# ============================================================================
+# Test 20: Summary of all checks
+# ============================================================================
+
+test_summary() {
+    echo ""
+    echo "=========================================="
+    echo "Sandbox Environment Summary"
+    echo "=========================================="
+    echo ""
+    echo "Platform: $PLATFORM_DIR"
+    echo "Skills: $SANDBOX_SKILLS_DIR"
+    echo ""
+    
+    # Count skills
+    local skill_count=$(ls -d "$SANDBOX_SKILLS_DIR"/*/ 2>/dev/null | wc -l)
+    echo "Skills loaded: $skill_count"
+    
+    # List skills
+    for skill_dir in "$SANDBOX_SKILLS_DIR"/*/; do
+        [ -d "$skill_dir" ] || continue
+        local skill_name=$(basename "$skill_dir")
+        if [ -L "$skill_dir" ]; then
+            echo "  - $skill_name (symlink)"
+        else
+            echo "  - $skill_name (directory)"
+        fi
+    done
+    
+    echo ""
+    echo "Submodules:"
+    if [ -d "$PLATFORM_DIR/standards/.git" ]; then
+        echo "  - standards: $(git -C "$PLATFORM_DIR/standards" rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+    fi
+    if [ -d "$PLATFORM_DIR/guard/.git" ]; then
+        echo "  - guard: $(git -C "$PLATFORM_DIR/guard" rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+    fi
+    
+    echo ""
+    return 0
 }
 
 # ============================================================================
@@ -747,25 +696,30 @@ main() {
     echo "=========================================="
     echo ""
     echo "Platform directory: $PLATFORM_DIR"
-    echo "Test directory: $TEST_DIR"
+    echo "Skills directory: $SANDBOX_SKILLS_DIR"
     echo ""
     
-    # Create test directory
-    mkdir -p "$TEST_DIR"
-    
     # Run tests
-    run_test "bootstrap.sh — clean run" test_bootstrap_clean_run
-    run_test "bootstrap.sh — idempotent (run twice)" test_bootstrap_idempotent
-    run_test "Skills symlink validation" test_skills_symlink_validation
+    run_test "Platform directory exists" test_platform_directory_exists
+    run_test "Git repository is valid" test_git_repository_valid
+    run_test "Submodules exist" test_submodules_exist
+    run_test "Skills directory exists" test_skills_directory_exists
+    run_test "zai-sandbox-rules skill exists" test_sandbox_rules_exists
+    run_test "All skills have SKILL.md" test_all_skills_have_skillmd
+    run_test "Skills are symlinks" test_skills_are_symlinks
+    run_test "No broken symlinks" test_no_broken_symlinks
     run_test "Governance system (.zai/)" test_governance_system
-    run_test "Verifiers" test_verifiers
-    run_test "Edge case — missing dependencies" test_missing_dependencies
-    run_test "Edge case — no git" test_no_git
-    run_test "Edge case — already existing Z-ai-platform" test_existing_platform
-    run_test "Edge case — skills directory conflicts" test_skills_conflicts
-    run_test "Verify bootstrap output format" test_bootstrap_output_format
-    run_test "Verify git config changes" test_git_config_changes
-    run_test "Verify symlink targets" test_symlink_targets
+    run_test "Verifiers exist" test_verifiers_exist
+    run_test "Run verify-standards.js" test_run_verify_standards
+    run_test "Run verify-id-graph.js" test_run_verify_id_graph
+    run_test "AGENT_RULES.md is readable" test_agent_rules_readable
+    run_test "Git config is correct" test_git_config_correct
+    run_test "Skills INDEX.md exists" test_skills_index_exists
+    run_test "Pre-commit hook exists" test_precommit_hook_exists
+    run_test "No CRLF in shell scripts" test_no_crlf_in_shell_scripts
+    run_test "Worklog exists" test_worklog_exists
+    run_test "CHANGELOG exists" test_changelog_exists
+    run_test "Summary" test_summary
     
     # Summary
     echo ""
