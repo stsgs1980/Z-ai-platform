@@ -23,7 +23,7 @@ on:
     branches: [main]
   schedule:
     # 03:00 UTC nightly = 06:00 Europe/Moscow
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -67,7 +67,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Run verify-standards.js
         id: verify-standards
@@ -260,19 +260,12 @@ jobs:
           }
           ls -la docs/_graph/
 
-      - name: Generate Mermaid process diagrams
-        id: diagrams
-        run: |
-          bash standards/scripts/render-diagrams.sh
-          ls -la docs/_diagrams/
-
       - name: Upload graph artifact
         uses: actions/upload-artifact@v7
         with:
           name: id-graph
           path: |
             docs/_graph/
-            docs/_diagrams/
           retention-days: 30
 
       - name: Upload verifier output (on failure)
