@@ -209,8 +209,8 @@ test_empty_skillmd() {
         # Backup original
         cp "$skill_dir/SKILL.md" "$test_skill"
         
-        # Empty it
-        echo "" > "$skill_dir/SKILL.md"
+        # Empty it (truncate to zero bytes)
+        : > "$skill_dir/SKILL.md"
         
         # Try to read it
         if [ -s "$skill_dir/SKILL.md" ]; then

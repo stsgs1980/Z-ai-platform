@@ -932,3 +932,31 @@ Agent now gets real-time feedback between commits, not just at commit time.
 ### Follow-up
 
 Test daemon in sandbox (inotifywait availability).
+
+---
+
+## 2026-07-04 17:45 — Sandbox test results + bugfix
+
+### What changed
+
+- Added `.gitattributes` enforcing LF for `*.sh` files
+- Fixed edge-case-tests.sh: `echo "" > file` → `: > file` (empty SKILL.md check)
+- All shell scripts converted from CRLF to LF
+- Ran all 3 sandbox test suites on WSL
+
+### Results
+
+| Test suite                  | Pass/Total | Notes                                                 |
+| --------------------------- | ---------- | ----------------------------------------------------- |
+| sandbox-integration-test.sh | 18/20      | 2 FAIL — skills not at /home/z/my-project/ (WSL path) |
+| sandbox-behavior-test.sh    | 7/10       | 3 FAIL — same reason                                  |
+| edge-case-tests.sh          | 15/15      | All PASS after bugfix                                 |
+
+### Bugfix
+
+`echo "" > file` writes 1 byte (newline). `[ -s file ]` returns true. Changed to `: > file` (truncate to 0 bytes).
+
+### Remaining
+
+- Daemon test (inotifywait) needs real sandbox
+- Skills path tests need real sandbox (/home/z/my-project/skills)
