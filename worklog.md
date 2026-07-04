@@ -884,3 +884,19 @@ committed them. They were produced by a sandbox agent. Investigation:
 **Expected result:** All tests should pass when run after successful bootstrap.
 
 **Next steps:** Push updated tests, re-run in sandbox.
+
+---
+
+## 2026-07-04 — fix submodule check in integration test
+
+**Task:** Fix test bug where `-d` (is directory) fails for submodule `.git` files.
+
+**Problem:** Git submodules store `.git` as a file (containing `gitdir:` reference), not a directory. Test used `[ -d "$PLATFORM_DIR/standards/.git" ]` which always fails.
+
+**Fix:** Changed to `[ -e ]` (exists) which works for both files and directories.
+
+**Files changed:**
+
+- `tests/sandbox-integration-test.sh` — 3 places fixed
+
+**Result:** All 20 tests should now pass in sandbox.

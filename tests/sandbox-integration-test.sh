@@ -125,16 +125,16 @@ test_git_repository_valid() {
 test_submodules_exist() {
     local errors=0
     
-    # Check standards submodule
-    if [ -d "$PLATFORM_DIR/standards/.git" ]; then
+    # Check standards submodule (.git is a file in submodules, not a directory)
+    if [ -e "$PLATFORM_DIR/standards/.git" ]; then
         log_info "Standards submodule exists"
     else
         log_fail "Standards submodule not found"
         errors=$((errors + 1))
     fi
     
-    # Check guard submodule
-    if [ -d "$PLATFORM_DIR/guard/.git" ]; then
+    # Check guard submodule (.git is a file in submodules, not a directory)
+    if [ -e "$PLATFORM_DIR/guard/.git" ]; then
         log_info "Guard submodule exists"
     else
         log_fail "Guard submodule not found"
@@ -675,10 +675,10 @@ test_summary() {
     
     echo ""
     echo "Submodules:"
-    if [ -d "$PLATFORM_DIR/standards/.git" ]; then
+    if [ -e "$PLATFORM_DIR/standards/.git" ]; then
         echo "  - standards: $(git -C "$PLATFORM_DIR/standards" rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
     fi
-    if [ -d "$PLATFORM_DIR/guard/.git" ]; then
+    if [ -e "$PLATFORM_DIR/guard/.git" ]; then
         echo "  - guard: $(git -C "$PLATFORM_DIR/guard" rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
     fi
     
