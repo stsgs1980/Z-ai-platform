@@ -14,13 +14,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 - `sandbox-integration-test.sh`: trailing slash from glob pattern `*/` defeated `[ -L ]` symlink check in Test 7 and Summary, causing false "0 symlinks" even when symlinks exist
 - `vitest.config.ts`: prevent parent sandbox PostCSS config bleed (add `css.postcss.plugins: []`)
-- `AGENT_RULES.md` §9: update submodule pins to match actual HEADs (standards@f945f0a1, guard@91b81b97)
+- `AGENT_RULES.md` §9: update submodule pins to match actual HEADs (standards@4b0fdf5, guard@91b81b97)
 - `.zai/verifier-daemon.sh`: fix false [VIOLATION] logging — grep -q "FAIL" was matching summary line "FAIL: 0", changed to grep -q "\[FAIL\]"
 - `.gitignore`: add `.zai/.verifier-daemon.pid` (was untracked, causing noise in git status)
+- `standards/scripts/graph-deps.sh`: fix path bugs (missing 5 nodes) — skills/skills/ → skills/, add guard/instructions/, guard/scripts/, guard/tools/
 
 ### Added
 
 - `AGENT_RULES.md`: language setting — all agent communication in Russian (Cyrillic), no emojis
+- `SESSION-HANDOFF.md`: Sandbox Agent Limitations section documenting which commands sandbox agents block/allow
 
 ---
 

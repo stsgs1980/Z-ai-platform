@@ -43,6 +43,24 @@ Also updated CHANGELOG.md with these fixes.
 
 **Next steps:** Push to GitHub.
 
+### 2026-07-04 (3)
+
+**Entry:** Fix graph-deps.sh path bugs, update submodule pins
+
+GLM-5.2 found 3 bugs in graph-deps.sh that caused the ID graph to be incomplete (37/42 nodes):
+
+1. `skills/skills/` → `skills/` (legacy submodule path from when skills was a git submodule)
+2. Added `guard/instructions/` for PROC-* nodes (4 nodes)
+3. Added `guard/scripts/` and `guard/tools/` for TOOL-* nodes (2 nodes)
+
+Also updated:
+
+- AGENT_RULES.md submodule pins to standards@4b0fdf5
+- SESSION-HANDOFF.md with Sandbox Agent Limitations section
+- CHANGELOG.md with all fixes
+
+**Next steps:** Push to GitHub.
+
 ---
 
 ### 2026-07-02

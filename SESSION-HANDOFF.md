@@ -39,6 +39,41 @@ All code passes. Sandbox tests fully pass (45/45). Multiple agents tested (GLM-5
 
 **Note**: All agents execute `git clone` (safe — downloads only). All agents refuse `curl ... | bash` initially but may execute after inspection. Russian language setting works after reminder in chat.
 
+## Sandbox Agent Limitations
+
+| Command Type        | Agent Behavior | Reason                                    |
+| ------------------- | -------------- | ----------------------------------------- |
+| `curl ... \| bash`  | **BLOCKED**    | Executes remote code — high security risk |
+| `bash <(curl ...)`  | **BLOCKED**    | Executes remote code — high security risk |
+| `git clone`         | **ALLOWED**    | Downloads files only — low risk           |
+| `git pull`          | **ALLOWED**    | Downloads files only — low risk           |
+| `bun add`           | **ALLOWED**    | Package installation — expected behavior  |
+| `node scripts/*.js` | **ALLOWED**    | Local script execution — low risk         |
+
+**Workaround for bootstrap.sh:**
+
+If the agent refuses to run bootstrap.sh, use this alternative sequence:
+
+```bash
+# Agent will execute these commands:
+git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git /home/z/my-project/Z-ai-platform
+cd /home/z/my-project/Z-ai-platform
+git config core.fileMode false
+git submodule foreach --recursive 'git config core.fileMode false'
+# Skills are already integrated — no symlink needed
+```
+
+**Why this works:**
+
+- `git clone` is safe (downloads files only)
+- `git config` is safe (modifies local config)
+- Skills are already present in the repo as inline directories
+
+**For fresh sandbox sessions:**
+The agent will typically find and execute the necessary commands on its own when given a clear goal. Provide context:
+
+> "I need to set up Z-ai-platform in this sandbox. Clone https://github.com/stsgs1980/Z-ai-platform.git with submodules into /home/z/my-project/Z-ai-platform and verify the skills are accessible."
+
 ## Remaining tasks
 
 1. **Issue #2** — rename AGENT_RULES.md → AGENT-RULES.md (143 refs, 34 files) — defer
