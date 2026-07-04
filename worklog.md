@@ -900,3 +900,35 @@ committed them. They were produced by a sandbox agent. Investigation:
 - `tests/sandbox-integration-test.sh` — 3 places fixed
 
 **Result:** All 20 tests should now pass in sandbox.
+
+---
+
+## [2026-07-04 16:55] Add verifier-daemon.sh — active background monitor
+
+**Status:** [OK]
+**Files:** .zai/verifier-daemon.sh, AGENT_RULES.md
+
+### What was done
+
+Created background file watcher for real-time standard compliance monitoring.
+
+Daemon supports two modes:
+
+- inotifywait (preferred) — real-time file system events
+- polling (fallback) — checks every 10s if inotifywait unavailable
+
+Checks run automatically: verify-standards, verify-id-graph, verify-skills, line-count.
+Log rotation at 1MB, PID management, graceful shutdown.
+
+Updated AGENT_RULES.md:
+
+- Added Step 7 to onboarding protocol (start daemon)
+- Added §7.2 documenting daemon usage and behavior
+
+### Result
+
+Agent now gets real-time feedback between commits, not just at commit time.
+
+### Follow-up
+
+Test daemon in sandbox (inotifywait availability).

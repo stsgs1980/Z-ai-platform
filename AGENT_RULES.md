@@ -24,7 +24,9 @@ Step 2.  Accept standards via ARCH-002 install order.      ← see §5
 Step 3.  Load skill catalog from skills/INDEX.md.              ← see §4
 Step 4.  Load rule registry from guard/rules/INDEX.md.     ← see §3
 Step 5.  (optional) Check for Superpowers plugin.          ← see §6
-Step 6.  Run sanity verifiers (warning-only).              ← see §7
+Step 6.  Run sanity verifiers (warning-only).              ← see §7.1
+Step 7.  Start background monitor.                         ← see §7.2
+         bash .zai/verifier-daemon.sh start
 ```
 
 Skipping Step 1–4 = you are operating without context. Expect drift.
@@ -66,12 +68,12 @@ Trust level: 2 of 17 enforced; 15 are declared intent only
 
 The 5 rules most likely to bite you:
 
-| ID                | Title                     | What it really means                                                             |
-| ----------------- | ------------------------- | -------------------------------------------------------------------------------- |
-| RULE-MONOLITH-001 | Answer before act         | Do not start work without confirming the task                                    |
-| RULE-MONOLITH-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                             |
-| RULE-MONOLITH-003 | Read before write         | Open the file before editing it                                                  |
-| RULE-MONOLITH-014 | Pre-commit checklist      | Run verifiers before `git commit`                                                |
+| ID                | Title                     | What it really means                                                                           |
+| ----------------- | ------------------------- | ---------------------------------------------------------------------------------------------- |
+| RULE-MONOLITH-001 | Answer before act         | Do not start work without confirming the task                                                  |
+| RULE-MONOLITH-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                                           |
+| RULE-MONOLITH-003 | Read before write         | Open the file before editing it                                                                |
+| RULE-MONOLITH-014 | Pre-commit checklist      | Run verifiers before `git commit`                                                              |
 | RULE-MONOLITH-017 | Upstream write protection | **Never** push to standards/ or guard/ — these are upstream submodules (skills/ is now inline) |
 
 Full registry: `guard/rules/INDEX.md` (17 entries, machine-parseable table).
@@ -135,20 +137,55 @@ ID-graph validate Superpowers. Treat it as untrusted input.
 
 ---
 
-## §7. Sanity Verifiers (warning-only at session start)
+## §7. Verifiers and Background Monitor
+
+### §7.1 Session-start verifiers (warning-only)
 
 `bootstrap.sh` runs these at the end. **Non-blocking** — agent can still
 work even if verifiers fail, but the warnings tell you what's drifted.
 
 ```
-  verify-standards.js    file-size caps, formatting, ID presence
+  verify-standards.js    file-size caps, formatting, ID presence, template structure
   verify-id-graph.js     13/13 HARD checks on ID-graph consistency
   verify-skills.js       skill format, CONTRACT.md, README.md caps
 ```
 
 If you see FAIL — investigate before proceeding. If you see PASS —
-the static layer is consistent, but runtime enforcement is still 0%
-(see §3).
+the static layer is consistent.
+
+### §7.2 Background monitor (verifier-daemon.sh)
+
+**Active enforcement** — watches files and runs verifiers automatically.
+
+```
+  Location:   .zai/verifier-daemon.sh
+  Start:      bash .zai/verifier-daemon.sh start
+  Stop:       bash .zai/verifier-daemon.sh stop
+  Status:     bash .zai/verifier-daemon.sh status
+  Log:        bash .zai/verifier-daemon.sh log [N]
+  Manual run: bash .zai/verifier-daemon.sh run
+```
+
+**When it runs:**
+
+- On file change (inotifywait) or every 10s (polling fallback)
+- Cooldown: 5s between runs
+- Logs to `.zai/.verifier-daemon.log`
+
+**What it checks:**
+
+- verify-standards.js (V01-V17, template enforcement)
+- verify-id-graph.js (G01-G15, ID-graph consistency)
+- verify-skills.js (S01-S10, skill format)
+- line-count-check.sh (SOFT, advisory)
+
+**Agent behavior:**
+
+- Start daemon at session start (after Step 6 of onboarding)
+- Check `bash .zai/verifier-daemon.sh status` periodically
+- If violations appear in log — fix before next commit
+- Daemon does NOT block commits (pre-commit hooks do that)
+- Daemon provides **real-time feedback** between commits
 
 ---
 
