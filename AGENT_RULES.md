@@ -2,7 +2,7 @@
 
 > **Owner**: Platform maintainer (this repo's owner)
 > **Target**: Z-ai-platform v2.7.0 (2026-07-04)
-> **Submodule pins**: standards@b16d154 · guard@8eb6fe1 (skills inline since a3d358b)
+> **Submodule pins**: standards@f945f0a1 · guard@91b81b97 (skills inline since a3d358b)
 > **Status**: ACTIVE — supersedes bootstrap.sh as the agent onboarding source
 > **Last Updated**: 2026-07-04
 
@@ -238,9 +238,9 @@ This file targets a specific platform version. If submodule pointers
 drift, this file may give incorrect references.
 
 ```
-  Platform:     v2.6.0  (2026-06-22)
-  standards@    b16d154  (verified 2026-07-04)
-  guard@        8eb6fe1  (verified 2026-07-04)
+  Platform:     v2.7.0  (2026-07-04)
+  standards@    f945f0a1  (verified 2026-07-04)
+  guard@        91b81b97  (verified 2026-07-04)
   skills:       inline monorepo (not a submodule since a3d358b)
   Node:         >=20.12.0 (local), v24.x (sandbox)
 ```

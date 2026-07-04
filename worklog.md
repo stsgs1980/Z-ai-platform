@@ -23,6 +23,10 @@ Also updated CHANGELOG.md with version 1.1.1 entry.
 
 Added language setting to AGENT_RULES.md — all agent communication in Russian (Cyrillic).
 
+Fixed vitest PostCSS bleed — added css.postcss.plugins to prevent parent config inheritance.
+
+Updated AGENT_RULES.md §9 submodule pins to actual HEADs (standards@f945f0a1, guard@91b81b97).
+
 **Next steps:** Push to GitHub, test in fresh sandbox.
 
 ---

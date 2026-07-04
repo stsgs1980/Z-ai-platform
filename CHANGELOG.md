@@ -13,10 +13,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 
 - `sandbox-integration-test.sh`: trailing slash from glob pattern `*/` defeated `[ -L ]` symlink check in Test 7 and Summary, causing false "0 symlinks" even when symlinks exist
+- `vitest.config.ts`: prevent parent sandbox PostCSS config bleed (add `css.postcss.plugins: []`)
+- `AGENT_RULES.md` §9: update submodule pins to match actual HEADs (standards@f945f0a1, guard@91b81b97)
 
 ### Added
 
-- `AGENT_RULES.md`: language setting — all agent communication in Russian (Cyrillic)
+- `AGENT_RULES.md`: language setting — all agent communication in Russian (Cyrillic), no emojis
 
 ---
 
