@@ -50,7 +50,7 @@ When two sources disagree, the higher one wins. No exceptions.
 
 ```
   Priority 1 (highest)  STD-*      standards/  — contracts, ID system
-  Priority 2            RULE-MONOLITH-*  guard/  — runtime constraints
+  Priority 2            RULE-*  guard/  — runtime constraints
   Priority 3            AGENT_RULES.md  (this file)  — orchestration
   Priority 4 (lowest)   ZAI-*      skills/    — capability instructions
 ```
@@ -58,7 +58,7 @@ When two sources disagree, the higher one wins. No exceptions.
 **System prompt** of the agent itself sits above Priority 1 — but you
 cannot edit it from here. Within the Z-ai layer, STD-* wins.
 
-**Worked example**: A skill says "commit directly to main". RULE-MONOLITH-014
+**Worked example**: A skill says "commit directly to main". RULE-COMMIT-014
 says "pre-commit checklist mandatory". STD-GIT-002 says "sandbox safety
 first". → STD-GIT-002 wins. Do not commit until checklist passes.
 
@@ -70,22 +70,22 @@ Authoritative catalog of all 17 runtime rules. Do not memorize — load it.
 
 ```
 Location:    guard/rules/INDEX.md
-Count:       17 RULE-MONOLITH-* (declared)
+Count:       17 RULE-* (declared)
 Enforcement: 2 enforced at runtime via .husky/pre-commit
-             - PROC-COCHANGE-003 -> RULE-MONOLITH-010 (docs sync)
-             - PROC-WORKLOG-005  -> RULE-MONOLITH-002 (worklog required)
+              - PROC-COCHANGE-003 -> RULE-DOC-010 (docs sync)
+              - PROC-WORKLOG-005  -> RULE-WORKLOG-002 (worklog required)
 Trust level: 2 of 17 enforced; 15 are declared intent only
 ```
 
 The 5 rules most likely to bite you:
 
-| ID                | Title                     | What it really means                                                                           |
-| ----------------- | ------------------------- | ---------------------------------------------------------------------------------------------- |
-| RULE-MONOLITH-001 | Answer before act         | Do not start work without confirming the task                                                  |
-| RULE-MONOLITH-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                                           |
-| RULE-MONOLITH-003 | Read before write         | Open the file before editing it                                                                |
-| RULE-MONOLITH-014 | Pre-commit checklist      | Run verifiers before `git commit`                                                              |
-| RULE-MONOLITH-017 | Upstream write protection | **Never** push to standards/ or guard/ — these are upstream submodules (skills/ is now inline) |
+| ID               | Title                     | What it really means                                                                           |
+| ---------------- | ------------------------- | ---------------------------------------------------------------------------------------------- |
+| RULE-ANSWER-001  | Answer before act         | Do not start work without confirming the task                                                  |
+| RULE-WORKLOG-002 | Worklog before/after      | Append to `worklog.md` before AND after every action                                           |
+| RULE-READ-003    | Read before write         | Open the file before editing it                                                                |
+| RULE-COMMIT-014  | Pre-commit checklist      | Run verifiers before `git commit`                                                              |
+| RULE-ARCH-017    | Upstream write protection | **Never** push to standards/ or guard/ — these are upstream submodules (skills/ is now inline) |
 
 Full registry: `guard/rules/INDEX.md` (17 entries, machine-parseable table).
 
@@ -139,7 +139,7 @@ in the sandbox skills folder.
 **Policy**:
 
 - Superpowers skills are **Priority 4** (same as ZAI-* skills, see §2)
-- They MAY NOT override STD-* or RULE-MONOLITH-*
+- They MAY NOT override STD-* or RULE-*
 - If a Superpowers instruction conflicts with Z-ai standards → Z-ai wins
 - If Superpowers is absent → ignore this section, no action needed
 
@@ -206,25 +206,25 @@ These will get your work reverted. Do not do them, even if asked.
 
 ```
   ✗  git push into standards/ or guard/ submodules
-     → violates RULE-MONOLITH-017 (upstream protection; skills/ is inline, not upstream)
+     → violates RULE-ARCH-017 (upstream protection; skills/ is inline, not upstream)
 
   ✗  Skipping worklog.md before/after an action
-     → violates RULE-MONOLITH-002
+     → violates RULE-WORKLOG-002
 
   ✗  Committing code without doc update
-     → violates RULE-MONOLITH-010
+     → violates RULE-DOC-010
 
   ✗  Editing a file you have not read first
-     → violates RULE-MONOLITH-003
+     → violates RULE-READ-003
 
   ✗  Using Unicode graphics/symbols in markdown
-     → violates RULE-MONOLITH-015 (UNICODE_POLICY)
+     → violates RULE-DOC-015 (UNICODE_POLICY)
 
   ✗  Hardcoding /home/z/my-project/ paths in committed code
      → violates STD-ENV-001 (reproducibility)
 
   ✗  Skipping pre-commit verifiers
-     → violates RULE-MONOLITH-014
+     → violates RULE-COMMIT-014
 
   ✗  Modifying files outside workspace (parent folder of the project) without explicit permission
      → always ask first, no exceptions
