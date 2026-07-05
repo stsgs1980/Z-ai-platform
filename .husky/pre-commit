@@ -5,8 +5,8 @@
 # Two source groups, both run on every commit:
 #
 #   1. guard/ (PROC-COCHANGE-003, PROC-WORKLOG-005)
-#      - code + docs sync (RULE-MONOLITH-010, HARD)
-#      - worklog entry required for code changes (RULE-MONOLITH-002, HARD)
+#      - code + docs sync (RULE-DOC-010, HARD)
+#      - worklog entry required for code changes (RULE-WORKLOG-002, HARD)
 #
 #   2. standards/ (verify-*.js, migrated from the removed .githooks/)
 #      - verify-standards.js  -- content-level invariants (V01-V11, HARD)
@@ -28,10 +28,10 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
 
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
-# PROC-COCHANGE-003: code + docs sync (RULE-MONOLITH-010)
+# PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard
 
-# PROC-WORKLOG-005: worklog entry required for code changes (RULE-MONOLITH-002)
+# PROC-WORKLOG-005: worklog entry required for code changes (RULE-WORKLOG-002)
 bash guard/scripts/worklog-check.sh --hard
 
 # --- Group 2: standards/ verify-*.js (HARD) ---------------------------------

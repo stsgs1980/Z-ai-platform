@@ -4,7 +4,7 @@
 #
 # Purpose:
 #   Validate the commit message against Conventional Commits v1.0
-#   (per STD-GIT-001 §1.1-1.4 and RULE-MONOLITH-004).
+#   (per STD-GIT-001 §1.1-1.4 and RULE-COMMIT-004).
 #
 #   Migrated from .githooks/commit-msg (2026-07-04) when the project
 #   consolidated to a single hooks system under Husky. The .githooks/
@@ -79,7 +79,7 @@ if ! printf '%s' "$SUBJECT" | grep -qE "$CC_REGEX"; then
   echo "[commit-msg]   refactor!: split design-system into 3 standards (BREAKING)"
   echo "[commit-msg]"
   echo "[commit-msg] Per STD-GIT-001 §1.1 (Conventional Commits required)"
-  echo "[commit-msg] and RULE-MONOLITH-004 (one logical block -- one commit)."
+  echo "[commit-msg] and RULE-COMMIT-004 (one logical block -- one commit)."
   echo "[commit-msg]"
   echo "[commit-msg] To bypass (NOT recommended): git commit --no-verify"
   exit 1
@@ -94,7 +94,7 @@ if [ "$SUBJECT_LEN" -gt 72 ]; then
   echo "[commit-msg]   $SUBJECT"
   echo "[commit-msg] ---- end subject ----"
   echo "[commit-msg] Trim the subject. If it cannot be trimmed, the commit may"
-  echo "[commit-msg] be too broad -- consider splitting per RULE-MONOLITH-004."
+  echo "[commit-msg] be too broad -- consider splitting per RULE-COMMIT-004."
   echo "[commit-msg]"
   echo "[commit-msg] To bypass (NOT recommended): git commit --no-verify"
   exit 1
