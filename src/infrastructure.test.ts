@@ -119,17 +119,17 @@ describe("z-ai-platform infrastructure", () => {
     const gitmodules = readFileSync(".gitmodules", "utf-8");
 
     it("declares standards submodule", () => {
-      expect(gitmodules).toContain("[submodule \"standards\"]");
+      expect(gitmodules).toContain('[submodule "standards"]');
       expect(gitmodules).toContain("path = standards");
     });
 
     it("declares guard submodule", () => {
-      expect(gitmodules).toContain("[submodule \"guard\"]");
+      expect(gitmodules).toContain('[submodule "guard"]');
       expect(gitmodules).toContain("path = guard");
     });
 
     it("does NOT declare skills as submodule (monorepo)", () => {
-      expect(gitmodules).not.toContain("[submodule \"skills\"]");
+      expect(gitmodules).not.toContain('[submodule "skills"]');
     });
   });
 
@@ -143,8 +143,8 @@ describe("z-ai-platform infrastructure", () => {
       expect(existsSync("guard/.git")).toBe(true);
     });
 
-    it("skills/ has INDEX.md (monorepo, not submodule)", () => {
-      expect(existsSync("skills/INDEX.md")).toBe(true);
+    it("skills/ has SKILL.md files (monorepo, not submodule)", () => {
+      expect(existsSync("skills/zai-skill-creator/SKILL.md")).toBe(true);
     });
 
     it("standards/ has verify-standards.js", () => {
