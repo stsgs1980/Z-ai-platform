@@ -26,7 +26,7 @@ Choose the domain that BEST fits the skill's primary purpose:
 | `QA` | Testing: test plans, validation, quality checks |
 | `REQ` | Requirements: PRD, clarity, specifications |
 | `META` | Meta-skills: skill creation, ID system, toolkit itself |
-| `STS` | User-created: any skill created by STS |
+| `DEVTOOLS` | Developer tools and utilities |
 | `GIT` | (reserved) Git operations: clone, branch, checkpoint |
 | `SDK` | (reserved) API integration: z-ai-web-dev-sdk |
 | `SEC` | (reserved) Security: input validation, sanitization |
@@ -39,14 +39,13 @@ Choose the domain that BEST fits the skill's primary purpose:
 
 ### Finding Next Number
 
-1. Open skill-id-system (ZAI-META-001)
-2. Find the domain section (e.g., "5.1. Memory (MEM)")
-3. Find the highest number in that domain
-4. Add 1 for the new skill
+1. Search all `SKILL.md` files in `skills/` directory for `id: ZAI-<DOMAIN>-` pattern
+2. Find the highest number in that domain
+3. Add 1 for the new skill
 
 ### Example
 
-Current MEM skills:
+Current MEM skills found in SKILL.md files:
 - ZAI-MEM-001: memory-store
 - ZAI-MEM-002: memory-query
 - ZAI-MEM-003: memory-delete
@@ -56,31 +55,25 @@ Next MEM skill: ZAI-MEM-005
 
 ---
 
-## User-Created Skills (STS Domain)
+## User-Created Skills (DEVTOOLS Domain)
 
-**IMPORTANT:** Skills created by the user (STS) should ALWAYS use `ZAI-STS-XXX`.
+**IMPORTANT:** Skills created by the user should ALWAYS use `ZAI-DEVTOOLS-XXX`.
 
 This distinguishes them from toolkit skills and prevents conflicts.
 
 ### Naming Convention
 
 - Folder name: `my-skill/` (no special suffix required)
-- ID uses `STS` domain: `ZAI-STS-XXX`
+- ID uses `DEVTOOLS` domain: `ZAI-DEVTOOLS-XXX`
 
-### Current STS Registry
+### Current DEVTOOLS Registry
 
 | ID | Skill Name | Status |
 |----|------------|--------|
-| ZAI-STS-001 | prompt-engineering | Active |
-| ZAI-STS-002 | sync-toolkit | Active |
-| ZAI-STS-003 | performance-code-generator | Active |
-| ZAI-STS-004 | frontend-styling-expert | Active |
-| ZAI-STS-005 | phi-layout | Active |
-| ZAI-STS-006 | zai-ui-composer | Active |
-| ZAI-STS-007 | workflow-discipline | Active |
+| ZAI-DEVTOOLS-001 | skill-creator | Active |
 
 When creating a user skill:
-1. Find first available ZAI-STS-XXX
+1. Find first available ZAI-DEVTOOLS-XXX
 2. Assign to new skill
 3. Create folder with skill name
 4. Update registry with skill name
@@ -93,7 +86,7 @@ When creating a user skill:
 
 If a skill could fit multiple domains:
 1. Choose the PRIMARY function
-2. If equal, prefer: MEM > FS > SESSION > DEV > ARCH > QA > REQ > META > STS > GIT > SDK > SEC > DOC > HEALTH
+2. If equal, prefer: MEM > FS > SESSION > DEV > ARCH > QA > REQ > META > DEVTOOLS > GIT > SDK > SEC > DOC > HEALTH
 
 ### What if number is taken?
 
@@ -105,15 +98,9 @@ Check the registry carefully. If a number is skipped, use the first available.
 
 After creating a skill with an ID:
 
-1. Open `/skills/skill-id-system/SKILL.md`
-2. Find the appropriate domain section
-3. Add entry in format:
-
-```markdown
-| ZAI-XXX-NNN | skill-name | 1.0 | Active |
-```
-
-4. Commit changes
+1. The skill is automatically registered via its SKILL.md frontmatter
+2. No separate registry update needed
+3. Commit changes
 
 ---
 
@@ -138,11 +125,11 @@ After creating a skill with an ID:
 
 **Domain analysis:**
 - Could be DOC (documentation)
-- Could be STS (user-created)
+- Could be DEVTOOLS (user-created)
 
-**Decision:** STS (user-created takes priority for custom skills)
+**Decision:** DEVTOOLS (user-created takes priority for custom skills)
 
-**ID:** ZAI-STS-008, folder: `weekly-report/`
+**ID:** ZAI-DEVTOOLS-002, folder: `weekly-report/`
 
 ### Example 3: Memory Backup Skill
 
@@ -162,10 +149,9 @@ After creating a skill with an ID:
 
 Before finalizing ID:
 
-- [ ] Checked skill-id-system registry
+- [ ] Searched SKILL.md files for current skills
 - [ ] Confirmed domain selection
 - [ ] Verified number is available
-- [ ] Added to registry
 - [ ] Updated SKILL.md frontmatter
 
 ---

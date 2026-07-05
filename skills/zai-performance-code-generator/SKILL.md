@@ -2,7 +2,7 @@
 name: zai-performance-code-generator
 compatibility: sandbox
 description: "Generate high-performance code with optimization for algorithmic complexity, cache locality, memory allocations, and parallelism. Use this skill when the user asks for performant code, to optimize existing code, improve program speed, reduce memory consumption, or mentions Big O, cache hits, SIMD, lock-free structures, object pooling, arena allocator, vectorization, profiling. Also activate on: 'slow code', 'optimization', 'performance', 'high performance', 'low latency', 'throughput', 'cache miss', 'allocation', 'memory leak', 'bottleneck', 'profiling', 'hot path'."
-id: ZAI-STS-003
+id: ZAI-DEV-002
 version: 1.0
 author: StsDev
 trigger: optimize, performance, slow code, Big O, cache, SIMD, allocation, bottleneck, hot path, throughput, latency, profiling, memory leak, vectorization, lock-free
@@ -12,7 +12,7 @@ related:
 
 # Skill: Zai Performance Code Generator v1.0
 
-> ID: ZAI-STS-003
+> ID: ZAI-DEV-002
 > Version: 1.0
 > Last Updated: 2026-05
 

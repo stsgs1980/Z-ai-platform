@@ -1,5 +1,6 @@
 ---
 name: zai-md-std
+id: ZAI-DOC-001
 author: StsDev
 version: 1.0.0
 description: >

@@ -3,7 +3,7 @@ name: zai-phi-layout
 version: 3.0
 compatibility: both
 description: "Proportional CSS Grid layouts using phi and Fibonacci spacing. Use when users want bento layouts, masonry grids, asymmetric grids, timeline layouts, staggered layouts, Linear/Vercel-style zeitgeist pages, harmonious page compositions, nature-inspired proportions, or any layout beyond standard symmetric grids. Triggers: bento grid, bento layout, bento box, masonry, masonry grid, timeline layout, asymmetric grid, asymmetric layout, staggered layout, Linear-style, Vercel-style, zeitgeist, harmonious layout, nature-inspired grid, organic grid, proportional layout, Fibonacci, Fibonacci layout, Fibonacci spacing, phi grid, phi layout, golden ratio, divine proportion, sacred geometry, modular scale grid, neutral palette, dark mode grid, accessible grid, container query grid."
-id: ZAI-STS-005
+id: ZAI-ARCH-003
 author: StsDev
 trigger: phi layout, golden ratio, Fibonacci, bento, masonry, zeitgeist, asymmetric, timeline, sacred geometry, golden grid, Linear-style, Vercel-style, container query
 related:
@@ -12,7 +12,7 @@ related:
 
 # Skill: Zai Phi Layout v3.0
 
-> ID: ZAI-STS-005
+> ID: ZAI-ARCH-003
 > Version: 3.0
 > Last Updated: 2026-05
 

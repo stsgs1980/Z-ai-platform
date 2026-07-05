@@ -1,5 +1,6 @@
 ---
 name: zai-sandbox-rules
+id: ZAI-DEV-005
 author: StsDev
 version: "1.5.0"
 description: "CRITICAL: Load this skill BEFORE responding to ANY request involving dev servers, npm/bun/next commands, or sandbox operations. This skill MUST be checked before executing any command. Triggers on: bun run dev, npm run dev, next dev, start dev, run dev, запусти dev, dev server, preview not working, EADDRINUSE, HMR crash, port 3000, module not found, init sandbox, restart dev, sandbox broken, white screen, 500 error, sandbox inactive, idle timeout."

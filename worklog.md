@@ -11,6 +11,34 @@ Sections separated by ---
 
 ## Sessions
 
+### 2026-07-05
+
+**Entry:** Restructure skill IDs, remove STS domain, delete registry
+
+Removed redundant infrastructure:
+
+- Deleted `skills/zai-skill-registry/` (SKILL.md + references/id-assignment-guide.md)
+- Deleted `skills/INDEX.md`
+
+Redistributed skills by functional domain:
+
+- ARCH (4): zai-mermaid-diagrams, zai-anti-monolith, zai-phi-layout, zai-ui-composer
+- DEV (5): zai-project-clone, zai-performance-code-generator, zai-frontend-styling-expert, zai-debugging, zai-sandbox-rules
+- DOC (1): zai-md-std
+- META (2): zai-prompt-engineering, zai-workflow-discipline
+- DEVTOOLS (1): zai-skill-creator
+
+Assigned IDs to all 13 skills (ZAI-ARCH-001 through ZAI-DEVTOOLS-001).
+
+Updated supporting files:
+
+- `skills/zai-skill-creator/references/id-assignment-guide.md`: registry update = SKILL.md frontmatter only
+- `skills/zai-skill-creator/scripts/quick_validate.py`: replaced STS with DEVTOOLS domain
+
+Cleaned all STS/skill-registry/INDEX.md references across skills directory.
+
+**Next steps:** Verify all skills have correct IDs, push to GitHub.
+
 ### 2026-07-04
 
 **Entry:** Fix trailing slash bug in sandbox-integration-test.sh

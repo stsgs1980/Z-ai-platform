@@ -53,18 +53,18 @@ description: >
     Fibonacci 4, Equal Grid), ALWAYS delegate grid generation to phi-layout and only
     handle skin/effects/components yourself.
   - anti-monolith: System skill (Z.ai sandbox, not in toolkit). Decomposes code; zai-ui-composer composes UI.
-id: ZAI-STS-006
+id: ZAI-ARCH-004
 author: StsDev
 trigger: compose UI, UI composition, zai-ui, ui-kit, skin selection, dark-zai, light-corp, amber-retro, glass card, neon effect, UI scoring, production UI
 changelog: v1.1.2 -- add concrete code templates in Section 14, define phi-layout invocation protocol, add LLM Self-Correction rules
 related:
   - STD-SKILL-001
-  - ZAI-STS-007
+  - ZAI-META-005
 ---
 
 # Skill: Zai UI Composer v1.1.2
 
-> ID: ZAI-STS-006
+> ID: ZAI-ARCH-004
 > Version: 1.1.2
 > Last Updated: 2026-05
 > author: StsDev

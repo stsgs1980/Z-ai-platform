@@ -2,7 +2,7 @@
 name: zai-workflow-discipline
 author: StsDev
 description: "MANDATORY workflow discipline rules. This skill MUST auto-activate at the start of every session and before every task. Enforces 8 non-negotiable rules: 1) Explain WHY before HOW, 2) One task = one complete command, 3) Check environment before instructing, 4) Never break working things, 5) Test before push, 6) No parallel structures, 7) Report failures honestly, 8) READ BEFORE WRITE — never overwrite a file on the target environment without first reading and comparing the existing version. This rule is ABSOLUTE for install scripts, copy operations, and any deployment action. Triggers: session start, begin work, task, command, instruction, fix, implement, create, build, deploy, update, run, next step, continue, давай, сделай, исправь, обнови, запусти, дальше, на, вперёд. This skill is ALWAYS active."
-id: ZAI-STS-007
+id: ZAI-META-005
 version: 2.0
 trigger: session start, task, command, instruction, fix, implement, build, deploy, update, run, continue, давай, сделай, исправь
 related:
@@ -11,7 +11,7 @@ related:
 
 # Skill: Zai Workflow Discipline v2.0
 
-> ID: ZAI-STS-007
+> ID: ZAI-META-005
 > Version: 2.0
 > Last Updated: 2026-05
 

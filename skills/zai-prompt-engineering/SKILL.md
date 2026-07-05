@@ -36,7 +36,7 @@ description: >
   DO NOT ACTIVATE FOR: general coding questions (not about prompts), UI/UX design requests,
   debugging code errors (unless explicitly about prompt engineering), database queries,
   deployment/infrastructure questions.
-id: ZAI-STS-001
+id: ZAI-META-003
 version: 1.1
 trigger: prompt, prompt engineering, improve prompt, system prompt, CoT, few-shot
 related:
@@ -45,7 +45,7 @@ related:
 
 # Skill: Zai Prompt Engineering v1.1
 
-> ID: ZAI-STS-001
+> ID: ZAI-META-003
 > Version: 1.1
 > Last Updated: 2026-05
 

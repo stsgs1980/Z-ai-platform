@@ -1,5 +1,6 @@
 ---
 name: zai-skill-creator
+id: ZAI-DEVTOOLS-001
 author: StsDev
 version: 1.0
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, verify skill claims against reality, or optimize a skill's description for better triggering accuracy.
@@ -66,7 +67,7 @@ Components:
 - **name**: kebab-case identifier (<=64 chars). MUST start with `zai-` prefix
 - **description**: trigger mechanism — what it does AND when to use it. All "when" info goes here, not in the body. Models tend to under-trigger skills, so make descriptions slightly "pushy" with synonyms and related phrases. Keep under 1024 chars.
 - **author**: MUST be `StsDev` (hardcoded, all skills in this library)
-- **id**: ZAI-XXX-NNN format, assigned via `zai-skill-registry`. Optional — only if skill participates in ID graph
+- **id**: ZAI-XXX-NNN format, optional — only if skill participates in ID graph
 - **version**: semantic version (start at v1.0)
 - **body**: instructions, structured for progressive disclosure
 
@@ -78,7 +79,7 @@ name: zai-<skill-name>
 description: "<what it does and when to trigger>"
 author: StsDev
 version: 1.0
-id: ZAI-XXX-NNN  # optional, assign via zai-skill-registry
+id: ZAI-XXX-NNN  # optional
 ---
 ```
 
