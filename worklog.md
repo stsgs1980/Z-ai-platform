@@ -1250,3 +1250,18 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Added new skill to catalog (14 total, was 13)
   - Updated loading order: zai-answer-before-act is #1 (RULE ZERO)
   - Added ID, version, purpose to skills table
+
+## 2026-07-06 (22)
+
+- Status: Done
+- Task: Create check-snapshot-sync.sh for early snapshot drift detection
+- Details:
+  - read guard/scripts/check-sandbox-env.sh
+  - Created guard/scripts/check-snapshot-sync.sh
+  - Detects: ID graph snapshot mismatch BEFORE push
+  - Catches: new ID, new Related: edge, removed ID
+  - Tested in SOFT and HARD mode (both work)
+  - Tested FAIL scenario: pre-commit correctly blocks commit
+  - Added to pre-commit hook (after check-work-cycle.sh)
+  - Added to CI workflow (verify-id-graph.yml)
+  - Workflow: cd standards && node scripts/verify-id-graph.js --update-snapshot --compare=_snapshots/id-graph-baseline.json

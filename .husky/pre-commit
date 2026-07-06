@@ -95,6 +95,14 @@ if ! bash guard/scripts/check-work-cycle.sh --hard; then
   exit 1
 fi
 
+# Snapshot sync: catches uncommitted graph changes BEFORE push
+echo "[pre-commit] check-snapshot-sync.sh (ID graph drift detection)"
+if ! bash guard/scripts/check-snapshot-sync.sh --hard; then
+  echo "[pre-commit] FAIL: ID graph snapshot out of sync."
+  echo "[pre-commit] Fix: cd standards && node scripts/verify-id-graph.js --update-snapshot --compare=_snapshots/id-graph-baseline.json"
+  exit 1
+fi
+
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard
