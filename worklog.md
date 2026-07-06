@@ -279,3 +279,16 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Added to pre-commit hook (Group 0)
   - Tested: PASS scenario, FAIL scenario (91 commits stale)
   - Uses Python or Node for date calculation (cross-platform)
+
+## 2026-07-06 (27)
+
+- Status: Done
+- Task: Fix pre-commit vs CI script coverage drift
+- Details:
+  - read .github/workflows/verify-id-graph.yml
+  - Discovered: CI runs only 6 of 11 governance scripts
+  - Missing in CI: check-commit-checklist, check-no-loops, check-read-before-write, check-version-bump, check-changelog-sync
+  - Fixed: added 5 missing scripts to CI for loop
+  - Created guard/scripts/check-script-coverage.sh to prevent this drift
+  - Added to pre-commit hook (catches future drift)
+  - Result: pre-commit and CI now run identical 11-script set

@@ -83,7 +83,7 @@ jobs:
         run: |
           echo "Running governance enforcement scripts..."
           FAIL=0
-          for script in guard/scripts/check-no-bypass.sh guard/scripts/check-ahg-integrity.sh guard/scripts/check-sandbox-env.sh guard/scripts/check-session-start.sh guard/scripts/check-work-cycle.sh guard/scripts/check-snapshot-sync.sh; do
+          for script in guard/scripts/check-no-bypass.sh guard/scripts/check-ahg-integrity.sh guard/scripts/check-sandbox-env.sh guard/scripts/check-session-start.sh guard/scripts/check-work-cycle.sh guard/scripts/check-snapshot-sync.sh guard/scripts/check-changelog-sync.sh guard/scripts/check-commit-checklist.sh guard/scripts/check-no-loops.sh guard/scripts/check-read-before-write.sh guard/scripts/check-version-bump.sh guard/scripts/check-script-coverage.sh; do
             if [ -f "$script" ]; then
               echo "--- Running $script ---"
               if bash "$script" --hard 2>&1; then

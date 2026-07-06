@@ -111,6 +111,14 @@ if ! bash guard/scripts/check-changelog-sync.sh --hard --max-age=1; then
   exit 1
 fi
 
+# Pre-commit vs CI coverage: ensure both run same script set
+echo "[pre-commit] check-script-coverage.sh (pre-commit vs CI drift)"
+if ! bash guard/scripts/check-script-coverage.sh --hard; then
+  echo "[pre-commit] FAIL: pre-commit and CI coverage drift."
+  echo "[pre-commit] Fix: align script lists in .husky/pre-commit and .github/workflows/*.yml"
+  exit 1
+fi
+
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard
