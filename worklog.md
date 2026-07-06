@@ -413,6 +413,22 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Final state: graph-viewer consumes the data, URL has all graph fields
   - Result: end-to-end works (push in Z-ai-platform -> visible in graph-viewer within ~3 min)
 
+## 2026-07-06 (34)
+
+- Status: Done
+- Task: Fix CI #205 failure: check-work-cycle.sh detecting bot commits as unlogged
+- Details:
+  - read gh run view output for #205
+  - Root cause: github-actions[bot] commits (auto-export of graph/id-graph.json)
+    do not touch worklog.md, but check treated them as unlogged human commits
+  - CI #205 detected 2/5 commits without worklog, max run: 2
+  - Fix: skip bot commits in check-work-cycle.sh
+    - Use 'git log --format=%H | %ae' to get author email
+    - Skip commits matching bot patterns (github-actions[bot], *@noreply.github.com, _bot@_)
+    - Bot commits reset the unlogged run counter
+  - Tested: 5 commits checked, 2 bot skipped, 0 unlogged, RESULT: PASS
+  - Pushed to guard (cbc5e4e) and Z-ai-platform main
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 
