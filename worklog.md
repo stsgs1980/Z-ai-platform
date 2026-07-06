@@ -1123,3 +1123,14 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
 3. Create zai-governance-template repository
 4. Add to npm or use as git submodule
 5. Document integration for other projects
+
+## 2026-07-06 (13)
+
+- Status: Done
+- Task: Rewrite governance A/B test
+- Details:
+  - read tests/governance-ab-test.sh
+  - read guard/scripts/check-commit-checklist.sh
+  - Updated A/B test with realistic scenario (monolithic component)
+  - Fixed WORKLOG-002 false positive (only require worklog if it has changes)
+  - A/B test proves governance works: GOV=OFF -> PASS, GOV=ON -> BLOCKED
