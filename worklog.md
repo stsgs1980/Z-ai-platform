@@ -292,3 +292,98 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Created guard/scripts/check-script-coverage.sh to prevent this drift
   - Added to pre-commit hook (catches future drift)
   - Result: pre-commit and CI now run identical 11-script set
+
+## 2026-07-06 (28)
+
+- Status: Done
+- Task: Add Plans and Backlog section to worklog
+- Details:
+  - 6 tiers of remaining work
+  - Tier 1: zai-governance-template + sandbox re-run (HIGH)
+  - Tier 2: split large files (cosmetic, 5-6h)
+  - Tier 3: new skills (10h, valuable)
+  - Tier 4: docs (4h, public-facing)
+  - Tier 5: tooling (21h, future)
+  - Tier 6: architecture (2-3 days, deferred)
+  - Total backlog: ~50 hours
+
+Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
+Z-ai-platform is governance-complete. Remaining work is split into tiers.
+
+### Tier 1: Next logical step (high priority)
+
+| #   | Task                                                    | Estimate | Notes                                                                                                                                                              |
+| --- | ------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.1 | Create `zai-governance-template` repo                   | 2-3h     | Universal governance layer for other projects. Includes: standards/, guard/, skills/, .husky/, CI, bootstrap.sh, README, tests. Excludes: src/, worklog.md, .zai/. |
+| 1.2 | Re-run sandbox tests in [chat.z.ai](https://chat.z.ai/) | 2 min    | Verify all 30 tests pass after today changes (skills/INDEX.md, soft warnings cleanup, dead standards removal)                                                      |
+
+### Tier 2: Structure cleanup (low priority, cosmetic)
+
+| #   | Task                                                                          | Estimate | Why                                                                                                                                 |
+| --- | ----------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 2.1 | Split META-001-standard-id-system.md (969 lines)                              | 1h       | Approaching 1000-line hard cap. Split into: ID-system (registry + format), ID-faq (FAQ + history), ID-migration (migration guides). |
+| 2.2 | Split DESIGN-001-profile-terminal-dashboard.md (947 lines)                    | 1h       | Profile-specific content. Move to `standards/profiles/` subdirectory, keep main DESIGN-001 slim.                                    |
+| 2.3 | Split DESIGN-001-design-system.md (840 lines)                                 | 1h       | Could split into: tokens (color/typography/spacing), archetypes (cards/buttons), patterns (responsive).                             |
+| 2.4 | Split RULE-MONOLITH-012.md (128 lines)                                        | 30m      | Largest rule. Split into: thresholds (caps), exemptions, anti-patterns.                                                             |
+| 2.5 | Compress 3 standards over 800 lines (GIT-002 839, DOC-003 796, SKILL-001 790) | 2h       | All within hard cap (1000) but over soft cap (800). Extract §XA Known Issues to separate files.                                     |
+
+### Tier 3: Skill additions (medium priority, content)
+
+| #   | Task                             | Estimate | Notes                                                                                         |
+| --- | -------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| 3.1 | Create `zai-code-review` skill   | 2h       | Code review patterns: checklist, focus areas, feedback style. ZAI-DEV-007.                    |
+| 3.2 | Create `zai-testing` skill       | 2h       | TDD methodology: red-green-refactor, test isolation, coverage targets. ZAI-DEV-008.           |
+| 3.3 | Create `zai-refactor` skill      | 2h       | Refactoring patterns: extract method, rename, move. Safe refactoring checklist. ZAI-ARCH-003. |
+| 3.4 | Create `zai-api-design` skill    | 2h       | REST/GraphQL design: resource modeling, error responses, versioning. ZAI-DEV-009.             |
+| 3.5 | Create `zai-git-workflow` skill  | 1h       | Branch strategy, commit messages, PR etiquette. ZAI-DEV-010.                                  |
+| 3.6 | Create `zai-documentation` skill | 1h       | Technical writing: structure, examples, diagrams. ZAI-DOC-002.                                |
+
+### Tier 4: Documentation (medium priority, public-facing)
+
+| #   | Task                              | Estimate | Notes                                                                                            |
+| --- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| 4.1 | Create GOVERNANCE.md (defect #11) | 1h       | Escalation paths, decision process, conflict resolution, who owns what. Currently no formal doc. |
+| 4.2 | Create CONTRIBUTING.md            | 30m      | Already exists (5.9KB). Verify it covers current workflow.                                       |
+| 4.3 | Create DEPENDENCY-GUIDE.md        | 1h       | How projects should depend on Z-ai-platform. Submodule vs npm vs direct copy.                    |
+| 4.4 | Create MIGRATIONS.md (template)   | 1h       | Per-version migration guide template for projects using this governance.                         |
+| 4.5 | Create tests/coverage-report.md   | 30m      | Script-by-script coverage report. What each script catches, when to extend.                      |
+
+### Tier 5: Tooling (low priority, future)
+
+| #   | Task                                  | Estimate | Notes                                                                           |
+| --- | ------------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| 5.1 | Create `zai-graph-viewer` skill/tool  | 4h       | Defect #12: compliance dashboard. Web UI showing ID graph + drift.              |
+| 5.2 | Create meta-verifier (defect #9)      | 4h       | Verifier that checks verifiers. Cross-STD-refs validation.                      |
+| 5.3 | Create audit mode (defect #10)        | 4h       | Historical scan mode. Detect when old code violates current rules.              |
+| 5.4 | Add compliance scoring (defect #19)   | 4h       | 0-100 score based on rules enforced, soft warnings, etc. For public visibility. |
+| 5.5 | Quarterly review process (defect #13) | 1h       | Schedule + checklist + automation.                                              |
+| 5.6 | Auto-expansion of rules (defect #14)  | 4h       | When new RULE-* is declared, auto-generate check-*.sh stub.                     |
+
+### Tier 6: Architecture proposals (deferred until needed)
+
+| #   | Task                                         | Estimate | Notes                                                        |
+| --- | -------------------------------------------- | -------- | ------------------------------------------------------------ |
+| 6.1 | bootstrap.sh sidecar pattern (defect #15-18) | 1 day    | --uninstall, idempotency, integration markers.               |
+| 6.2 | Anti-monolith auto-activation (defect #20)   | 4h       | Skill that fires when files exceed thresholds.               |
+| 6.3 | Ecosystem governance scope (defect #2)       | 1 day    | Enforce rules across all Z-ai repos, not just Z-ai-platform. |
+
+### Open governance defects (from governance-escalation-report.md)
+
+13 active defects remain OPEN. See `tests/governance-escalation-report.md` for full list.
+
+### Deferred
+
+- `zai-answer-before-act` skill has 8 eval test cases; running them in Z.ai sandbox requires a manual session. Mark as TODO for next sandbox run.
+- `RULE-ANSWER-001` remains LLM-judgment only (1 of 17). Cannot be auto-enforced via shell scripts.
+- Sandbox test re-run after today changes (T1.2).
+
+### Total backlog estimate
+
+- Tier 1: 2-3 hours (HIGH priority, do next)
+- Tier 2: 5-6 hours (cosmetic, when bored)
+- Tier 3: 10 hours (content, valuable)
+- Tier 4: 4 hours (docs, public-facing)
+- Tier 5: 21 hours (tooling, future)
+- Tier 6: 2-3 days (architecture, deferred)
+
+**Total: ~50 hours of remaining work.** Platform is production-ready, this is nice-to-have.
