@@ -251,5 +251,31 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - read worklog.md (was 1125 lines)
   - Archived 4 days of detailed session notes into summary block
   - Kept 2026-07-06 entries intact (today's work)
-  - Result: 1125 -> 250 lines (-78%)
+  - Result: 1125 -> 255 lines (-78%)
   - Full history preserved in git log
+
+## 2026-07-06 (25)
+
+- Status: Done
+- Task: Bump CHANGELOG to 1.2.0
+- Details:
+  - read CHANGELOG.md (was 1.1.1 from 2026-07-04)
+  - Created 1.2.0 entry with Added/Changed/Removed/Fixed sections
+  - Added statistics table (rules enforced 2->16, warnings 36->0, etc.)
+  - Recorded breaking changes: none
+  - Documented submodule updates
+
+## 2026-07-06 (26)
+
+- Status: Done
+- Task: Create check-changelog-sync.sh for CHANGELOG drift detection
+- Details:
+  - read guard/scripts/check-snapshot-sync.sh
+  - Created guard/scripts/check-changelog-sync.sh
+  - Detects: CHANGELOG.md older than threshold (default 1 day)
+  - Lists recent commits since last version (for context)
+  - Heuristic: 1 day + 3+ commits = violation
+  - Configurable: --max-age=N flag
+  - Added to pre-commit hook (Group 0)
+  - Tested: PASS scenario, FAIL scenario (91 commits stale)
+  - Uses Python or Node for date calculation (cross-platform)

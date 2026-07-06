@@ -103,6 +103,14 @@ if ! bash guard/scripts/check-snapshot-sync.sh --hard; then
   exit 1
 fi
 
+# CHANGELOG freshness: warn if CHANGELOG.md is stale despite significant work
+echo "[pre-commit] check-changelog-sync.sh (CHANGELOG freshness)"
+if ! bash guard/scripts/check-changelog-sync.sh --hard --max-age=1; then
+  echo "[pre-commit] FAIL: CHANGELOG.md is stale."
+  echo "[pre-commit] Fix: bump version and add Added/Changed/Fixed entries"
+  exit 1
+fi
+
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard
