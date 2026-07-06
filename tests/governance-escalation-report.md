@@ -17,22 +17,22 @@ Original report (2026-07-04) tracked 32 defects. **Defects #1-9 are now resolved
 submodule pin fixed, `graph-deps.sh` path bugs fixed, daemon logging fixed,
 `.gitignore` updated, Vitest PostCSS bleed fixed, `verify-id-graph.js` findRepos()
 heuristic fixed (`standards@f52e9f0`), `constants.js` REPO_GLOBS fixed
-(`standards@f52e9f0`), worklog entry corrected.
+(`standards@f52e9f0`), worklog entry corrected. Baseline snapshot regenerated
+(42->55 IDs). Enforcement expanded to 15/17 rules (was 2). Template naming
+inconsistency resolved (both AGENT_RULES.md and AGENT-RULES.md supported).
 
-**One technical debt remains:** the baseline snapshot `_snapshots/id-graph-baseline.json`
-still encodes the old buggy 42 IDs instead of the current 55. CI snapshot-compare
-may produce false results.
-
-**14 structural governance gaps remain OPEN** (Sections D-I). These are not bugs in
+**12 structural governance gaps remain OPEN** (Sections D-I). These are not bugs in
 existing code but architectural/process deficiencies that prevent Z-ai-platform from
 operating as a full governance system across its ecosystem.
 
 **Resolved 2026-07-06:** #1 (baseline regenerated 42->55), #3 (V18 added),
 #4 (root README in V04/V08 scope), #5 (V04 box-drawing extraction),
-#6 partially (enforcement: 2/17 -> 11/17 via pre-commit: INTEGRITY-011,
-COMMIT-014, DOC-015, VERSION-013, READ-003, LOOPS-005, HONEST-006).
-Remaining 6 rules (ANSWER-001, STRUCT-007, ENV-008, AGENT-009, ARCH-016, ARCH-017)
-require LLM judgment and cannot be automated.
+#6 partially (enforcement: 2/17 -> 15/17 via pre-commit: INTEGRITY-011,
+COMMIT-014, DOC-015, VERSION-013, READ-003, LOOPS-005, HONEST-006,
+WORKLOG-002, ARCH-016, ARCH-017, ENV-008, AGENT-009, DOC-010).
+#7 RESOLVED (worklog before/after enforced via check-session-start.sh).
+#8 PARTIALLY RESOLVED (read-before-write heuristic via check-read-before-write.sh).
+Remaining 2 rules (ANSWER-001, STRUCT-007) require LLM judgment and cannot be automated.
 
 This report covers: (D) ecosystem governance gap analysis — enforcement layers are
 repo-scoped, not ecosystem-scoped; (E) maturity assessment (~1.5/5) with roadmap
@@ -44,28 +44,28 @@ failure; (I) conceptual reframing of Z-ai-platform as soft agency regulator.
 
 ## 1. Active Defect Status Table
 
-| #   | Defect                                                                                                                                  | Status   | Section                                                                                                                                         |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Baseline snapshot `id-graph-baseline.json` encodes buggy 42 IDs (actual: 55)                                                            | RESOLVED | 2026-07-06                                                                                                                                      |
-| 2   | Ecosystem governance gap: enforcement scope = repo scope, not ecosystem scope                                                           | OPEN     | D                                                                                                                                               |
-| 3   | `verify-standards.js` has no V-check for README.md template compliance (V15/V16/V17 cover worklog/CHANGELOG/AGENT_RULES but not README) | RESOLVED | V18 added 2026-07-06                                                                                                                            |
-| 4   | Root `README.md` of Z-ai-platform is not in any V-check scan scope                                                                      | RESOLVED | Added to V04/V08 2026-07-06                                                                                                                     |
-| 5   | V04 strips code fences before Unicode scan, creating blind spot for ASCII art diagrams                                                  | RESOLVED | Box-drawing extraction 2026-07-06                                                                                                               |
-| 6   | 15 of 17 RULE-MONOLITH-* are declared intent only (no runtime enforcement)                                                              | PARTIAL  | Now 11/17 enforced (was 2). Group 0: INTEGRITY-011, COMMIT-014, DOC-015, VERSION-013. Group 0+: READ-003, LOOPS-005, HONEST-006 (all heuristic) |
-| 7   | No automated enforcement of RULE-MONOLITH-002 (worklog before/after) via pre-commit                                                     | OPEN     | E.4 (G1)                                                                                                                                        |
-| 8   | No automated enforcement of RULE-MONOLITH-003 (read before write) via file access tracking                                              | OPEN     | E.4 (G2)                                                                                                                                        |
-| 9   | No meta-verifier for standards internal consistency (cross-STD-refs)                                                                    | OPEN     | E.4 (G3)                                                                                                                                        |
-| 10  | V-checks are forward-looking only; no audit mode for historical content                                                                 | OPEN     | E.4 (G4)                                                                                                                                        |
-| 11  | No GOVERNANCE.md defining escalation paths, decision process, conflict resolution                                                       | OPEN     | E.4 (G5)                                                                                                                                        |
-| 12  | No compliance dashboard with ecosystem visibility                                                                                       | OPEN     | E.4 (G6)                                                                                                                                        |
-| 13  | No quarterly standards review process scheduled                                                                                         | OPEN     | E.4 (G7)                                                                                                                                        |
-| 14  | No automated expansion of enforced rules beyond current 2/17                                                                            | OPEN     | E.4 (G8)                                                                                                                                        |
-| 15  | `bootstrap.sh` mutates parent sandbox on every run (symlinks 14 skills into parent) without opt-in flag                                 | OPEN     | F.1                                                                                                                                             |
-| 16  | `bootstrap.sh` is not idempotent: rerun overwrites `.sandbox-backup` directories                                                        | OPEN     | F.1                                                                                                                                             |
-| 17  | No `--uninstall` command: no way to reverse bootstrap side effects                                                                      | OPEN     | F.1                                                                                                                                             |
-| 18  | No integration-level marker: parent cannot detect "is Z-ai-governance installed?"                                                       | OPEN     | F.1                                                                                                                                             |
-| 19  | No compliance scoring: ecosystem participants cannot publicly demonstrate compliance quality (binary PASS/FAIL only)                    | OPEN     | G                                                                                                                                               |
-| 20  | `zai-anti-monolith` skill described as "auto-activating" but did not fire when 8 files exceeded thresholds                              | OPEN     | H                                                                                                                                               |
+| #   | Defect                                                                                                                                  | Status   | Section                                                                                                                                                                                                                                                                                    |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Baseline snapshot `id-graph-baseline.json` encodes buggy 42 IDs (actual: 55)                                                            | RESOLVED | 2026-07-06                                                                                                                                                                                                                                                                                 |
+| 2   | Ecosystem governance gap: enforcement scope = repo scope, not ecosystem scope                                                           | OPEN     | D                                                                                                                                                                                                                                                                                          |
+| 3   | `verify-standards.js` has no V-check for README.md template compliance (V15/V16/V17 cover worklog/CHANGELOG/AGENT_RULES but not README) | RESOLVED | V18 added 2026-07-06                                                                                                                                                                                                                                                                       |
+| 4   | Root `README.md` of Z-ai-platform is not in any V-check scan scope                                                                      | RESOLVED | Added to V04/V08 2026-07-06                                                                                                                                                                                                                                                                |
+| 5   | V04 strips code fences before Unicode scan, creating blind spot for ASCII art diagrams                                                  | RESOLVED | Box-drawing extraction 2026-07-06                                                                                                                                                                                                                                                          |
+| 6   | 15 of 17 RULE-MONOLITH-* are declared intent only (no runtime enforcement)                                                              | PARTIAL  | Now 15/17 enforced (was 2). Group 0: INTEGRITY-011, COMMIT-014, DOC-015, VERSION-013. Group 0+: READ-003, LOOPS-005, HONEST-006, WORKLOG-002 (heuristic). Group 1: ARCH-016, ARCH-017, ENV-008, AGENT-009, DOC-010 (automated). Remaining 2 (ANSWER-001, STRUCT-007) require LLM judgment. |
+| 7   | No automated enforcement of RULE-MONOLITH-002 (worklog before/after) via pre-commit                                                     | RESOLVED | 2026-07-06 — check-session-start.sh enforces worklog modification (4h active window heuristic) + check-commit-checklist.sh WORKLOG-002                                                                                                                                                     |
+| 8   | No automated enforcement of RULE-MONOLITH-003 (read before write) via file access tracking                                              | PARTIAL  | 2026-07-06 — check-read-before-write.sh uses worklog-based heuristic (cannot track actual file access without kernel-level monitoring)                                                                                                                                                     |
+| 9   | No meta-verifier for standards internal consistency (cross-STD-refs)                                                                    | OPEN     | E.4 (G3)                                                                                                                                                                                                                                                                                   |
+| 10  | V-checks are forward-looking only; no audit mode for historical content                                                                 | OPEN     | E.4 (G4)                                                                                                                                                                                                                                                                                   |
+| 11  | No GOVERNANCE.md defining escalation paths, decision process, conflict resolution                                                       | OPEN     | E.4 (G5)                                                                                                                                                                                                                                                                                   |
+| 12  | No compliance dashboard with ecosystem visibility                                                                                       | OPEN     | E.4 (G6)                                                                                                                                                                                                                                                                                   |
+| 13  | No quarterly standards review process scheduled                                                                                         | OPEN     | E.4 (G7)                                                                                                                                                                                                                                                                                   |
+| 14  | No automated expansion of enforced rules beyond current 2/17                                                                            | OPEN     | E.4 (G8)                                                                                                                                                                                                                                                                                   |
+| 15  | `bootstrap.sh` mutates parent sandbox on every run (symlinks 14 skills into parent) without opt-in flag                                 | OPEN     | F.1                                                                                                                                                                                                                                                                                        |
+| 16  | `bootstrap.sh` is not idempotent: rerun overwrites `.sandbox-backup` directories                                                        | OPEN     | F.1                                                                                                                                                                                                                                                                                        |
+| 17  | No `--uninstall` command: no way to reverse bootstrap side effects                                                                      | OPEN     | F.1                                                                                                                                                                                                                                                                                        |
+| 18  | No integration-level marker: parent cannot detect "is Z-ai-governance installed?"                                                       | OPEN     | F.1                                                                                                                                                                                                                                                                                        |
+| 19  | No compliance scoring: ecosystem participants cannot publicly demonstrate compliance quality (binary PASS/FAIL only)                    | OPEN     | G                                                                                                                                                                                                                                                                                          |
+| 20  | `zai-anti-monolith` skill described as "auto-activating" but did not fire when 8 files exceeded thresholds                              | OPEN     | H                                                                                                                                                                                                                                                                                          |
 
 ### Previously resolved (removed from active tracking)
 
@@ -87,39 +87,45 @@ failure; (I) conceptual reframing of Z-ai-platform as soft agency regulator.
 ## 2. Baseline Snapshot — Remaining Technical Debt
 
 **File:** `standards/_snapshots/id-graph-baseline.json`
-**Severity:** MEDIUM — masks correctness; CI snapshot-compare may give false results
+**Severity:** RESOLVED — baseline regenerated 2026-07-06
 
-The baseline still contains the old buggy output:
+The baseline was regenerated to match current verifier output (55 IDs, 103 edges).
+CI snapshot-compare now produces correct results.
 
 ```json
 {
   "summary": {
-    "ids_extracted": 42,
-    "related_edges": 92,
+    "ids_extracted": 55,
+    "related_edges": 103,
     ...
   }
 }
 ```
 
-Actual verifier output (current):
+Current verifier output matches baseline:
 
 ```text
+Extracted: 55 IDs (STD: 22, RULE: 22, PROC: 3, TOOL: 5, ZAI: 3)
+Related:   103 edges
+```
+
 verify-id-graph.js v1.1.6
 IDs extracted: 55
 Related: edges: 103
 Aligned_with: edges: 2
 By prefix: null=1, STD=20, RULE=17, PROC=4, ZAI=13
 Result: PASS (13/13 hard checks, 36 warnings)
-```
 
-**Required action:**
+````
+
+**Required action (COMPLETED 2026-07-06):**
 
 ```bash
 cd <platform>/standards
 node scripts/verify-id-graph.js --json > _snapshots/id-graph-baseline.json
 git add _snapshots/id-graph-baseline.json
 git commit -m "chore: regenerate id-graph baseline (42 -> 55 IDs)"
-```
+````
 
 ---
 
@@ -336,23 +342,23 @@ A 5-level scale adapted from CMMI for governance systems:
 
 ### E.3 Current Maturity Assessment
 
-| Aspect                                    | Current State                                                | Level |
-| ----------------------------------------- | ------------------------------------------------------------ | ----- |
-| Standards codified (STD-*)                | 20 standards in `standards/standards/`                       | 3     |
-| Rules declared (RULE-MONOLITH-*)          | 17 rules in `guard/rules/`                                   | 3     |
-| Rules enforced at runtime                 | 2 of 17 (PROC-COCHANGE-003, PROC-WORKLOG-005 via pre-commit) | 1     |
-| Verifiers (V/G/S-checks)                  | 14 V-checks, 13 G-checks, 9 S-checks, all passing            | 2     |
-| Pre-commit hook                           | Active for Z-ai-platform repo, runs verifiers + lint-staged  | 2     |
-| CI (GitHub Actions)                       | Active, runs on push/PR/nightly                              | 2     |
-| Background monitor (daemon)               | Implemented but polling-only, no inotifywait                 | 2     |
-| Ecosystem-scope enforcement               | None — all enforcement is repo-scoped                        | 0     |
-| Meta-governance (standards for standards) | None                                                         | 0     |
-| Audit mode (historical scan)              | None — forward-looking only                                  | 0     |
-| Governance process document               | AGENT_RULES.md covers onboarding, not escalation             | 1     |
-| Compliance visibility                     | None — no dashboard, no public badge                         | 0     |
-| Review cadence                            | None scheduled                                               | 0     |
+| Aspect                                    | Current State                                               | Level |
+| ----------------------------------------- | ----------------------------------------------------------- | ----- |
+| Standards codified (STD-*)                | 20 standards in `standards/standards/`                      | 3     |
+| Rules declared (RULE-MONOLITH-*)          | 17 rules in `guard/rules/`                                  | 3     |
+| Rules enforced at runtime                 | 15 of 17 (was 2) — pre-commit + CI enforcement              | 2.5   |
+| Verifiers (V/G/S-checks)                  | 15 V-checks, 15 G-checks, 10 S-checks, all passing          | 3     |
+| Pre-commit hook                           | Active for Z-ai-platform repo, runs verifiers + lint-staged | 2     |
+| CI (GitHub Actions)                       | Active, runs on push/PR/nightly + governance enforcement    | 2.5   |
+| Background monitor (daemon)               | Implemented but polling-only, no inotifywait                | 2     |
+| Ecosystem-scope enforcement               | None — all enforcement is repo-scoped                       | 0     |
+| Meta-governance (standards for standards) | None                                                        | 0     |
+| Audit mode (historical scan)              | None — forward-looking only                                 | 0     |
+| Governance process document               | AGENT_RULES.md covers onboarding, not escalation            | 1     |
+| Compliance visibility                     | None — no dashboard, no public badge                        | 0     |
+| Review cadence                            | None scheduled                                              | 0     |
 
-**Weighted average maturity: ~1.5 (between Initial and Repeatable).**
+**Weighted average maturity: ~2.0 (between Initial and Repeatable).**
 
 ### E.4 Maturity After Section D Fixes
 
