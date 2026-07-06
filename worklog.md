@@ -324,6 +324,26 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Added check-crlf.sh to pre-commit + CI
   - Total: 4/4 remaining recommendations RESOLVED
 
+## 2026-07-06 (30)
+
+- Status: Done
+- Task: Add Tier 7 (Maintenance Workflow) to Plans and Backlog
+- Details:
+  - read worklog.md
+  - Added "Maintenance Workflow" section after Tier 6
+  - Documented Z-ai-platform = develop/test bed role
+  - Documented zai-governance-template = distribute role
+  - 7 tasks for automation:
+    - 7.1: Git submodule setup (30m)
+    - 7.2: sync.sh script for cherry-pick (1h)
+    - 7.3: CI on template repo (30m)
+    - 7.4: promote.sh for version bumps (1h)
+    - 7.5: MAINTENANCE.md in template (30m)
+    - 7.6: Quarterly review automation (2h)
+    - 7.7: Webhook auto-port Z-ai-platform push to template (4h)
+  - Total: ~10 hours
+  - Updated total backlog to ~60 hours (was ~50)
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 
@@ -402,5 +422,101 @@ Z-ai-platform is governance-complete. Remaining work is split into tiers.
 - Tier 4: 4 hours (docs, public-facing)
 - Tier 5: 21 hours (tooling, future)
 - Tier 6: 2-3 days (architecture, deferred)
+- Tier 7: ~10 hours (maintenance automation, after template created)
 
-**Total: ~50 hours of remaining work.** Platform is production-ready, this is nice-to-have.
+**Total: ~60 hours of remaining work.** Platform is production-ready, this is nice-to-have.
+
+---
+
+## Maintenance Workflow (after zai-governance-template is created)
+
+Z-ai-platform is the "live" instance where new governance features are developed
+and tested. zai-governance-template is the "distributable" that other projects consume.
+The workflow below describes how changes flow between them.
+
+### Maintenance roles
+
+| Repo                        | Role               | Changes                                     |
+| --------------------------- | ------------------ | ------------------------------------------- |
+| **Z-ai-platform**           | Develop + test bed | All new governance features first land here |
+| **zai-governance-template** | Distribute         | Receives only tested, stable changes        |
+
+### Update flow
+
+```
+Z-ai-platform (live)              zai-governance-template (dist)
+       │                                       │
+       │  1. Need to add/fix governance        │
+       │  2. Develop + iterate (13 scripts)    │
+       │  3. Test in sandbox (30/30)           │
+       │  4. Validate (verifiers clean)        │
+       │                                       │
+       │  5. Port to template ───────────────> │
+       │     (via submodule pull OR sync.sh)    │
+       │                                       │
+       │  6. Bump template version             │
+       │  7. Update template CHANGELOG          │
+       │                                       │
+       │  8. Other projects can pull ────────> │
+       │                                       │
+```
+
+### Tier 7: Automation for maintenance
+
+| #   | Task                                                | Estimate | Notes                                                                                                                  |
+| --- | --------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 7.1 | Set up git submodule for template                   | 30m      | Other projects can do `git submodule update` to get latest governance. Tested in zai-governance-template repo.         |
+| 7.2 | Create `sync.sh` script for cherry-pick             | 1h       | Semi-automatic script: detects governance changes in Z-ai-platform, prompts to port to template. Logs what was synced. |
+| 7.3 | Add CI on template repo                             | 30m      | Template must also pass 13 governance scripts + verifiers. Otherwise template is "broken" example.                     |
+| 7.4 | Create `promote.sh` for version bumps               | 1h       | Auto-bump template version, update template CHANGELOG, generate MIGRATIONS.md section.                                 |
+| 7.5 | Document the maintenance workflow                   | 30m      | Add `MAINTENANCE.md` to template with: when to sync, how to sync, who maintains what.                                  |
+| 7.6 | Quarterly review automation                         | 2h       | Cron job that runs governance scripts on Z-ai-platform, reports drift, suggests actions.                               |
+| 7.7 | Webhook: Z-ai-platform push → auto-port to template | 4h       | GitHub Action on Z-ai-platform that opens PR on template with cherry-picked changes. Reviewer approves or rejects.     |
+
+### Submodule + sync.sh detail
+
+**Submodule approach** (simpler):
+
+```bash
+# In zai-governance-template, add Z-ai-platform as submodule
+cd zai-governance-template
+git submodule add https://github.com/stsgs1980/Z-ai-platform.git reference
+# Reference doc: standards/, guard/, skills/ extracted from reference/
+
+# In other project:
+git submodule add https://github.com/stsgs1980/zai-governance-template.git
+# Auto-updates: git submodule update --remote
+```
+
+**sync.sh approach** (more control):
+
+```bash
+#!/bin/bash
+# sync.sh — Port governance changes from Z-ai-platform to template
+PLATFORM_DIR="$HOME/my-project/Z-ai-platform"
+TEMPLATE_DIR="$HOME/my-project/zai-governance-template"
+
+# Detect changed governance files
+cd "$PLATFORM_DIR"
+CHANGED=$(git diff main..HEAD --name-only -- standards/ guard/ skills/ .husky/ .github/ bootstrap.sh)
+
+if [ -z "$CHANGED" ]; then
+  echo "No governance changes to sync"
+  exit 0
+fi
+
+echo "Changed governance files:"
+echo "$CHANGED"
+read -p "Port these to template? [y/N] " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  cd "$TEMPLATE_DIR"
+  for f in $CHANGED; do
+    cp "$PLATFORM_DIR/$f" "$TEMPLATE_DIR/$f"
+  done
+  echo "Synced. Run 'git status' and commit."
+fi
+```
+
+### Tier 7 total estimate: ~10 hours
+
+---
