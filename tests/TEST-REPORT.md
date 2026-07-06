@@ -71,13 +71,16 @@ Run separately. See `tests/sandbox-behavior-test.sh`.
 
 ## Resolved Issues
 
-| Issue                                   | Severity | Status   | Fixed in                                           |
-| --------------------------------------- | -------- | -------- | -------------------------------------------------- |
-| CRITICAL-001: bootstrap.sh CRLF         | CRITICAL | RESOLVED | Earlier session                                    |
-| FINDING-001: Multiple scripts CRLF      | HIGH     | RESOLVED | Earlier session + 2026-07-06 (pre-push)            |
-| FINDING-002: No .gitattributes          | HIGH     | RESOLVED | Earlier session + 2026-07-06 (added .husky/* rule) |
-| FINDING-003: No syntax validation in CI | MEDIUM   | OPEN     | Not yet implemented                                |
-| FINDING-004: Inconsistent hook endings  | HIGH     | RESOLVED | 2026-07-06 (all LF)                                |
+| Issue                                   | Severity | Status   | Fixed in                                            |
+| --------------------------------------- | -------- | -------- | --------------------------------------------------- |
+| CRITICAL-001: bootstrap.sh CRLF         | CRITICAL | RESOLVED | Earlier session                                     |
+| FINDING-001: Multiple scripts CRLF      | HIGH     | RESOLVED | Earlier session + 2026-07-06 (pre-push)             |
+| FINDING-002: No .gitattributes          | HIGH     | RESOLVED | Earlier session + 2026-07-06 (added .husky/* rule)  |
+| FINDING-003: No syntax validation in CI | MEDIUM   | RESOLVED | 2026-07-06 (added "Shell script syntax check" step) |
+| FINDING-004: Inconsistent hook endings  | HIGH     | RESOLVED | 2026-07-06 (all LF, 2026-07-06 final cleanup)       |
+| R1: `bash -n` syntax check in CI        | MEDIUM   | RESOLVED | 2026-07-06 (already in CI workflow)                 |
+| R2: `.editorconfig` with end_of_line=lf | LOW      | RESOLVED | Earlier session                                     |
+| R3: CRLF detection in pre-commit        | LOW      | RESOLVED | 2026-07-06 (guard/scripts/check-crlf.sh)            |
 
 ---
 
@@ -85,9 +88,6 @@ Run separately. See `tests/sandbox-behavior-test.sh`.
 
 | #   | Recommendation                                 | Priority | Status |
 | --- | ---------------------------------------------- | -------- | ------ |
-| R1  | Add `bash -n` syntax check to CI workflow      | MEDIUM   | OPEN   |
-| R2  | Create `.editorconfig` with `end_of_line = lf` | LOW      | OPEN   |
-| R3  | Add CRLF detection to pre-commit hook          | LOW      | OPEN   |
 | R4  | Document line ending policy in CONTRIBUTING.md | LOW      | OPEN   |
 
 ---

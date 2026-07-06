@@ -307,6 +307,23 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Tier 6: architecture (2-3 days, deferred)
   - Total backlog: ~50 hours
 
+## 2026-07-06 (29)
+
+- Status: Done
+- Task: Close remaining tests/ tasks (R1-R4 + FINDING-003)
+- Details:
+  - read tests/TEST-REPORT.md
+  - read .editorconfig, .gitattributes, .github/workflows/verify-id-graph.yml
+  - R1: bash -n syntax check in CI - already done (resolved in earlier session)
+  - R2: .editorconfig - already exists (resolved in earlier session)
+  - R3: Created guard/scripts/check-crlf.sh
+    - Detects CRLF in shell scripts and husky hooks
+    - Fixed 8 files with CRLF: co-change-check.sh, setup-001.sh, update-002.sh, worklog-check.sh, check-md.sh, graph-deps.sh, remove-stack-signature-footers.sh, render-diagrams.sh
+  - R4: Added §3.3 Line ending policy to CONTRIBUTING.md
+  - Updated TEST-REPORT.md: 3 items moved to RESOLVED, only R4 was already RESOLVED via doc
+  - Added check-crlf.sh to pre-commit + CI
+  - Total: 4/4 remaining recommendations RESOLVED
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 

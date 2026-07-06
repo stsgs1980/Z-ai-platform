@@ -119,6 +119,14 @@ if ! bash guard/scripts/check-script-coverage.sh --hard; then
   exit 1
 fi
 
+# CRLF detection: ensure all shell scripts use LF
+echo "[pre-commit] check-crlf.sh (line ending detection)"
+if ! bash guard/scripts/check-crlf.sh --hard; then
+  echo "[pre-commit] FAIL: CRLF detected in shell scripts."
+  echo "[pre-commit] Fix: for f in \$(git ls-files '*.sh'); do sed -i 's/\\r\$//' \"\$f\"; git add \"\$f\"; done"
+  exit 1
+fi
+
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard

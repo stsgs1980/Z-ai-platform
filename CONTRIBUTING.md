@@ -92,6 +92,37 @@ node standards/scripts/verify-id-graph.js
 node standards/scripts/verify-standards.js
 ```
 
+### 3.3. Line ending policy
+
+**All shell scripts and config files MUST use LF line endings.**
+
+CRLF line endings will cause bash on Linux to fail silently. The Z-ai-platform
+enforces this through three layers:
+
+| Layer            | File            | Behavior                                                         |
+| ---------------- | --------------- | ---------------------------------------------------------------- |
+| `.gitattributes` | Git attributes  | `*.sh text eol=lf`, `*.json text eol=lf`, `.husky/* text eol=lf` |
+| `.editorconfig`  | Editor settings | `end_of_line = lf` for `*`, `*.sh`, `.husky/*`                   |
+| `check-crlf.sh`  | Pre-commit hook | Detects any CRLF in shell scripts, fails if found                |
+
+**Windows developers:** set `git config core.autocrlf false` to prevent Git from
+converting LF to CRLF on checkout.
+
+**If you accidentally introduce CRLF:**
+
+```bash
+# Check what has CRLF
+bash guard/scripts/check-crlf.sh --hard
+
+# Fix all files
+for f in $(git ls-files '*.sh' '*.bash' '.husky/*'); do
+  sed -i 's/\r$//' "$f"
+  git add "$f"
+done
+```
+
+**Excluded files** (Windows-native, CRLF is correct): `*.cmd`, `*.bat`, `*.ps1`
+
 You must see `Result: PASS (13/13 hard checks, N warnings)` from
 `verify-id-graph.js` and `Total: 8 | PASS: 8 | FAIL: 0` from
 `verify-standards.js`. If any HARD check fails, the CI on GitHub will
