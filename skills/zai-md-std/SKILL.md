@@ -13,6 +13,10 @@ description: >
   "validate .md", "check doc standard", "lint documentation". Russian: "напиши
   документацию", "сделай changelog", "подготовь спек", "напиши гайд", "оформи
   документ", "сделай worklog проекта", "проверь markdown", "приведи .md в порядок".
+related:
+  - STD-DOC-002
+  - STD-DOC-003
+  - STD-META-001
 ---
 
 # Skill: Zai Markdown Standard v1.0.0

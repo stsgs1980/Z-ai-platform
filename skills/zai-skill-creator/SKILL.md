@@ -4,7 +4,9 @@ id: ZAI-DEVTOOLS-001
 author: StsDev
 version: 1.0
 description: Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, verify skill claims against reality, or optimize a skill's description for better triggering accuracy.
----
+related:
+  - STD-SKILL-001
+  - STD-META-001
 
 # Skill: Zai Skill Creator v1.0
 

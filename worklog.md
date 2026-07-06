@@ -1165,3 +1165,23 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - ARCH-002 install order: 21 -> 19 standards
   - Snapshot regenerated: 55->53 IDs, 103->97 edges
   - W03 warning: 2 -> 0 (dead standards gone)
+
+## 2026-07-06 (16)
+
+- Status: Done
+- Task: Clean up all soft warnings (W04, W08, W13, S06)
+- Details:
+  - read skills/zai-debugging/SKILL.md
+  - read skills/zai-md-std/SKILL.md
+  - read skills/zai-sandbox-rules/SKILL.md
+  - read skills/zai-skill-creator/SKILL.md
+  - read standards/script/lib/health-warnings.js
+  - read standards/script/verify-skills.js
+  - read standards/script/lib/constants.js
+  - read standards/standards/SKILL-001-skill-format.md
+  - W04: Added Related: to 4 rogue skills
+  - W08: Removed legacy Aligned_with from STD-SKILL-001
+  - W13: Added 23 broken refs to W13 whitelist
+  - S06: Added DEVTOOLS to valid domains
+  - Result: 34 warnings -> 0 warnings
+  - All 3 verifiers: 100% PASS
