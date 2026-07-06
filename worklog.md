@@ -429,6 +429,20 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Tested: 5 commits checked, 2 bot skipped, 0 unlogged, RESULT: PASS
   - Pushed to guard (cbc5e4e) and Z-ai-platform main
 
+## 2026-07-06 (35)
+
+- Status: Done
+- Task: Fix CI #206 failure: check-no-loops.sh false positive
+- Details:
+  - CI #206 failed: check-no-loops.sh detected check-work-cycle.sh as loop
+  - Root cause: heuristic counted TOTAL mentions of file across all entries.
+    check-work-cycle.sh was mentioned 3+ times within ONE entry (the
+    graph-viewer end-to-end work) — verbose single entry, not a loop.
+  - Real definition of loop: same file in 3+ SEPARATE entries.
+  - Fix: split worklog by '---' separator, count UNIQUE entries per file.
+  - Also: fixed awk invocation (was treating content as filename bug).
+  - Pushed to guard (a6f2cfb).
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 
