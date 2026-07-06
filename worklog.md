@@ -1061,3 +1061,16 @@ Fixes applied:
 - Pushed standards@4b0fdf5 to remote
 
 Results: 52 IDs (was 42), 103 edges (was 92), 10 ZAI-* nodes (was 0), 13/13 HARD PASS
+
+---
+
+### 2026-07-06
+
+**Entry:** Task 13 - Update CI and test files with new rule IDs
+
+Updated remaining files with new rule IDs:
+
+- `.github/workflows/verify-id-graph.yml`: replaced RULE-MONOLITH-017 with RULE-ARCH-017 (line 162)
+- `tests/sandbox-behavior-test.sh`: replaced RULE-MONOLITH-* pattern with RULE-* (lines 436-439)
+
+Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec).

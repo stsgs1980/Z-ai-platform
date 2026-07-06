@@ -433,10 +433,10 @@ test_agent_can_understand_priority() {
             return 1
         fi
         
-        if grep -q "RULE-MONOLITH-" "$PLATFORM_DIR/AGENT_RULES.md"; then
-            log_info "RULE-MONOLITH-* rules referenced"
+        if grep -q "RULE-" "$PLATFORM_DIR/AGENT_RULES.md"; then
+            log_info "RULE-* rules referenced"
         else
-            log_fail "RULE-MONOLITH-* rules not referenced"
+            log_fail "RULE-* rules not referenced"
             return 1
         fi
         

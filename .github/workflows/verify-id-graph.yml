@@ -160,7 +160,7 @@ jobs:
       # Runs line-count-check.sh in --hard mode: fails CI if any platform
       # source code file exceeds §4.18.1 hard cap (250 for .js/.py/.sh/.ts).
       # Submodule files (standards/, guard/, skills/) are excluded per
-      # RULE-MONOLITH-017 (upstream write protection).
+      # RULE-ARCH-017 (upstream write protection).
       # -------------------------------------------------------------------
       - name: Anti-monolith check (PROC-LINECOUNT-004, --hard)
         run: bash guard/scripts/line-count-check.sh --hard
