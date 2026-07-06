@@ -1146,3 +1146,22 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Created INDEX.md listing all 13 skills with IDs, versions, purposes
   - Includes loading order and "when to load which skill" matrix
   - Sandbox test results: 19/20 integration, 8/10 behavior (was 15/20, 7/10)
+
+## 2026-07-06 (15)
+
+- Status: Done
+- Task: Remove dead standards STD-ERR-002 and STD-TEST-001
+- Details:
+  - read standards/standards/ERR-002-error-recovery.md
+  - read standards/standards/TEST-001-testing.md
+  - read META-001-standard-id-system.md
+  - read ARCH-002-implementation-order.md
+  - read ERR-001-error-handling.md
+  - read A11Y-001-wcag-2-1-aa.md
+  - read ENV-001-reproducibility.md
+  - Deleted 2 dead standard files
+  - Removed all forward references in 5 other standards
+  - Recovery strategies folded into ERR-001 §4-§5
+  - ARCH-002 install order: 21 -> 19 standards
+  - Snapshot regenerated: 55->53 IDs, 103->97 edges
+  - W03 warning: 2 -> 0 (dead standards gone)
