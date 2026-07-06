@@ -302,28 +302,32 @@ jobs:
       # dashboards, audit scripts) read. The JSON is deterministic: same input
       # -> same output. Updated on every push to main.
       #
-      # URL: https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/standards/_graph/id-graph.json
-      # Format: see standards/_graph/README.md
+      # URL: https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/graph/id-graph.json
+      # Format: see graph/README.md
+      #
+      # Layout:
+      #   docs/_graph/   — visual artifacts (SVG, PNG, DOT) for documentation
+      #   graph/         — machine-consumable exports (JSON) for API consumers
       # -------------------------------------------------------------------------
       - name: Export ID graph as JSON (for graph-viewer)
         id: graph-json
         run: |
-          mkdir -p standards/_graph
-          node standards/scripts/verify-id-graph.js --json > standards/_graph/id-graph.json
+          mkdir -p graph
+          node standards/scripts/verify-id-graph.js --json > graph/id-graph.json
           # Also export summary for quick inspection
           node -e "
-            const j = require('./standards/_graph/id-graph.json');
+            const j = require('./graph/id-graph.json');
             console.log(JSON.stringify(j.summary, null, 2));
-          " > standards/_graph/id-graph-summary.json
+          " > graph/id-graph-summary.json
           # Update timestamp
           node -e "
             const fs = require('fs');
-            const j = JSON.parse(fs.readFileSync('standards/_graph/id-graph.json'));
+            const j = JSON.parse(fs.readFileSync('graph/id-graph.json'));
             j.exported_at = new Date().toISOString();
-            fs.writeFileSync('standards/_graph/id-graph.json', JSON.stringify(j, null, 2));
+            fs.writeFileSync('graph/id-graph.json', JSON.stringify(j, null, 2));
           "
           echo "ID graph JSON exported:"
-          ls -la standards/_graph/
+          ls -la graph/
 
       - name: Commit graph JSON back to repo
         id: commit-json
@@ -331,7 +335,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add standards/_graph/id-graph.json standards/_graph/id-graph-summary.json
+          git add graph/id-graph.json graph/id-graph-summary.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
@@ -346,7 +350,6 @@ jobs:
           name: id-graph
           path: |
             docs/_graph/
-            standards/_graph/
           retention-days: 30
 
       - name: Upload verifier output (on failure)

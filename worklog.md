@@ -356,7 +356,7 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Updated workflow permissions: contents: write (needed for auto-commit)
   - Created standards/_graph/ directory with:
     - README.md: API contract for graph-viewer (endpoints, format, examples)
-    - .gitkeep: preserve directory in git
+    - .gitkeep: preserve directory
   - Documented in API contract:
     - 3 endpoints: id-graph.json, id-graph-summary.json, visual graphs
     - Refresh strategy: 5 min periodic (recommended)
@@ -365,6 +365,25 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
     - Anti-patterns section
     - Refresh timeline (~3 min from push to visible)
   - User manually updates Z-ai-graph-viewer with the documented pattern
+
+## 2026-07-06 (32)
+
+- Status: Done
+- Task: Fix CI failure + move JSON to graph/ directory
+- Details:
+  - read .github/workflows/verify-id-graph.yml
+  - CI #202 failed: fatal: Pathspec 'standards/_graph/id-graph.json' is in submodule 'standards'
+  - Root cause: standards/_graph/ is in submodule, git add refuses from main repo
+  - Decision: move JSON to graph/ (top-level, not in docs/ or submodule)
+  - Reasoning:
+    - standards/_graph/ = submodule path (forbidden)
+    - docs/_graph/ = mixed semantics (visual + API)
+    - graph/ = clean separation: graph/ = API, docs/_graph/ = visual
+  - Updated workflow: generate + commit JSON to graph/
+  - Created graph/README.md: API contract (endpoints, refresh, examples, stability)
+  - Updated standards/_graph/README.md: URLs now point to graph/ (not standards/_graph/)
+  - Refresh timeline: ~3 min from push to visible
+  - Total: 3 repos affected (Z-ai-platform main, standards submodule, graph-viewer)
 
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
