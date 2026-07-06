@@ -344,6 +344,28 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Total: ~10 hours
   - Updated total backlog to ~60 hours (was ~50)
 
+## 2026-07-06 (31)
+
+- Status: Done
+- Task: Make Z-ai-graph-viewer show true Z-ai-platform state
+- Details:
+  - read .github/workflows/verify-id-graph.yml
+  - read governance-escalation-report.md
+  - Added CI step: Export ID graph as JSON (for graph-viewer)
+  - Added CI step: Commit graph JSON back to repo (auto-update)
+  - Updated workflow permissions: contents: write (needed for auto-commit)
+  - Created standards/_graph/ directory with:
+    - README.md: API contract for graph-viewer (endpoints, format, examples)
+    - .gitkeep: preserve directory in git
+  - Documented in API contract:
+    - 3 endpoints: id-graph.json, id-graph-summary.json, visual graphs
+    - Refresh strategy: 5 min periodic (recommended)
+    - Code example: useGraphWithAutoRefresh hook
+    - Status UI: Live/Stale/Loading/Error badges
+    - Anti-patterns section
+    - Refresh timeline (~3 min from push to visible)
+  - User manually updates Z-ai-graph-viewer with the documented pattern
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 

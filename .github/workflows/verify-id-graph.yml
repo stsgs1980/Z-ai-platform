@@ -27,7 +27,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # needed to commit graph JSON back to repo on push to main
 
 # Cancel in-progress runs of the same workflow when a new commit lands.
 # Without this, two pushes in quick succession (e.g. fix-up commit right
@@ -296,12 +296,57 @@ jobs:
           }
           ls -la docs/_graph/
 
+      # -------------------------------------------------------------------------
+      # Export ID graph as JSON for Z-ai-graph-viewer consumption.
+      # This is the "source of truth" data that external tools (graph-viewer,
+      # dashboards, audit scripts) read. The JSON is deterministic: same input
+      # -> same output. Updated on every push to main.
+      #
+      # URL: https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/standards/_graph/id-graph.json
+      # Format: see standards/_graph/README.md
+      # -------------------------------------------------------------------------
+      - name: Export ID graph as JSON (for graph-viewer)
+        id: graph-json
+        run: |
+          mkdir -p standards/_graph
+          node standards/scripts/verify-id-graph.js --json > standards/_graph/id-graph.json
+          # Also export summary for quick inspection
+          node -e "
+            const j = require('./standards/_graph/id-graph.json');
+            console.log(JSON.stringify(j.summary, null, 2));
+          " > standards/_graph/id-graph-summary.json
+          # Update timestamp
+          node -e "
+            const fs = require('fs');
+            const j = JSON.parse(fs.readFileSync('standards/_graph/id-graph.json'));
+            j.exported_at = new Date().toISOString();
+            fs.writeFileSync('standards/_graph/id-graph.json', JSON.stringify(j, null, 2));
+          "
+          echo "ID graph JSON exported:"
+          ls -la standards/_graph/
+
+      - name: Commit graph JSON back to repo
+        id: commit-json
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add standards/_graph/id-graph.json standards/_graph/id-graph-summary.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: export ID graph JSON for graph-viewer (auto-update)"
+            git push
+            echo "ID graph JSON committed and pushed"
+          fi
+
       - name: Upload graph artifact
         uses: actions/upload-artifact@v7
         with:
           name: id-graph
           path: |
             docs/_graph/
+            standards/_graph/
           retention-days: 30
 
       - name: Upload verifier output (on failure)
