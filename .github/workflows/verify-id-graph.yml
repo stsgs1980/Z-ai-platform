@@ -64,6 +64,21 @@ jobs:
       - name: Submodule status
         run: git submodule status
 
+      - name: Shell script syntax check
+        run: |
+          echo "Checking shell script syntax..."
+          for f in bootstrap.sh save-work.sh status.sh .husky/pre-commit .husky/pre-push .husky/commit-msg guard/scripts/*.sh standards/scripts/*.sh; do
+            if [ -f "$f" ]; then
+              if bash -n "$f" 2>&1; then
+                echo "  OK: $f"
+              else
+                echo "  FAIL: $f"
+                exit 1
+              fi
+            fi
+          done
+          echo "All shell scripts pass syntax check."
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
