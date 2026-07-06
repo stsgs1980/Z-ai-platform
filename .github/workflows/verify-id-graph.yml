@@ -79,6 +79,27 @@ jobs:
           done
           echo "All shell scripts pass syntax check."
 
+      - name: Governance enforcement (guard scripts)
+        run: |
+          echo "Running governance enforcement scripts..."
+          FAIL=0
+          for script in guard/scripts/check-no-bypass.sh guard/scripts/check-ahg-integrity.sh guard/scripts/check-sandbox-env.sh guard/scripts/check-session-start.sh; do
+            if [ -f "$script" ]; then
+              echo "--- Running $script ---"
+              if bash "$script" --hard 2>&1; then
+                echo "  PASS: $script"
+              else
+                echo "  FAIL: $script"
+                FAIL=1
+              fi
+            fi
+          done
+          if [ $FAIL -eq 1 ]; then
+            echo "Governance enforcement FAILED"
+            exit 1
+          fi
+          echo "All governance checks passed."
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
