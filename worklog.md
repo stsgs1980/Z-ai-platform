@@ -1134,3 +1134,15 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Updated A/B test with realistic scenario (monolithic component)
   - Fixed WORKLOG-002 false positive (only require worklog if it has changes)
   - A/B test proves governance works: GOV=OFF -> PASS, GOV=ON -> BLOCKED
+
+## 2026-07-06 (14)
+
+- Status: Done
+- Task: Create skills/INDEX.md
+- Details:
+  - read tests/sandbox-integration-test.sh
+  - read tests/sandbox-behavior-test.sh
+  - Tests expected skills/INDEX.md with zai-sandbox-rules and zai-skill-creator
+  - Created INDEX.md listing all 13 skills with IDs, versions, purposes
+  - Includes loading order and "when to load which skill" matrix
+  - Sandbox test results: 19/20 integration, 8/10 behavior (was 15/20, 7/10)
