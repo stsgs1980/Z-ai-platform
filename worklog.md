@@ -1185,3 +1185,42 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - S06: Added DEVTOOLS to valid domains
   - Result: 34 warnings -> 0 warnings
   - All 3 verifiers: 100% PASS
+
+## 2026-07-06 (17)
+
+- Status: Done
+- Task: Create check-work-cycle.sh for RULE-STRUCT-007
+- Details:
+  - read guard/scripts/check-no-loops.sh
+  - Created guard/scripts/check-work-cycle.sh
+  - Detects: commits without worklog touch (consecutive drift)
+  - Heuristic: 2+ consecutive commits without worklog = violation
+  - Added to pre-commit hook (Group 0)
+  - Added to CI workflow (verify-id-graph.yml)
+  - Updated governance-escalation-report.md: 15/17 -> 16/17 enforced
+  - Test result on current repo: 4/10 unlogged (caught real drift)
+
+## 2026-07-06 (18) — retrospective backfill
+
+- Status: Done
+- Task: Backfill worklog entries for commits that did not update worklog
+- Details:
+  - Commits 9d615a5, d2a6c39, 03d95fb, 13cb161, 89757bc shipped without worklog touch
+  - This is historical drift: pre-commit did not yet enforce RULE-STRUCT-007
+  - check-work-cycle.sh (just added) correctly flagged 4/10 unlogged
+  - This entry backfills the missing worklog trace for those commits
+  - All 5 commits covered: CI governance checks, baseline snapshot, README, naming, governance report
+  - Going forward: every commit will be flagged if worklog is missing
+
+## 2026-07-06 (19)
+
+- Status: Done
+- Task: Integrate check-work-cycle.sh (RULE-STRUCT-007) into pre-commit + CI
+- Details:
+  - read .husky/pre-commit
+  - read .github/workflows/verify-id-graph.yml
+  - read tests/governance-escalation-report.md
+  - Added check-work-cycle.sh to pre-commit Group 0
+  - Added to CI governance enforcement step
+  - Updated governance-escalation-report.md: 16/17 rules enforced
+  - All hooks pass on this commit

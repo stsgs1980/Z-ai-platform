@@ -88,6 +88,13 @@ if ! bash guard/scripts/check-session-start.sh --hard; then
   exit 1
 fi
 
+# RULE-STRUCT-007: work structure cycle (Read -> Plan -> Execute -> Record -> Commit)
+echo "[pre-commit] check-work-cycle.sh (RULE-STRUCT-007)"
+if ! bash guard/scripts/check-work-cycle.sh --hard; then
+  echo "[pre-commit] FAIL: work structure cycle violation."
+  exit 1
+fi
+
 # --- Group 1: guard PROC checks (HARD) --------------------------------------
 # PROC-COCHANGE-003: code + docs sync (RULE-DOC-010)
 bash guard/scripts/co-change-check.sh --hard
