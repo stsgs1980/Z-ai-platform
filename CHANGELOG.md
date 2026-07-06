@@ -44,7 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Fixed
 
 - `parseBlockquoteHeader` regex: `\r\n` line endings broke blockquote parsing on Windows (2 IDs extracted instead of 66)
-- `parseYAMLFrontmatter` regex: `\r\n` line endings broke YAML frontmatter parsing (RULE-MONOLITH-* not detected)
+- `parseYAMLFrontmatter` regex: `\r\n` line endings broke YAML frontmatter parsing (RULE-* not detected)
 - `file-scanner.js`: `path.relative()` returns backslashes on Windows, breaking glob matching for guard/skills repos
 - `graph-deps.sh`: temporary `.graph-transform.js` failed in ESM context (`"type": "module"` in package.json), renamed to `.cjs`
 - G03 cycle in Related graph: META-002 had bidirectional Related edges with GIT-001, DOC-002, AGENT-001 (trimmed to META-001 only)
@@ -62,8 +62,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 ### Added
 
 - worklog.md and CHANGELOG.md files to all Z-ai modules
-- Compliance with RULE-MONOLITH-002 (maintain worklog)
-- Compliance with RULE-MONOLITH-010 (documentation sync)
+- Compliance with RULE-WORKLOG-002 (maintain worklog)
+- Compliance with RULE-DOC-010 (documentation sync)
 - Basic documentation per standards
 
 ---

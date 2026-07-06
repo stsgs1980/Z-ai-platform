@@ -73,7 +73,7 @@ Submodule Z-ai-guard — правила и процедуры enforcement.
 
 | Каталог/файл    | Назначение                                                                 |
 | --------------- | -------------------------------------------------------------------------- |
-| `rules/`        | 17 правил RULE-MONOLITH-001..017 (atomic rules)                            |
+| `rules/`        | 17 правил RULE-001..017 (atomic rules)                                     |
 | `scripts/`      | Процедуры: co-change-check, worklog-check, line-count-check, setup, update |
 | `instructions/` | Инструкции к процедурам                                                    |
 | `tools/`        | Инструменты (verify-docs, bump)                                            |

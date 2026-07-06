@@ -70,7 +70,7 @@ The platform uses a 3-layer repository architecture with an inline skills monore
 ## Project Structure
 
 - `standards/` - Z-ai-standards submodule (L1): STD-* files, verifier scripts, snapshots
-- `guard/` - Z-ai-guard submodule (L2): RULE-MONOLITH-* rules, procedures, tools
+- `guard/` - Z-ai-guard submodule (L2): RULE-* rules, procedures, tools
 - `skills/` - Monorepo (L3): 14 skill directories with ZAI-* IDs
 - `.github/workflows/` - CI workflows (verify-id-graph.yml, e2e-verifiers.yml)
 - `eslint-rules/` - Custom ESLint rules for STD-DOC-003 compliance

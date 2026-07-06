@@ -114,7 +114,7 @@ Added worklog.md and changelog.md files to all four Z-ai modules:
 
 Added worklog.md and CHANGELOG.md to Z-ai-platform.
 
-**Work content:** Created files per RULE-MONOLITH-010 (documentation sync) and RULE-MONOLITH-002 (maintain worklog).
+**Work content:** Created files per RULE-DOC-010 (documentation sync) and RULE-WORKLOG-002 (maintain worklog).
 
 **Next steps:** Add worklog.md and CHANGELOG.md to Z-ai-guard (if missing) and complete work.
 
@@ -672,7 +672,7 @@ and earlier. Four issues identified during configuration audit.
   "14 skills / skills/INDEX.md (inline monorepo since a3d358b)".
 - §9 version lock: skills@9797e69 submodule pin -> "inline monorepo";
   standards@/guard@ pins refreshed to actual SHAs (b16d154, 8eb6fe1).
-- §3/§8 RULE-MONOLITH-017 wording: skills/ removed from upstream-protection
+- §3/§8 RULE-ARCH-017 wording: skills/ removed from upstream-protection
   list (now inline, not upstream).
 - Header pins + Last Updated refreshed.
 
@@ -689,7 +689,7 @@ and earlier. Four issues identified during configuration audit.
 - Line 425: push-list entry -> `Z-ai-platform/worklog.md`.
 - Line 1077: "3554-line ... docs/session/worklog.md" -> "500+ line ... worklog.md (root, canonical)".
 - Remaining refs in `worklog.md` lines 309/315/421 left intact (append-only history).
-- Upstream refs in `standards/` (CI-AND-TESTING.md, META-001) NOT touched — separate PR per RULE-MONOLITH-017.
+- Upstream refs in `standards/` (CI-AND-TESTING.md, META-001) NOT touched — separate PR per RULE-ARCH-017.
 
 ---
 

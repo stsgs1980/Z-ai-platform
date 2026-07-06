@@ -105,7 +105,7 @@ some indicate real cleanup opportunities.
 | Prefix | Layer | Lives in   | Example              |
 | ------ | ----- | ---------- | -------------------- |
 | STD    | L1    | standards/ | STD-META-001         |
-| RULE   | L2    | guard/     | RULE-MONOLITH-002    |
+| RULE   | L2    | guard/     | RULE-WORKLOG-002     |
 | PROC   | L2    | guard/     | PROC-MONOLITH-SETUP  |
 | TOOL   | L2    | guard/     | TOOL-MONOLITH-VERIFY |
 | ZAI    | L3    | skills/    | ZAI-META-001         |
@@ -121,11 +121,11 @@ Must be reciprocated (both sides must declare it).
 
 ### 5.1 Add a new rule
 
-1. Create `guard/rules/RULE-MONOLITH-018.md` with YAML frontmatter:
+1. Create `guard/rules/RULE-NEW-018.md` with YAML frontmatter:
 
    ```yaml
    ---
-   id: RULE-MONOLITH-018
+   id: RULE-NEW-018
    title: <short title>
    version: 1.0
    level: [C]
@@ -134,7 +134,7 @@ Must be reciprocated (both sides must declare it).
    owning-standard: STD-META-001 v2.0
    last-updated: 2026-06-17
    related:
-     - RULE-MONOLITH-002
+      - RULE-WORKLOG-002
      - STD-META-001
    ---
    ```
@@ -143,7 +143,7 @@ Must be reciprocated (both sides must declare it).
 3. Run `node standards/scripts/verify-id-graph.js` locally.
 4. Commit and push **inside the submodule** (`cd guard && git push`).
 5. Bump the submodule pointer in Z-ai-platform:
-   `cd .. && git add guard && git commit -m "Bump guard: add RULE-MONOLITH-018"`.
+   `cd .. && git add guard && git commit -m "Bump guard: add RULE-NEW-018"`.
 
 ### 5.2 Add a new skill
 
