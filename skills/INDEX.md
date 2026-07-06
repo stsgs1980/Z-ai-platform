@@ -6,14 +6,15 @@
 
 ---
 
-## 1. Available skills (13)
+## 1. Available skills (14)
 
 | Skill | ID | Version | Purpose |
 |-------|-----|---------|---------|
 | [zai-anti-monolith](./zai-anti-monolith/SKILL.md) | ZAI-ARCH-002 | 1.0 | Modular architecture enforcement. Auto-activates when files > 250 lines, components > 200 lines, or FSD violations are detected. |
-| [zai-debugging](./zai-debugging/SKILL.md) | — | — | Systematic debugging methodology for agents. Root-cause analysis, hypothesis testing, log analysis. |
+| [zai-answer-before-act](./zai-answer-before-act/SKILL.md) | ZAI-DEV-006 | 1.0.0 | **RULE ZERO: Always load first.** Enforces RULE-ANSWER-001: questions get answers, tasks get executed. Decision algorithm with 8 worked examples. |
+| [zai-debugging](./zai-debugging/SKILL.md) | ZAI-DEV-004 | 1.0.0 | Systematic debugging methodology for agents. Root-cause analysis, hypothesis testing, log analysis. |
 | [zai-frontend-styling-expert](./zai-frontend-styling-expert/SKILL.md) | — | — | Frontend styling guidance: CSS, Tailwind, design tokens, responsive layout. |
-| [zai-md-std](./zai-md-std/SKILL.md) | — | — | Markdown standards enforcement. STD-DOC-002/003 compliance: code fences, no emoji, language tags. |
+| [zai-md-std](./zai-md-std/SKILL.md) | ZAI-DOC-001 | 1.0.0 | Markdown standards enforcement. STD-DOC-002/003 compliance: code fences, no emoji, language tags. |
 | [zai-mermaid-diagrams](./zai-mermaid-diagrams/SKILL.md) | — | — | Mermaid diagram creation and validation for documentation. |
 | [zai-performance-code-generator](./zai-performance-code-generator/SKILL.md) | — | — | Performance-aware code generation. Algorithmic complexity, memory layout, hot path awareness. |
 | [zai-phi-layout](./zai-phi-layout/SKILL.md) | — | — | Phi-based layout and proportions for UI design. Golden ratio, Fibonacci spacing. |
@@ -47,10 +48,11 @@
 
 The agent should load skills **on demand**, not all at once. Priority:
 
-1. **zai-sandbox-rules** — always, before any command
-2. **zai-workflow-discipline** — at session start
-3. **Domain-specific skills** — when the task requires them
-4. **zai-anti-monolith** — auto-activates on threshold violations
+1. **zai-answer-before-act** — at session start, before EVERY user message (RULE ZERO)
+2. **zai-sandbox-rules** — always, before any command
+3. **zai-workflow-discipline** — at session start
+4. **Domain-specific skills** — when the task requires them
+5. **zai-anti-monolith** — auto-activates on threshold violations
 
 ---
 

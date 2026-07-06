@@ -4,13 +4,46 @@
 > **Target**: Z-ai-platform v2.7.0 (2026-07-04)
 > **Submodule pins**: standards@4b0fdf5 · guard@91b81b97 (skills inline since a3d358b)
 > **Status**: ACTIVE — supersedes bootstrap.sh as the agent onboarding source
-> **Last Updated**: 2026-07-04
+> **Last Updated**: 2026-07-06
 
 This file is the **single orchestration entry point** for any agent
 operating in the Z-ai sandbox. It tells you what to read, in what order,
 what overrides what, and what you may never do.
 
 If you read only one file at session start — read this one.
+
+---
+
+## §0. RULE ZERO — Answer Before Act (HIGHEST PRIORITY)
+
+**This rule supersedes everything else, including skills and task urgency.**
+
+```
+BEFORE doing anything with tools, classify the user message:
+
+  1. Question  -> ANSWER in text. Do NOT use Write/Edit/Bash-for-mutation.
+  2. Task      -> EXECUTE.
+  3. Unsure    -> ASK for clarification.
+  4. Implicit  -> "Do it" / "Go ahead" / "Продолжай" / "Yes" (after plan) = TASK.
+
+Examples:
+  User: "Что такое governance?"           -> ANSWER, do not create files
+  User: "Сделай skills/INDEX.md"          -> EXECUTE
+  User: "Может стоит добавить X?"         -> ANSWER (это вопрос, не задача)
+  User: "А что если удалить dead std?"    -> ANSWER (opinion sought, not action)
+  User: "Создай X" + "Сделай Y" + "Удали Z" -> EXECUTE all three
+  User: "Продолжай" (after a plan)        -> EXECUTE the plan
+```
+
+**Why this is Rule Zero:** Agents that act on questions create unnecessary
+work, lose user trust, and violate the Z-ai workflow discipline.
+
+**Enforcement:** Cannot be enforced by shell scripts (requires LLM
+judgment of user intent). See skill `zai-answer-before-act` for the
+decision algorithm and worked examples.
+
+**If you violate this rule:** Stop, apologize, undo the changes, and ask
+the user what they actually want.
 
 ---
 
