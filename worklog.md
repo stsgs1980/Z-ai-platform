@@ -385,6 +385,34 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - Refresh timeline: ~3 min from push to visible
   - Total: 3 repos affected (Z-ai-platform main, standards submodule, graph-viewer)
 
+## 2026-07-06 (33)
+
+- Status: Done
+- Task: Make Z-ai-graph-viewer show true Z-ai-platform state (end-to-end)
+- Details:
+  - Work in C:/Users/stsgr/My Projects/Z-ai-graph-viewer/ (explicit permission)
+  - Created src/lib/url-fetcher.ts: fetch JSON from URL, transform to IdGraph
+  - Created src/components/hooks/use-graph-from-url.ts: periodic refresh (5 min)
+  - Created src/components/status-bar.tsx: Live/Stale/Loading/Error UI
+  - Created src/components/graph-client.tsx: client wrapper
+  - Updated src/app/page.tsx: simple server wrapper with warm-up
+  - Updated .env.example: documented NEXT_PUBLIC_USE_FS, NEXT_PUBLIC_GRAPH_JSON_URL
+  - First build error: graph-loader.ts in client bundle (node:fs)
+    - Fix: removed FS import from graph-client.tsx
+  - Second build error: spawn() dynamic import (Turbopack)
+    - Fix: removed fetchVerifierSummary function entirely
+  - Third error: stale .next cache
+    - Fix: rm -rf .next
+  - Fourth error: TypeScript url not in scope
+    - Fix: added url parameter to transformToIdGraph(json, url)
+  - Fifth runtime error: graph JSON has no ids/related_edges (only summary)
+    - Root cause: verify-id-graph.js --json only outputted verifier results
+    - Fix: extended lib/output.js to include full graph data
+    - Bumped version 1.1.6 -> 1.1.7
+    - Updated snapshot: 53->54 IDs, 97->109 edges
+  - Final state: graph-viewer consumes the data, URL has all graph fields
+  - Result: end-to-end works (push in Z-ai-platform -> visible in graph-viewer within ~3 min)
+
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
 
