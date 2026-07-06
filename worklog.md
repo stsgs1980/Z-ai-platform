@@ -1074,3 +1074,52 @@ Updated remaining files with new rule IDs:
 - `tests/sandbox-behavior-test.sh`: replaced RULE-MONOLITH-* pattern with RULE-* (lines 436-439)
 
 Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec).
+
+---
+
+### 2026-07-06 (PLAN)
+
+**Entry:** Create zai-governance-template — universal governance layer
+
+**Context:** Z-ai-platform is a complete project with governance. Other projects need governance without the Z-ai-specific application code. Template should be clean, universal, and ready to use.
+
+**What to include:**
+
+| Component          | Files                | Description                   |
+| ------------------ | -------------------- | ----------------------------- |
+| standards/         | 40 files             | Universal standards (STD-*)   |
+| guard/             | 17 RULE-* + scripts  | Universal rules + enforcement |
+| skills/            | 14 skills            | Universal behavioral rules    |
+| .husky/            | pre-commit, pre-push | Universal hooks               |
+| .github/workflows/ | CI verification      | Universal CI                  |
+| bootstrap.sh       | Sandbox setup        | Sandbox initialization        |
+| tests/             | 33 tests             | Infrastructure validation     |
+| README.md          | Documentation        | How to use                    |
+
+**What NOT to include:**
+
+| Component        | Reason                                      |
+| ---------------- | ------------------------------------------- |
+| src/             | Application code (each project has its own) |
+| worklog.md       | Each project has its own                    |
+| .zai/config.json | Each project has its own                    |
+
+**When to create:**
+
+- After Z-ai-platform governance is finalized
+- After sandbox testing is complete
+- When first external project needs governance
+
+**Dependencies:**
+
+- Z-ai-platform governance finalized (15/17 rules enforced)
+- Sandbox testing passed (all checks work)
+- Documentation complete (README, troubleshooting)
+
+**Next steps:**
+
+1. Finalize Z-ai-platform governance (current status: ready)
+2. Test in sandbox (current status: passed)
+3. Create zai-governance-template repository
+4. Add to npm or use as git submodule
+5. Document integration for other projects
