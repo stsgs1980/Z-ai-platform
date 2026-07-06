@@ -440,8 +440,28 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
     graph-viewer end-to-end work) — verbose single entry, not a loop.
   - Real definition of loop: same file in 3+ SEPARATE entries.
   - Fix: split worklog by '---' separator, count UNIQUE entries per file.
-  - Also: fixed awk invocation (was treating content as filename bug).
+  - Also: fixed awk invocation (was treating content as filename).
   - Pushed to guard (a6f2cfb).
+
+## 2026-07-06 (36)
+
+- Status: Done
+- Task: Create skills-registry.json infrastructure
+- Details:
+  - read skills/INDEX.md
+  - User asked: "почему skills без связей?" (why no skill connections)
+  - Answer: skills have related: in frontmatter but no validation
+  - Built: build-skills-registry.cjs (scans skills/{name}/SKILL.md)
+  - Built: validate-skills.cjs (6 checks: IDs, related resolves,
+    implements/supports extracted correctly, boilerplate warning)
+  - Wired into CI as 2 new steps: build + validate
+  - Output: skills-registry.json (alongside guard/registry.json)
+  - Found: 14 skills, 14 with ZAI id, 14 with related
+  - Found: 1 skill (ZAI-DEV-006) has RULE-ANSWER-001 in related
+  - Found: 4 skills (ZAI-DEV-003, ZAI-ARCH-001/003, ZAI-DEV-002) have
+    only [STD-SKILL-001] (boilerplate, no semantic connection)
+  - For verification in Z.ai sandbox (user will check)
+  - Renamed scripts to .cjs (package.json has type:module)
 
 Status: 16/17 rules enforced, 0 soft warnings, 30/30 sandbox tests, CHANGELOG 1.2.0.
 Z-ai-platform is governance-complete. Remaining work is split into tiers.
