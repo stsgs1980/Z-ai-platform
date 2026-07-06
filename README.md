@@ -11,6 +11,7 @@ Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard) a
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
+- [Sandbox Workflow](#sandbox-workflow)
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
 - [Scripts](#scripts)
@@ -21,9 +22,10 @@ Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard) a
 ## Features
 
 - **3-layer architecture** — platform (L0) + standards (L1) + guard (L2) with 14 inline skills (L3)
-- **Cross-repo ID graph** — 42 IDs with 92 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
+- **Cross-repo ID graph** — 55 IDs with 103 Related: edges and 2 Aligned_with: edges, verified by 13/13 HARD checks
+- **Governance enforcement** — 15/17 rules enforced via pre-commit hooks (8 scripts) + CI (4 scripts + 5 verifiers)
 - **Nightly + push CI** — `verify-standards.js`, `verify-id-graph.js`, `verify-skills.js`, and snapshot compare run automatically
-- **Pre-commit hooks** — Husky runs guard PROC checks + verify-standards/id-graph/skills + lint-staged on every commit (auto-installed via `npm install`)
+- **Pre-commit hooks** — Husky runs guard PROC checks + governance scripts + verify-standards/id-graph/skills + lint-staged on every commit (auto-installed via `npm install`)
 - **Bootstrap script** — one command restores all 14 custom skills into any fresh Z.ai sandbox session
 
 ## Tech Stack
@@ -62,6 +64,67 @@ git config --get core.hooksPath   # should print .husky/_
 # Bootstrap skills into a Z.ai sandbox
 bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
 ```
+
+## Sandbox Workflow
+
+### Fresh Session (after sandbox restart)
+
+```bash
+# 1. Clone with submodules
+cd /home/z/my-project
+git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
+
+# 2. Set git config for sandbox
+cd /home/z/my-project/Z-ai-platform
+git config core.fileMode false
+git submodule foreach --recursive 'git config core.fileMode false'
+
+# 3. Install dependencies (auto-enables Husky hooks)
+npm install
+
+# 4. Verify everything works
+ls .husky/                          # Should show: pre-commit pre-push commit-msg
+git config core.hooksPath           # Should show: .husky/_
+node standards/scripts/verify-standards.js    # Should show: 15/15 PASS
+node standards/scripts/verify-id-graph.js     # Should show: 13/13 HARD PASS
+```
+
+### What Runs Automatically
+
+| When              | What                                                                | Where          |
+| ----------------- | ------------------------------------------------------------------- | -------------- |
+| `git commit`      | Pre-commit hooks (8 governance scripts + 4 verifiers + lint-staged) | Local          |
+| `git push`        | CI workflow (governance checks + verifiers + graph generation)      | GitHub Actions |
+| Nightly 03:00 UTC | CI workflow (same as push)                                          | GitHub Actions |
+
+### Pre-commit Hook Chain
+
+```
+Group 0 (HARD): 8 governance scripts
+  check-no-bypass.sh       (INTEGRITY-011: no hook tampering)
+  check-commit-checklist.sh (COMMIT-014: emoji, large files)
+  check-version-bump.sh    (VERSION-013: version via ahg.sh)
+  check-read-before-write.sh (READ-003: read before write)
+  check-no-loops.sh        (LOOPS-005: loop detection)
+  check-ahg-integrity.sh   (ARCH-016/017: submodule immutability)
+  check-sandbox-env.sh     (ENV-008: sandbox verification)
+  check-session-start.sh   (AGENT-009: session start protocol)
+
+Group 1 (HARD): co-change + worklog
+Group 2 (HARD): verify-standards.js + verify-id-graph.js + verify-skills.js
+Group 3 (SOFT): line-count-check.sh
+Group 4:        lint-staged (eslint + prettier)
+```
+
+### Troubleshooting
+
+| Problem                      | Fix                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| Hooks not working            | `npm install` or `git config core.hooksPath .husky/_`                                             |
+| `core.fileMode` noise        | `git config core.fileMode false`                                                                  |
+| Snapshot mismatch            | `node verify-id-graph.js --update-snapshot --compare=standards/_snapshots/id-graph-baseline.json` |
+| `check-sandbox-env.sh` fails | Normal — sandbox manages dev server via `.zscripts/dev.sh`                                        |
+| Skills not found             | Run `bootstrap.sh` to symlink skills into sandbox                                                 |
 
 ## Architecture
 
