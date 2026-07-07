@@ -3,7 +3,7 @@
 # save-work.sh — quick save your work to GitHub (safety net against session death)
 #
 # Usage:
-#   bash /home/z/my-project/Z-ai-platform/save-work.sh "what you did"
+#   bash scripts/save-work.sh "what you did"
 #
 # What it does:
 #   1. Stages ALL changes in Z-ai-platform + 2 submodules (standards, guard)

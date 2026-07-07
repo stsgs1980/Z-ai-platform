@@ -45,14 +45,14 @@ Run separately. See `tests/sandbox-behavior-test.sh`.
 
 ## Line Ending Verification (2026-07-06)
 
-| File                | Status |
-| ------------------- | ------ |
-| `bootstrap.sh`      | LF     |
-| `save-work.sh`      | LF     |
-| `status.sh`         | LF     |
-| `.husky/pre-commit` | LF     |
-| `.husky/pre-push`   | LF     |
-| `.husky/commit-msg` | LF     |
+| File                   | Status |
+| ---------------------- | ------ |
+| `bootstrap.sh`         | LF     |
+| `scripts/save-work.sh` | LF     |
+| `scripts/status.sh`    | LF     |
+| `.husky/pre-commit`    | LF     |
+| `.husky/pre-push`      | LF     |
+| `.husky/commit-msg`    | LF     |
 
 ### `.gitattributes` coverage
 

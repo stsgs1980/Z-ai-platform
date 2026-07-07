@@ -3,7 +3,7 @@
 # status.sh — check if your custom skills are loaded in the current session
 #
 # Usage:
-#   bash /home/z/my-project/Z-ai-platform/status.sh
+#   bash scripts/status.sh
 #
 # Run this if you suspect the session restarted or skills are missing.
 # It tells you:

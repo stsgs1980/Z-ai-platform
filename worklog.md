@@ -639,3 +639,18 @@ fi
 ### Tier 7 total estimate: ~10 hours
 
 ---
+
+## 2026-07-07 (37)
+
+- Status: Done
+- Task: Move utility scripts to scripts/ directory
+- Details:
+  - Moved save-work.sh, status.sh, fix-code-block-langs.py to scripts/
+  - Deleted outdated SESSION-HANDOFF.md
+  - Updated CI workflow shell syntax check paths
+  - Updated HANDBOOK.md script table
+  - Updated TEST-REPORT.md line ending table
+  - Updated sandbox-integration-test.sh script paths
+  - Updated guard submodule (check-crlf.sh, setup-001.sh paths)
+  - Updated id-graph baseline snapshot (54 IDs, 116 edges, 2 warnings)
+  - Fixed validate-skills.cjs regex for A11Y-001 (digits in prefix)

@@ -171,21 +171,21 @@ TypeScript конфигурация (strict mode, ES2022+, ESNext modules).
 
 ## Ключевые файлы в корне
 
-| Файл                      | Назначение                                                        |
-| ------------------------- | ----------------------------------------------------------------- |
-| `AGENT_RULES.md`          | Точка входа для агентов: протокол онбординга, приоритеты, запреты |
-| `README.md`               | Описание проекта                                                  |
-| `CHANGELOG.md`            | Журнал изменений (Keep a Changelog)                               |
-| `CONTRIBUTING.md`         | Гайд для контрибьюторов                                           |
-| `worklog.md`              | Аппенди-онли лог действий (STD-DOC-008)                           |
-| `bootstrap.sh`            | Единая точка входа: install + update + restore                    |
-| `status.sh`               | Диагностика состояния проекта                                     |
-| `save-work.sh`            | Сохранение текущей работы                                         |
-| `package.json`            | NPM-конфигурация: скрипты, зависимости                            |
-| `.prettierrc`             | Prettier: LF, 100 chars, double quotes                            |
-| `.gitmodules`             | Объявление submodules (standards, guard)                          |
-| `.env.example`            | Пример переменных окружения                                       |
-| `fix-code-block-langs.py` | Разовый скрипт исправления языков в code blocks                   |
+| Файл                              | Назначение                                                        |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `AGENT_RULES.md`                  | Точка входа для агентов: протокол онбординга, приоритеты, запреты |
+| `README.md`                       | Описание проекта                                                  |
+| `CHANGELOG.md`                    | Журнал изменений (Keep a Changelog)                               |
+| `CONTRIBUTING.md`                 | Гайд для контрибьюторов                                           |
+| `worklog.md`                      | Аппенди-онли лог действий (STD-DOC-008)                           |
+| `bootstrap.sh`                    | Единая точка входа: install + update + restore                    |
+| `scripts/status.sh`               | Диагностика состояния проекта                                     |
+| `scripts/save-work.sh`            | Сохранение текущей работы                                         |
+| `package.json`                    | NPM-конфигурация: скрипты, зависимости                            |
+| `.prettierrc`                     | Prettier: LF, 100 chars, double quotes                            |
+| `.gitmodules`                     | Объявление submodules (standards, guard)                          |
+| `.env.example`                    | Пример переменных окружения                                       |
+| `scripts/fix-code-block-langs.py` | Разовый скрипт исправления языков в code blocks                   |
 
 ---
 

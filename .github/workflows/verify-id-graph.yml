@@ -67,7 +67,7 @@ jobs:
       - name: Shell script syntax check
         run: |
           echo "Checking shell script syntax..."
-          for f in bootstrap.sh save-work.sh status.sh .husky/pre-commit .husky/pre-push .husky/commit-msg guard/scripts/*.sh standards/scripts/*.sh; do
+          for f in bootstrap.sh scripts/save-work.sh scripts/status.sh .husky/pre-commit .husky/pre-push .husky/commit-msg guard/scripts/*.sh standards/scripts/*.sh scripts/*.sh; do
             if [ -f "$f" ]; then
               if bash -n "$f" 2>&1; then
                 echo "  OK: $f"

@@ -576,7 +576,7 @@ test_precommit_hook_exists() {
 test_no_crlf_in_shell_scripts() {
     local errors=0
     
-    for script in bootstrap.sh save-work.sh status.sh; do
+    for script in bootstrap.sh scripts/save-work.sh scripts/status.sh; do
         if [ -f "$PLATFORM_DIR/$script" ]; then
             # Check for CRLF
             if cat -A "$PLATFORM_DIR/$script" | grep -q $'\r'; then
