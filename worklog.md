@@ -654,3 +654,13 @@ fi
   - Updated guard submodule (check-crlf.sh, setup-001.sh paths)
   - Updated id-graph baseline snapshot (54 IDs, 116 edges, 2 warnings)
   - Fixed validate-skills.cjs regex for A11Y-001 (digits in prefix)
+
+## 2026-07-07 (38)
+
+- Status: Done
+- Task: Add CI status check script
+- Details:
+  - Created scripts/push-and-check.sh (push + GitHub API CI check)
+  - Added git alias: git push-and-check
+  - Updated CI workflow shell syntax check
+  - Usage: bash scripts/push-and-check.sh [--wait]
