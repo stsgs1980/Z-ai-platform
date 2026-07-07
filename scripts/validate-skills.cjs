@@ -19,7 +19,9 @@ function warn(m) {
 function info(m) {
   console.log("  INFO: " + m);
 }
-const reg = JSON.parse(fs.readFileSync("skills-registry.json", "utf-8"));
+const reg = JSON.parse(
+  fs.readFileSync(path.join(PLATFORM, "scripts", "skills-registry.json"), "utf-8"),
+);
 const skillFolders = new Set(
   fs
     .readdirSync(SKILLS_DIR)
@@ -34,8 +36,9 @@ const ruleFiles = new Set(
 const stdShort = new Set(
   fs
     .readdirSync(STANDARDS_DIR)
-    .filter((f) => /^[A-Z]+-/.test(f))
-    .map((f) => f.match(/^([A-Z]+-\d+)/)[1]),
+    .filter((f) => /^[A-Z]/.test(f))
+    .map((f) => f.match(/^([A-Z]+\d*[A-Z]*-\d+)/)?.[1])
+    .filter(Boolean),
 );
 const regIds = new Set(reg.ids.filter((e) => e.id).map((e) => e.id));
 console.log("=== Check 1: every registry ZAI id has a skill folder ===");

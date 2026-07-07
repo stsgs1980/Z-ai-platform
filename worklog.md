@@ -451,11 +451,11 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
   - read skills/INDEX.md
   - User asked: "почему skills без связей?" (why no skill connections)
   - Answer: skills have related: in frontmatter but no validation
-  - Built: build-skills-registry.cjs (scans skills/{name}/SKILL.md)
-  - Built: validate-skills.cjs (6 checks: IDs, related resolves,
+  - Built: scripts/build-skills-registry.cjs (scans skills/{name}/SKILL.md)
+  - Built: scripts/validate-skills.cjs (6 checks: IDs, related resolves,
     implements/supports extracted correctly, boilerplate warning)
   - Wired into CI as 2 new steps: build + validate
-  - Output: skills-registry.json (alongside guard/registry.json)
+  - Output: scripts/skills-registry.json (alongside guard/registry.json)
   - Found: 14 skills, 14 with ZAI id, 14 with related
   - Found: 1 skill (ZAI-DEV-006) has RULE-ANSWER-001 in related
   - Found: 4 skills (ZAI-DEV-003, ZAI-ARCH-001/003, ZAI-DEV-002) have

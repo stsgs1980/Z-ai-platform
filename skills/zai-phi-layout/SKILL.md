@@ -8,6 +8,8 @@ author: StsDev
 trigger: phi layout, golden ratio, Fibonacci, bento, masonry, zeitgeist, asymmetric, timeline, sacred geometry, golden grid, Linear-style, Vercel-style, container query
 related:
   - STD-SKILL-001
+  - STD-FE-001
+  - STD-DESIGN-001
 ---
 
 # Skill: Zai Phi Layout v3.0

@@ -8,6 +8,7 @@ author: StsDev
 trigger: optimize, performance, slow code, Big O, cache, SIMD, allocation, bottleneck, hot path, throughput, latency, profiling, memory leak, vectorization, lock-free
 related:
   - STD-SKILL-001
+  - STD-FE-001
 ---
 
 # Skill: Zai Performance Code Generator v1.0

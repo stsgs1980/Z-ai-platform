@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T21:45:49.250Z",
+  "generated_at": "2026-07-07T07:52:17.446Z",
   "platform_version": "v2.7.0",
   "counts": {
     "ZAI": 14,
@@ -67,11 +67,17 @@
       "status": "ACTIVE",
       "file": "skills/zai-frontend-styling-expert/SKILL.md",
       "related": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001",
+        "STD-DESIGN-001",
+        "STD-A11Y-001"
       ],
       "implements": [],
       "supports": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001",
+        "STD-DESIGN-001",
+        "STD-A11Y-001"
       ]
     },
     {
@@ -99,11 +105,15 @@
       "status": "ACTIVE",
       "file": "skills/zai-mermaid-diagrams/SKILL.md",
       "related": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-DOC-002",
+        "STD-ARCH-001"
       ],
       "implements": [],
       "supports": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-DOC-002",
+        "STD-ARCH-001"
       ]
     },
     {
@@ -113,11 +123,13 @@
       "status": "ACTIVE",
       "file": "skills/zai-performance-code-generator/SKILL.md",
       "related": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001"
       ],
       "implements": [],
       "supports": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001"
       ]
     },
     {
@@ -127,11 +139,15 @@
       "status": "ACTIVE",
       "file": "skills/zai-phi-layout/SKILL.md",
       "related": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001",
+        "STD-DESIGN-001"
       ],
       "implements": [],
       "supports": [
-        "STD-SKILL-001"
+        "STD-SKILL-001",
+        "STD-FE-001",
+        "STD-DESIGN-001"
       ]
     },
     {

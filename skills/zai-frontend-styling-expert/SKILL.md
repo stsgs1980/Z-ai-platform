@@ -9,6 +9,9 @@ trigger: CSS, styling, responsive, accessibility, animation, hover effects, layo
 license: MIT
 related:
   - STD-SKILL-001
+  - STD-FE-001
+  - STD-DESIGN-001
+  - STD-A11Y-001
 ---
 
 # Skill: Zai Frontend Styling Expert v1.0

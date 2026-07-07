@@ -8,6 +8,8 @@ description: Comprehensive guide for creating software diagrams using Mermaid sy
 trigger: diagram, mermaid, flowchart, sequence diagram, ERD, class diagram, chart
 related:
   - STD-SKILL-001
+  - STD-DOC-002
+  - STD-ARCH-001
 ---
 
 

@@ -9,7 +9,7 @@ const path = require("path");
 
 const PLATFORM = process.cwd();
 const SKILLS_DIR = path.join(PLATFORM, "skills");
-const OUTPUT = path.join(PLATFORM, "skills-registry.json");
+const OUTPUT = path.join(PLATFORM, "scripts", "skills-registry.json");
 
 function readFrontmatter(content) {
   const m = content.match(/^---\r?\n([\s\S]+?)\r?\n---\r?\n/);
