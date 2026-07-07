@@ -3,11 +3,11 @@
   "effective_date": "2026-07-06",
   "summary": {
     "ids_extracted": 54,
-    "related_edges": 109,
+    "related_edges": 116,
     "aligned_with_edges": 0,
     "hard_pass": 13,
     "hard_fail": 0,
-    "warnings": 0
+    "warnings": 2
   },
   "checks": [
     {
@@ -89,7 +89,16 @@
       "details": []
     }
   ],
-  "warnings": [],
+  "warnings": [
+    {
+      "id": "W13",
+      "detail": "META-001-id-registry.md: references \"status.sh\" which does not exist in standards/ tree"
+    },
+    {
+      "id": "W13",
+      "detail": "META-001-id-registry.md: references \"Z-ai-platform/status.sh\" which does not exist in standards/ tree"
+    }
+  ],
   "ids": [
     {
       "id": "STD-AGENT-001",
@@ -983,6 +992,16 @@
       "file": "skills/zai-frontend-styling-expert/SKILL.md"
     },
     {
+      "from": "ZAI-DEV-003",
+      "to": "STD-FE-001",
+      "file": "skills/zai-frontend-styling-expert/SKILL.md"
+    },
+    {
+      "from": "ZAI-DEV-003",
+      "to": "STD-DESIGN-001",
+      "file": "skills/zai-frontend-styling-expert/SKILL.md"
+    },
+    {
       "from": "ZAI-DOC-001",
       "to": "STD-DOC-002",
       "file": "skills/zai-md-std/SKILL.md"
@@ -1003,13 +1022,38 @@
       "file": "skills/zai-mermaid-diagrams/SKILL.md"
     },
     {
+      "from": "ZAI-ARCH-001",
+      "to": "STD-DOC-002",
+      "file": "skills/zai-mermaid-diagrams/SKILL.md"
+    },
+    {
+      "from": "ZAI-ARCH-001",
+      "to": "STD-ARCH-001",
+      "file": "skills/zai-mermaid-diagrams/SKILL.md"
+    },
+    {
       "from": "ZAI-DEV-002",
       "to": "STD-SKILL-001",
       "file": "skills/zai-performance-code-generator/SKILL.md"
     },
     {
+      "from": "ZAI-DEV-002",
+      "to": "STD-FE-001",
+      "file": "skills/zai-performance-code-generator/SKILL.md"
+    },
+    {
       "from": "ZAI-ARCH-003",
       "to": "STD-SKILL-001",
+      "file": "skills/zai-phi-layout/SKILL.md"
+    },
+    {
+      "from": "ZAI-ARCH-003",
+      "to": "STD-FE-001",
+      "file": "skills/zai-phi-layout/SKILL.md"
+    },
+    {
+      "from": "ZAI-ARCH-003",
+      "to": "STD-DESIGN-001",
       "file": "skills/zai-phi-layout/SKILL.md"
     },
     {
@@ -1064,5 +1108,5 @@
     }
   ],
   "aligned_with_edges": [],
-  "exported_at": "2026-07-06T21:52:57.881Z"
+  "exported_at": "2026-07-07T08:57:58.238Z"
 }
