@@ -664,3 +664,16 @@ fi
   - Added git alias: git push-and-check
   - Updated CI workflow shell syntax check
   - Usage: bash scripts/push-and-check.sh [--wait]
+
+## 2026-07-08 (39)
+
+- Status: Done
+- Task: Add output formatting to verify-source-line-count.js
+- Details:
+  - read standards/scripts/verify-source-line-count.js
+  - Added printHuman() function: formatted output with PASS/FAIL icons, aligned columns, summary, ACTION REQUIRED
+  - Added printJSON() function: structured JSON with script metadata, summary, checks array
+  - Updated main() to call runChecks() then printHuman/printJSON based on opts.json
+  - Updated exit logic: hardFail > 0 && !opts.soft ? exit 1 : exit 0
+  - Verified: human-readable mode, JSON mode, --help, --soft all work correctly
+  - Committed in standards submodule: 38c4072
