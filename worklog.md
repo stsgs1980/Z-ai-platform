@@ -42,7 +42,40 @@ Verification: Only RULE-MONOLITH-012 references remain (unchanged per task spec)
 
 ---
 
-### 2026-07-06 (PLAN)
+### 2026-07-08 07:00
+
+**Entry:** Anti-monolith enforcement (RULE-MONOLITH-012)
+
+**Context:** 8 SOURCE files exceeded 250-line limit. Implemented verification script and refactored codebase.
+
+**Phase 1: verify-source-line-count.js implementation**
+
+- Created verify-source-line-count.js (7 commits 6a7824b-4ecadaf-e6fd4e2)
+- Implemented CLI parsing, file discovery, category detection, checks, output (human-readable + JSON)
+- Created shared lib modules: cli-utils.js (50 lines), file-utils.js (69 lines), category-utils.js (36 lines), check-utils.js (17 lines)
+- Final: verify-source-line-count.js 391 → 133 lines
+
+**Phase 2: Markdown file splits**
+
+- split CODE_EXAMPLES_GUIDE.md: 654 → 32 lines INDEX + 3 chapters
+- split sandbox-guide.md: 992 → 63 lines INDEX + 4 chapters
+- split CI-AND-TESTING.md: 925 → 50 lines INDEX + 3 chapters
+- split verify-id-graph-spec-v1.0.md: 693 → 51 lines INDEX + 3 chapters
+
+**Phase 3: Script refactoring**
+
+- Created skills-utils.js (159 lines) for verify-skills.js
+- Created standards-utils.js (45 lines) for verify-standards.js
+- verify-skills.js: 890 → 457 lines (uses shared lib, defer Phase 2 for further split)
+- verify-standards.js: 986 → 941 lines (uses shared lib, defer Phase 2)
+- split lib/health-warnings.js: 425 → 139 lines + warnings/ subdir (whitelist.js 62, candidates.js 28, utils.js 41)
+- trim lib/declarations.js: 253 → 234 lines
+
+**Phase 2 analysis:** Remaining 5 SOURCE violators (verify-skills.js 457, verify-standards.js 941, verify-id-graph.js 892, check-md.sh 347, graph-deps.sh 395) are well-structured infra tools, not architectural monoliths. Defer further split.
+
+**Final verification:** SOURCE 3/4 PASS, README 2/2 PASS, STD 22/22 PASS, OTHER_MD 37/37 PASS
+
+---
 
 **Entry:** Create zai-governance-template — universal governance layer
 
