@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ---
 
+## [1.3.0] - 2026-07-08
+
+### Added
+
+- **`standards/scripts/verify-source-line-count.js`** (TOOL-VERIFY-SRC-001): scaffold for anti-monolith source file verifier implementing RULE-MONOLITH-012 section 4.18.1
+  - CLI parsing: `--json`, `--soft`, `--root=<path>`, `--help/-h`
+  - Project root discovery via `package.json` walk-up
+  - Human-readable and CI-friendly output modes
+  - Exit codes: 0 (pass), 1 (violation), 2 (config error)
+
+### Changed
+
+- **Standards submodule**: updated with new verification script scaffold
+
+---
+
 ## [1.2.0] - 2026-07-06
 
 ### Added
