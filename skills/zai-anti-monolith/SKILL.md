@@ -5,7 +5,7 @@ version: 1.0
 compatibility: both
 description: "Modular architecture enforcement. Automatically activates when files exceed size limits, components have too many hooks, or code structure violates FSD/layer boundaries. Refactors monoliths into composable, testable modules using a 7-step decomposition strategy. Triggers: file > 250 lines, component > 200 lines, 3+ useState in one component, upward layer imports, mixed concerns in a single file. This skill MUST auto-activate whenever the agent encounters these patterns during ANY task — the agent does not need to be explicitly asked to refactor."
 id: ZAI-ARCH-002
-trigger: monolith, refactor, file too long, too many lines, too many hooks, useState overload, decompose, split component, extract hook, split file, modular architecture, FSD, layer violation, clean architecture, separation of concerns, 250 lines, 200 lines, file exceeds limit
+trigger: monolith, refactor, file too long, too many lines, too many hooks, useState overload, decompose, split component, extract hook, split file, modular architecture, FSD, layer violation, clean architecture, separation of concerns, 250 lines, 500 lines shell, 200 lines, file exceeds limit
 license: MIT
 related:
   - STD-SKILL-001
@@ -28,7 +28,8 @@ This skill enforces modular architecture by detecting and decomposing monolithic
 
 | Condition | Threshold | Severity |
 |-----------|-----------|----------|
-| File exceeds 250 lines | 250 lines | [C] Critical |
+| File exceeds 250 lines (TS/JS/Python) | 250 lines | [C] Critical |
+| Shell script exceeds 500 lines | 500 lines | [C] Critical |
 | Component exceeds 200 lines | 200 lines | [C] Critical |
 | 3+ `useState` in one component | 3 hooks | [W] Warning |
 | Upward layer imports (features -> sections) | 1 violation | [C] Critical |
@@ -38,7 +39,8 @@ This skill enforces modular architecture by detecting and decomposing monolithic
 | `useEffect` with 3+ dependencies | 3 deps | [I] Info |
 
 **Auto-trigger phrases (agent should recognize these patterns in ANY context):**
-- Writing a file that goes past 250 lines
+- Writing a file that goes past 250 lines (TS/JS/Python)
+- Writing a shell script that goes past 500 lines
 - Adding the 3rd `useState` to a component
 - Importing from a higher layer
 - A `page.tsx` that contains business logic
@@ -345,11 +347,12 @@ When decomposition is not practical:
 
 ```text
 THRESHOLDS:
-  File:     250 lines max (150 recommended)
-  Component: 200 lines max (100 recommended)
-  useState:  2 per component (3rd -> custom hook)
-  Function:  50 lines max
-  useEffect: 2 dependencies max (3+ -> refactor)
+   TS/JS/Python file: 250 lines max (150 recommended)
+   Shell script:       500 lines max (300 recommended)
+   Component:          200 lines max (100 recommended)
+   useState:           2 per component (3rd -> custom hook)
+   Function:           50 lines max
+   useEffect:          2 dependencies max (3+ -> refactor)
 
 7 STEPS:
   1. Identify sub-components -> extract to sections/
@@ -361,10 +364,11 @@ THRESHOLDS:
   7. Verify layer separation (no upward imports)
 
 AUTO-ACTIVATE WHEN:
-  - File crosses 250 lines
-  - 3rd useState added
-  - Upward import detected
-  - Mixed concerns in one file
+   - TS/JS/Python file crosses 250 lines
+   - Shell script crosses 500 lines
+   - 3rd useState added
+   - Upward import detected
+   - Mixed concerns in one file
 ```
 
 ---
@@ -372,7 +376,8 @@ AUTO-ACTIVATE WHEN:
 ## Communication Style
 
 This skill communicates in a direct, diagnostic style:
-- Announce violations: `[ANTI-MONOLITH] File exceeds 250 lines (312 lines): decompose`
+- Announce violations: `[ANTI-MONOLITH] TS/JS/Python file exceeds 250 lines (312 lines): decompose`
+- Announce violations: `[ANTI-MONOLITH] Shell script exceeds 500 lines (520 lines): decompose`
 - Use severity tags: [C] Critical (must fix), [W] Warning (should fix), [I] Info (consider)
 - Show before/after line counts: `DashboardPage: 312 lines -> 38 lines (composer) + 4 modules`
 - No emoji — use text markers: [OK], [FAIL], [VIOLATION], [EXCEPTION]
