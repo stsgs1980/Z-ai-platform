@@ -22,5 +22,4 @@ docs/_graph/
 # Runtime/session artifacts (generated, not source)
 worklog.md
 scripts/skills-registry.json
-graph/id-graph.json
 tests/governance-escalation-report.md
