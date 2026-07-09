@@ -18,3 +18,9 @@ docs/_graph/
 .zai/.verifier-daemon.lock
 .zai/.verifier-daemon.log
 .zai/.verifier-daemon.pid
+
+# Runtime/session artifacts (generated, not source)
+worklog.md
+scripts/skills-registry.json
+graph/id-graph.json
+tests/governance-escalation-report.md
