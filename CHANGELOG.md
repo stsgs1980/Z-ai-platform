@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ---
 
+## [1.3.1] - 2026-07-22
+
+### Fixed
+
+- **DOC-003 unicode-graphics-in-md**: aligned Rule 4 (no-unicode-graphics-in-md) with MD-001 resolution from DOC-002 v2.4.0 — description and messageId updated from [W] to [C]
+- **DOC-003 §2 Responsibility Separation**: updated version references (this doc v2.2 -> v2.3, MARKDOWN_STANDARD v2.3 -> v2.4)
+- **DOC-003 §10.1 configs**: changed emoji-in-md and unicode-graphics-in-md from warn to error
+- **DOC-003 §10.1.2 severity mapping**: rewrote table — all markdown rules now [C] Critical / error
+- **DOC-003 §10.2**: updated ESLint integration notes to reflect error severity
+- **README.md**: fixed bare-fence violation (added text language tag)
+
+### Changed
+
+- **Standards submodule**: DOC-003 bumped to v2.3.1
+
+---
+
 ## [1.3.0] - 2026-07-08
 
 ### Added

@@ -1,5 +1,9 @@
 # Z-ai-platform
 
+Z-ai-platform is a monorepo combining Z-ai-standards, Z-ai-guard, and Z-ai-skills into a single repository with unified development workflow. This platform provides full-stack tooling for standards governance, skill orchestration, and agent development.
+
+![badge-npm-version](https://img.shields.io/badge/npm-v0.1.0-blue) ![badge-license](https://img.shields.io/badge/license-MIT-green)
+
 Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard) and contains 14 skills as a monorepo. Enforces cross-repo ID-graph integrity in CI.
 
 [![Status: LIVE](https://img.shields.io/badge/Status-LIVE-brightgreen.svg?style=flat-square)]()
@@ -99,7 +103,7 @@ node standards/scripts/verify-id-graph.js     # Should show: 13/13 HARD PASS
 
 ### Pre-commit Hook Chain
 
-```
+```text
 Group 0 (HARD): 8 governance scripts
   check-no-bypass.sh       (INTEGRITY-011: no hook tampering)
   check-commit-checklist.sh (COMMIT-014: emoji, large files)
