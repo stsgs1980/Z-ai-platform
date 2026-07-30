@@ -1,6 +1,6 @@
 # Z-ai-platform
 
-Z-ai-platform is a monorepo combining Z-ai-standards, Z-ai-guard, and Z-ai-skills into a single repository with unified development workflow. This platform provides full-stack tooling for standards governance, skill orchestration, and agent development.
+Z-ai-platform is a **governance system** for AI agents in the Z.ai sandbox. It is NOT a web application. It enforces standards, rules, and skill orchestration for agents operating in the sandbox environment.
 
 ![badge-npm-version](https://img.shields.io/badge/npm-v0.1.0-blue) ![badge-license](https://img.shields.io/badge/license-MIT-green)
 
@@ -41,37 +41,62 @@ Orchestrator for the Z-ai ecosystem — pins two submodules (standards, guard) a
 
 ## Getting Started
 
-### Prerequisites
+**Important:** There are two different installation paths depending on your environment:
 
-- Node.js 20+
-- Git with submodule support
-- (For CI) SSH deploy key with read access to standards and guard submodule repos
+### Option A: Local Development (WebStorm, VS Code, OpenCode)
 
-### Installation
+For developing governance scripts, standards, or skills on your local machine:
 
 ```bash
+# Prerequisites: Node.js 20+, Git
 git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
 cd Z-ai-platform
-```
+npm install
 
-### Run
-
-```bash
-# Verify the ID graph locally
+# Verify governance works
 node standards/scripts/verify-standards.js
 node standards/scripts/verify-id-graph.js
+```
 
-# Pre-commit hooks install automatically via npm install (Husky)
-# To verify they are active:
-git config --get core.hooksPath   # should print .husky/_
+### Option B: Z.ai Sandbox (chat.z.ai) — Governance Installation
 
-# Bootstrap skills into a Z.ai sandbox
+To install Z-ai-platform as a governance layer in the Z.ai sandbox, use `bootstrap.sh`:
+
+```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
 ```
 
+**What bootstrap.sh does:**
+
+1. Clones Z-ai-platform into `/home/z/my-project/Z-ai-platform/`
+2. Sets `core.fileMode=false` (sandbox filesystem requirement)
+3. Creates symlinks from `skills/*` to `/home/z/my-project/skills/` (so sandbox can find them)
+4. Runs governance verifiers
+
+**Do NOT use `git clone --recurse-submodules` in the sandbox.** It clones into the wrong directory and does not create the symlinks the sandbox needs.
+
 ## Sandbox Workflow
 
+**This section applies only to Z.ai sandbox (chat.z.ai).** For local development, see "Option A" above.
+
 ### Fresh Session (after sandbox restart)
+
+One command restores all governance and skills:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
+```
+
+### What bootstrap.sh Does
+
+| Step | What Happens                                                | Why                                                       |
+| ---- | ----------------------------------------------------------- | --------------------------------------------------------- |
+| 1    | Clones Z-ai-platform to `/home/z/my-project/Z-ai-platform/` | Keeps governance separate from your project               |
+| 2    | Sets `core.fileMode=false`                                  | Sandbox filesystem sets +x on all files; git ignores this |
+| 3    | Symlinks skills to `/home/z/my-project/skills/`             | Sandbox loads skills from this path                       |
+| 4    | Runs governance verifiers                                   | Confirms everything works                                 |
+
+### Manual Setup (if bootstrap.sh fails)
 
 ```bash
 # 1. Clone with submodules
@@ -83,14 +108,18 @@ cd /home/z/my-project/Z-ai-platform
 git config core.fileMode false
 git submodule foreach --recursive 'git config core.fileMode false'
 
-# 3. Install dependencies (auto-enables Husky hooks)
+# 3. Install dependencies
 npm install
 
-# 4. Verify everything works
-ls .husky/                          # Should show: pre-commit pre-push commit-msg
-git config core.hooksPath           # Should show: .husky/_
-node standards/scripts/verify-standards.js    # Should show: 15/15 PASS
-node standards/scripts/verify-id-graph.js     # Should show: 13/13 HARD PASS
+# 4. Create skill symlinks manually
+mkdir -p /home/z/my-project/skills
+for skill in skills/zai-*/; do
+    ln -s "/home/z/my-project/Z-ai-platform/$skill" "/home/z/my-project/skills/$(basename $skill)"
+done
+
+# 5. Verify
+node standards/scripts/verify-standards.js
+node standards/scripts/verify-id-graph.js
 ```
 
 ### What Runs Automatically
