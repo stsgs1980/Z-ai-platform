@@ -73,7 +73,18 @@ bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main
 3. Creates symlinks from `skills/*` to `/home/z/my-project/skills/` (so sandbox can find them)
 4. Runs governance verifiers
 
-**Do NOT use `git clone --recurse-submodules` in the sandbox.** It clones into the wrong directory and does not create the symlinks the sandbox needs.
+**After governance is set up, clone your project for coding:**
+
+```bash
+# Governance is now active (skills, rules, AGENT_RULES.md)
+# Clone your project anywhere:
+cd /home/z/my-project
+git clone https://github.com/youruser/your-project.git
+cd your-project
+# Start coding — governance skills are available
+```
+
+**Important:** Do NOT clone Z-ai-platform manually with `git clone --recurse-submodules` — use `bootstrap.sh` instead. It creates the symlinks the sandbox needs.
 
 ## Sandbox Workflow
 
@@ -87,39 +98,24 @@ One command restores all governance and skills:
 bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main/bootstrap.sh)
 ```
 
-### What bootstrap.sh Does
+### After Governance is Set Up
 
-| Step | What Happens                                                | Why                                                       |
-| ---- | ----------------------------------------------------------- | --------------------------------------------------------- |
-| 1    | Clones Z-ai-platform to `/home/z/my-project/Z-ai-platform/` | Keeps governance separate from your project               |
-| 2    | Sets `core.fileMode=false`                                  | Sandbox filesystem sets +x on all files; git ignores this |
-| 3    | Symlinks skills to `/home/z/my-project/skills/`             | Sandbox loads skills from this path                       |
-| 4    | Runs governance verifiers                                   | Confirms everything works                                 |
+Once `bootstrap.sh` completes, the governance layer is active:
 
-### Manual Setup (if bootstrap.sh fails)
+- **Skills** are symlinked to `/home/z/my-project/skills/`
+- **Rules** are available via `AGENT_RULES.md`
+- **Verifiers** can run from `Z-ai-platform/standards/scripts/`
+
+Now you can clone your project for coding:
 
 ```bash
-# 1. Clone with submodules
+# Clone your project
 cd /home/z/my-project
-git clone --recurse-submodules https://github.com/stsgs1980/Z-ai-platform.git
+git clone https://github.com/youruser/your-project.git
+cd your-project
 
-# 2. Set git config for sandbox
-cd /home/z/my-project/Z-ai-platform
-git config core.fileMode false
-git submodule foreach --recursive 'git config core.fileMode false'
-
-# 3. Install dependencies
-npm install
-
-# 4. Create skill symlinks manually
-mkdir -p /home/z/my-project/skills
-for skill in skills/zai-*/; do
-    ln -s "/home/z/my-project/Z-ai-platform/$skill" "/home/z/my-project/skills/$(basename $skill)"
-done
-
-# 5. Verify
-node standards/scripts/verify-standards.js
-node standards/scripts/verify-id-graph.js
+# Governance skills are available (e.g., tdd-workflow, code-quality-checker)
+# Use them to work on your project
 ```
 
 ### What Runs Automatically
