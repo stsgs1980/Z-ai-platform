@@ -110,12 +110,12 @@ jobs:
       - name: Build skills registry
         run: |
           echo "Building skills-registry.json..."
-          node scripts/build-skills-registry.cjs
+          node standards/scripts/verify-skills.js --build-registry
 
       - name: Validate skills registry and connections
         run: |
           echo "Validating skills registry..."
-          if ! node scripts/validate-skills.cjs; then
+          if ! node standards/scripts/verify-skills.js --validate-registry; then
             echo "Skills validation FAILED"
             exit 1
           fi
