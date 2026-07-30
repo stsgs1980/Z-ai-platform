@@ -21,8 +21,8 @@
 
 set -euo pipefail
 
-PLATFORM_DIR="/home/z/my-project/Z-ai-platform"
-SANDBOX_SKILLS_DIR="/home/z/my-project/skills"
+PLATFORM_DIR="${ZAI_PLATFORM_DIR:-/home/z/my-project/Z-ai-platform}"
+SANDBOX_SKILLS_DIR="${ZAI_SKILLS_DIR:-/home/z/my-project/skills}"
 GITHUB_URL="https://github.com/stsgs1980/Z-ai-platform.git"
 
 echo "=== Step 1: Ensure Z-ai-platform is cloned ==="

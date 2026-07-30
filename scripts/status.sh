@@ -14,8 +14,8 @@
 
 set -euo pipefail
 
-PLATFORM_DIR="/home/z/my-project/Z-ai-platform"
-SANDBOX_SKILLS_DIR="/home/z/my-project/skills"
+PLATFORM_DIR="${ZAI_PLATFORM_DIR:-/home/z/my-project/Z-ai-platform}"
+SANDBOX_SKILLS_DIR="${ZAI_SKILLS_DIR:-/home/z/my-project/skills}"
 
 echo "============================================"
 echo "  Z.ai Sandbox Session Status"

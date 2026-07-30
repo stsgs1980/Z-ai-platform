@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-PLATFORM_DIR="/home/z/my-project/Z-ai-platform"
+PLATFORM_DIR="${ZAI_PLATFORM_DIR:-/home/z/my-project/Z-ai-platform}"
 cd "$PLATFORM_DIR"
 
 MSG="${1:-manual save at $(date -u +%Y-%m-%dT%H:%M:%SZ)}"

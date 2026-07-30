@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and this 
 
 ---
 
+## [1.3.2] - 2026-07-30
+
+### Changed
+
+- **scripts/status.sh**: replaced hardcoded `/home/z/my-project/` paths with environment variables (`ZAI_PLATFORM_DIR`, `ZAI_SKILLS_DIR`)
+- **scripts/save-work.sh**: replaced hardcoded `/home/z/my-project/` paths with environment variables (`ZAI_PLATFORM_DIR`)
+- **bootstrap.sh**: replaced hardcoded `/home/z/my-project/` paths with environment variables (`ZAI_PLATFORM_DIR`, `ZAI_SKILLS_DIR`)
+
+---
+
 ## [1.3.1] - 2026-07-22
 
 ### Fixed
