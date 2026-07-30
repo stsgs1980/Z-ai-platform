@@ -126,6 +126,10 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Security audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Run verify-standards.js
         id: verify-standards
         run: |
