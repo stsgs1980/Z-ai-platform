@@ -1,0 +1,1192 @@
+{
+  "version": "1.1.7",
+  "effective_date": "2026-07-30",
+  "summary": {
+    "ids_extracted": 126,
+    "related_edges": 0,
+    "aligned_with_edges": 0,
+    "hard_pass": 7,
+    "hard_fail": 0,
+    "warnings": 0
+  },
+  "checks": [
+    {
+      "id": "G03",
+      "status": "PASS",
+      "description": "No cycles in Related: graph",
+      "details": [
+        "no cycles"
+      ]
+    },
+    {
+      "id": "G08",
+      "status": "PASS",
+      "description": "No PROC → ZAI edges",
+      "details": [
+        "no PROC→ZAI edges"
+      ]
+    },
+    {
+      "id": "G09",
+      "status": "PASS",
+      "description": "No TOOL → PROC edges",
+      "details": [
+        "no TOOL→PROC edges"
+      ]
+    },
+    {
+      "id": "G10",
+      "status": "PASS",
+      "description": "No TOOL → ZAI edges",
+      "details": [
+        "no TOOL→ZAI edges"
+      ]
+    },
+    {
+      "id": "G11",
+      "status": "PASS",
+      "description": "No self-references",
+      "details": [
+        "no self-references"
+      ]
+    },
+    {
+      "id": "G14",
+      "status": "PASS",
+      "description": "Compatibility DAG valid for ZAI skills",
+      "details": [
+        "all valid"
+      ]
+    },
+    {
+      "id": "G15",
+      "status": "PASS",
+      "description": "Aligned_with: has corresponding Related: edge",
+      "details": [
+        "all aligned with Related:"
+      ]
+    }
+  ],
+  "warnings": [],
+  "ids": [
+    {
+      "id": "RULE-ENV-008",
+      "prefix": "RULE",
+      "domain": "ENV",
+      "number": "008",
+      "title": "verify-id-graph.js — Chapter 2: Algorithm & Check Catalog",
+      "file": "standards/docs/chapters/02-algorithm-checks.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "TOOL-VERIFY-004",
+      "prefix": "TOOL",
+      "domain": "VERIFY",
+      "number": "004",
+      "title": "verify-id-graph.js — Specification v1.0",
+      "file": "standards/docs/verify-id-graph-spec-v1.0.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-005",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "005",
+      "title": "Standard: Code Examples Guide v1.2 (EN)",
+      "file": "standards/guides/CODE_EXAMPLES_GUIDE.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-AGENT-001",
+      "prefix": "STD",
+      "domain": "AGENT",
+      "number": "001",
+      "title": "Standard: Subagent Standard v1.1 (EN)",
+      "file": "standards/standards/AGENT-001-subagent.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-AGENT-002",
+      "prefix": "STD",
+      "domain": "AGENT",
+      "number": "002",
+      "title": "Standard: Orchestration Standard v1.1 (EN)",
+      "file": "standards/standards/AGENT-002-orchestration.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-ARCH-001",
+      "prefix": "STD",
+      "domain": "ARCH",
+      "number": "001",
+      "title": "Standard: Architecture & Repo Layout v1.1.2 (EN)",
+      "file": "standards/standards/ARCH-001-architecture-and-repo-layout.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-ARCH-002",
+      "prefix": "STD",
+      "domain": "ARCH",
+      "number": "002",
+      "title": "Standard: Implementation Order v2.6",
+      "file": "standards/standards/ARCH-002-implementation-order.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DESIGN-001",
+      "prefix": "STD",
+      "domain": "DESIGN",
+      "number": "001",
+      "title": "Design System Standard",
+      "file": "standards/standards/DESIGN-001-design-system.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-002",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "002",
+      "title": "Standard: Markdown Formatting v2.4.4 (EN)",
+      "file": "standards/standards/DOC-002-markdown-standard.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-003",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "003",
+      "title": "Standard: Unicode Policy v2.3",
+      "file": "standards/standards/DOC-003-unicode-policy.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-ENV-001",
+      "prefix": "STD",
+      "domain": "ENV",
+      "number": "001",
+      "title": "Standard: Reproducibility v2.1",
+      "file": "standards/standards/ENV-001-reproducibility.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-ENV-002",
+      "prefix": "STD",
+      "domain": "ENV",
+      "number": "002",
+      "title": "Standard: Z.ai Integration v1.3 (EN)",
+      "file": "standards/standards/ENV-002-zai-integration.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-ERR-001",
+      "prefix": "STD",
+      "domain": "ERR",
+      "number": "001",
+      "title": "Standard: Error Handling Core v2.1 (EN)",
+      "file": "standards/standards/ERR-001-error-handling.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-FE-001",
+      "prefix": "STD",
+      "domain": "FE",
+      "number": "001",
+      "title": "Standard: Frontend Development v2.4 (EN)",
+      "file": "standards/standards/FE-001-frontend.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-GIT-001",
+      "prefix": "STD",
+      "domain": "GIT",
+      "number": "001",
+      "title": "Standard: GitHub Core v2.1 (EN)",
+      "file": "standards/standards/GIT-001-github.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-GIT-002",
+      "prefix": "STD",
+      "domain": "GIT",
+      "number": "002",
+      "title": "Standard: GitHub Sandbox Safety v1.1 (EN)",
+      "file": "standards/standards/GIT-002-github-sandbox.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-META-001",
+      "prefix": "STD",
+      "domain": "META",
+      "number": "001",
+      "title": "Standard: Standard ID System v2.0 (EN)",
+      "file": "standards/standards/META-001-standard-id-system.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-META-002",
+      "prefix": "STD",
+      "domain": "META",
+      "number": "002",
+      "title": "Standard: Language Policy v1.0 (EN)",
+      "file": "standards/standards/META-002-language-policy.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-SEC-001",
+      "prefix": "STD",
+      "domain": "SEC",
+      "number": "001",
+      "title": "Standard: Security Core v2.1 (EN)",
+      "file": "standards/standards/SEC-001-security-core.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-SEC-002",
+      "prefix": "STD",
+      "domain": "SEC",
+      "number": "002",
+      "title": "Standard: Security Extended v1.1 (EN)",
+      "file": "standards/standards/SEC-002-security-extended.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-SKILL-001",
+      "prefix": "STD",
+      "domain": "SKILL",
+      "number": "001",
+      "title": "Standard: Skill Format & Identification v1.1 (EN)",
+      "file": "standards/standards/SKILL-001-skill-format.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-007",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "007",
+      "title": "AGENT_RULES.md Template v1.0",
+      "file": "standards/templates/AGENT_RULES_TEMPLATE.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-006",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "006",
+      "title": "Changelog Template v1.0",
+      "file": "standards/templates/CHANGELOG_TEMPLATE.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-004",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "004",
+      "title": "Standard: README Template v3.0",
+      "file": "standards/templates/README_TEMPLATE.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "STD-DOC-005",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "005",
+      "title": "Worklog Template v1.0",
+      "file": "standards/templates/WORKLOG_TEMPLATE.md",
+      "repo": "Z-ai-standards"
+    },
+    {
+      "id": "PROC-COCHANGE-003",
+      "prefix": "PROC",
+      "domain": "COCHANGE",
+      "number": "003",
+      "title": "PROC-COCHANGE-003: Co-change check (code + docs sync)",
+      "file": "guard/instructions/PROC-COCHANGE-003.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "PROC-LINECOUNT-004",
+      "prefix": "PROC",
+      "domain": "LINECOUNT",
+      "number": "004",
+      "title": "PROC-LINECOUNT-004: Line count check (anti-monolith enforcement)",
+      "file": "guard/instructions/PROC-LINECOUNT-004.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "PROC-SETUP-001",
+      "prefix": "PROC",
+      "domain": "SETUP",
+      "number": "001",
+      "title": "PROC-SETUP-001: Project installer procedure",
+      "file": "guard/instructions/PROC-SETUP-001.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "PROC-UPDATE-002",
+      "prefix": "PROC",
+      "domain": "UPDATE",
+      "number": "002",
+      "title": "PROC-UPDATE-002: Project update procedure",
+      "file": "guard/instructions/PROC-UPDATE-002.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-AGENT-009",
+      "prefix": "RULE",
+      "domain": "AGENT",
+      "number": "009",
+      "title": "RULE-AGENT-009: Session Start Protocol (drift prevention)",
+      "file": "guard/rules/RULE-AGENT-009.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-ANSWER-001",
+      "prefix": "RULE",
+      "domain": "ANSWER",
+      "number": "001",
+      "title": "RULE-ANSWER-001: Answer before act (no unsolicited action)",
+      "file": "guard/rules/RULE-ANSWER-001.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-ARCH-016",
+      "prefix": "RULE",
+      "domain": "ARCH",
+      "number": "016",
+      "title": "RULE-ARCH-016: AHG submodule is immutable architecture (no removal, no inlining)",
+      "file": "guard/rules/RULE-ARCH-016.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-ARCH-017",
+      "prefix": "RULE",
+      "domain": "ARCH",
+      "number": "017",
+      "title": "RULE-ARCH-017: Upstream write protection (no consumer agent may push to AHG)",
+      "file": "guard/rules/RULE-ARCH-017.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-COMMIT-004",
+      "prefix": "RULE",
+      "domain": "COMMIT",
+      "number": "004",
+      "title": "RULE-COMMIT-004: One logical block -- one commit",
+      "file": "guard/rules/RULE-COMMIT-004.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-COMMIT-014",
+      "prefix": "RULE",
+      "domain": "COMMIT",
+      "number": "014",
+      "title": "RULE-COMMIT-014: Pre-commit mandatory checklist",
+      "file": "guard/rules/RULE-COMMIT-014.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-DOC-010",
+      "prefix": "RULE",
+      "domain": "DOC",
+      "number": "010",
+      "title": "RULE-DOC-010: Documentation sync (no code without docs)",
+      "file": "guard/rules/RULE-DOC-010.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-DOC-015",
+      "prefix": "RULE",
+      "domain": "DOC",
+      "number": "015",
+      "title": "RULE-DOC-015: No Unicode graphics (UNICODE_POLICY compliance)",
+      "file": "guard/rules/RULE-DOC-015.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-ENV-008",
+      "prefix": "RULE",
+      "domain": "ENV",
+      "number": "008",
+      "title": "RULE-ENV-008: Sandbox verification (no fake setup)",
+      "file": "guard/rules/RULE-ENV-008.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-HONEST-006",
+      "prefix": "RULE",
+      "domain": "HONEST",
+      "number": "006",
+      "title": "RULE-HONEST-006: Honest reporting",
+      "file": "guard/rules/RULE-HONEST-006.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-INTEGRITY-011",
+      "prefix": "RULE",
+      "domain": "INTEGRITY",
+      "number": "011",
+      "title": "RULE-INTEGRITY-011: Integrity protection (no self-sabotage)",
+      "file": "guard/rules/RULE-INTEGRITY-011.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-LOOPS-005",
+      "prefix": "RULE",
+      "domain": "LOOPS",
+      "number": "005",
+      "title": "RULE-LOOPS-005: No loops",
+      "file": "guard/rules/RULE-LOOPS-005.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-MONOLITH-012",
+      "prefix": "RULE",
+      "domain": "MONOLITH",
+      "number": "012",
+      "title": "RULE-MONOLITH-012: Anti-monolith (file size by category)",
+      "file": "guard/rules/RULE-MONOLITH-012.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-READ-003",
+      "prefix": "RULE",
+      "domain": "READ",
+      "number": "003",
+      "title": "RULE-READ-003: Read before write",
+      "file": "guard/rules/RULE-READ-003.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-STRUCT-007",
+      "prefix": "RULE",
+      "domain": "STRUCT",
+      "number": "007",
+      "title": "RULE-STRUCT-007: Work structure",
+      "file": "guard/rules/RULE-STRUCT-007.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-VERSION-013",
+      "prefix": "RULE",
+      "domain": "VERSION",
+      "number": "013",
+      "title": "RULE-VERSION-013: Use ahg bump for version updates",
+      "file": "guard/rules/RULE-VERSION-013.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "RULE-WORKLOG-002",
+      "prefix": "RULE",
+      "domain": "WORKLOG",
+      "number": "002",
+      "title": "RULE-WORKLOG-002: worklog -- BEFORE and AFTER every action",
+      "file": "guard/rules/RULE-WORKLOG-002.md",
+      "repo": "Z-ai-guard"
+    },
+    {
+      "id": "ZAI-DEV-006",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "006",
+      "title": "Skill: Zai Answer Before Act v1.0.0",
+      "file": "skills/zai-answer-before-act/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-ARCH-002",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "002",
+      "title": "Skill: Zai Anti-Monolith v1.0",
+      "file": "skills/zai-anti-monolith/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEV-004",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "004",
+      "title": "Skill: Zai Debugging v1.0.0",
+      "file": "skills/zai-debugging/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEV-003",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "003",
+      "title": "Skill: Zai Frontend Styling Expert v1.0",
+      "file": "skills/zai-frontend-styling-expert/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DOC-001",
+      "prefix": "ZAI",
+      "domain": "DOC",
+      "number": "001",
+      "title": "Skill: Zai Markdown Standard v1.0.0",
+      "file": "skills/zai-md-std/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-ARCH-001",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "001",
+      "title": "Skill: Zai Mermaid Diagramming v1.0",
+      "file": "skills/zai-mermaid-diagrams/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEV-002",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "002",
+      "title": "Skill: Zai Performance Code Generator v1.0",
+      "file": "skills/zai-performance-code-generator/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-ARCH-003",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "003",
+      "title": "Skill: Zai Phi Layout v3.0",
+      "file": "skills/zai-phi-layout/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEV-001",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "001",
+      "title": "Skill: Zai Project Clone v1.0",
+      "file": "skills/zai-project-clone/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-META-003",
+      "prefix": "ZAI",
+      "domain": "META",
+      "number": "003",
+      "title": "Skill: Zai Prompt Engineering v1.1",
+      "file": "skills/zai-prompt-engineering/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEV-005",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "005",
+      "title": "Skill: Zai Sandbox Rules v1.5.0",
+      "file": "skills/zai-sandbox-rules/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-DEVTOOLS-001",
+      "prefix": "ZAI",
+      "domain": "DEVTOOLS",
+      "number": "001",
+      "title": "Skill: Zai Skill Creator v1.0",
+      "file": "skills/zai-skill-creator/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "STD-DOC-002",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "002",
+      "title": "Стандарт: Форматирование Markdown v2.4 (EN)",
+      "file": "skills/zai-skill-creator/references/DOC-002-markdown-standard.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "STD-DOC-003",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "003",
+      "title": "Стандарт: Политика No-Unicode v2.3",
+      "file": "skills/zai-skill-creator/references/DOC-003-unicode-policy.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-ARCH-004",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "004",
+      "title": "Skill: Zai UI Composer v1.1.2",
+      "file": "skills/zai-ui-composer/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "ZAI-META-005",
+      "prefix": "ZAI",
+      "domain": "META",
+      "number": "005",
+      "title": "Skill: Zai Workflow Discipline v2.0",
+      "file": "skills/zai-workflow-discipline/SKILL.md",
+      "repo": "Z-ai-skills"
+    },
+    {
+      "id": "PROC-COCHANGE-003",
+      "prefix": "PROC",
+      "domain": "COCHANGE",
+      "number": "003",
+      "title": "PROC-COCHANGE-003: Co-change check (code + docs sync)",
+      "file": "guard/instructions/PROC-COCHANGE-003.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "PROC-LINECOUNT-004",
+      "prefix": "PROC",
+      "domain": "LINECOUNT",
+      "number": "004",
+      "title": "PROC-LINECOUNT-004: Line count check (anti-monolith enforcement)",
+      "file": "guard/instructions/PROC-LINECOUNT-004.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "PROC-SETUP-001",
+      "prefix": "PROC",
+      "domain": "SETUP",
+      "number": "001",
+      "title": "PROC-SETUP-001: Project installer procedure",
+      "file": "guard/instructions/PROC-SETUP-001.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "PROC-UPDATE-002",
+      "prefix": "PROC",
+      "domain": "UPDATE",
+      "number": "002",
+      "title": "PROC-UPDATE-002: Project update procedure",
+      "file": "guard/instructions/PROC-UPDATE-002.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-AGENT-009",
+      "prefix": "RULE",
+      "domain": "AGENT",
+      "number": "009",
+      "title": "RULE-AGENT-009: Session Start Protocol (drift prevention)",
+      "file": "guard/rules/RULE-AGENT-009.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-ANSWER-001",
+      "prefix": "RULE",
+      "domain": "ANSWER",
+      "number": "001",
+      "title": "RULE-ANSWER-001: Answer before act (no unsolicited action)",
+      "file": "guard/rules/RULE-ANSWER-001.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-ARCH-016",
+      "prefix": "RULE",
+      "domain": "ARCH",
+      "number": "016",
+      "title": "RULE-ARCH-016: AHG submodule is immutable architecture (no removal, no inlining)",
+      "file": "guard/rules/RULE-ARCH-016.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-ARCH-017",
+      "prefix": "RULE",
+      "domain": "ARCH",
+      "number": "017",
+      "title": "RULE-ARCH-017: Upstream write protection (no consumer agent may push to AHG)",
+      "file": "guard/rules/RULE-ARCH-017.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-COMMIT-004",
+      "prefix": "RULE",
+      "domain": "COMMIT",
+      "number": "004",
+      "title": "RULE-COMMIT-004: One logical block -- one commit",
+      "file": "guard/rules/RULE-COMMIT-004.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-COMMIT-014",
+      "prefix": "RULE",
+      "domain": "COMMIT",
+      "number": "014",
+      "title": "RULE-COMMIT-014: Pre-commit mandatory checklist",
+      "file": "guard/rules/RULE-COMMIT-014.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-DOC-010",
+      "prefix": "RULE",
+      "domain": "DOC",
+      "number": "010",
+      "title": "RULE-DOC-010: Documentation sync (no code without docs)",
+      "file": "guard/rules/RULE-DOC-010.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-DOC-015",
+      "prefix": "RULE",
+      "domain": "DOC",
+      "number": "015",
+      "title": "RULE-DOC-015: No Unicode graphics (UNICODE_POLICY compliance)",
+      "file": "guard/rules/RULE-DOC-015.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-ENV-008",
+      "prefix": "RULE",
+      "domain": "ENV",
+      "number": "008",
+      "title": "RULE-ENV-008: Sandbox verification (no fake setup)",
+      "file": "guard/rules/RULE-ENV-008.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-HONEST-006",
+      "prefix": "RULE",
+      "domain": "HONEST",
+      "number": "006",
+      "title": "RULE-HONEST-006: Honest reporting",
+      "file": "guard/rules/RULE-HONEST-006.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-INTEGRITY-011",
+      "prefix": "RULE",
+      "domain": "INTEGRITY",
+      "number": "011",
+      "title": "RULE-INTEGRITY-011: Integrity protection (no self-sabotage)",
+      "file": "guard/rules/RULE-INTEGRITY-011.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-LOOPS-005",
+      "prefix": "RULE",
+      "domain": "LOOPS",
+      "number": "005",
+      "title": "RULE-LOOPS-005: No loops",
+      "file": "guard/rules/RULE-LOOPS-005.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-MONOLITH-012",
+      "prefix": "RULE",
+      "domain": "MONOLITH",
+      "number": "012",
+      "title": "RULE-MONOLITH-012: Anti-monolith (file size by category)",
+      "file": "guard/rules/RULE-MONOLITH-012.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-READ-003",
+      "prefix": "RULE",
+      "domain": "READ",
+      "number": "003",
+      "title": "RULE-READ-003: Read before write",
+      "file": "guard/rules/RULE-READ-003.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-STRUCT-007",
+      "prefix": "RULE",
+      "domain": "STRUCT",
+      "number": "007",
+      "title": "RULE-STRUCT-007: Work structure",
+      "file": "guard/rules/RULE-STRUCT-007.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-VERSION-013",
+      "prefix": "RULE",
+      "domain": "VERSION",
+      "number": "013",
+      "title": "RULE-VERSION-013: Use ahg bump for version updates",
+      "file": "guard/rules/RULE-VERSION-013.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-WORKLOG-002",
+      "prefix": "RULE",
+      "domain": "WORKLOG",
+      "number": "002",
+      "title": "RULE-WORKLOG-002: worklog -- BEFORE and AFTER every action",
+      "file": "guard/rules/RULE-WORKLOG-002.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-006",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "006",
+      "title": "Skill: Zai Answer Before Act v1.0.0",
+      "file": "skills/zai-answer-before-act/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-ARCH-002",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "002",
+      "title": "Skill: Zai Anti-Monolith v1.0",
+      "file": "skills/zai-anti-monolith/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-004",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "004",
+      "title": "Skill: Zai Debugging v1.0.0",
+      "file": "skills/zai-debugging/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-003",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "003",
+      "title": "Skill: Zai Frontend Styling Expert v1.0",
+      "file": "skills/zai-frontend-styling-expert/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DOC-001",
+      "prefix": "ZAI",
+      "domain": "DOC",
+      "number": "001",
+      "title": "Skill: Zai Markdown Standard v1.0.0",
+      "file": "skills/zai-md-std/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-ARCH-001",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "001",
+      "title": "Skill: Zai Mermaid Diagramming v1.0",
+      "file": "skills/zai-mermaid-diagrams/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-002",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "002",
+      "title": "Skill: Zai Performance Code Generator v1.0",
+      "file": "skills/zai-performance-code-generator/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-ARCH-003",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "003",
+      "title": "Skill: Zai Phi Layout v3.0",
+      "file": "skills/zai-phi-layout/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-001",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "001",
+      "title": "Skill: Zai Project Clone v1.0",
+      "file": "skills/zai-project-clone/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-META-003",
+      "prefix": "ZAI",
+      "domain": "META",
+      "number": "003",
+      "title": "Skill: Zai Prompt Engineering v1.1",
+      "file": "skills/zai-prompt-engineering/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEV-005",
+      "prefix": "ZAI",
+      "domain": "DEV",
+      "number": "005",
+      "title": "Skill: Zai Sandbox Rules v1.5.0",
+      "file": "skills/zai-sandbox-rules/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-DEVTOOLS-001",
+      "prefix": "ZAI",
+      "domain": "DEVTOOLS",
+      "number": "001",
+      "title": "Skill: Zai Skill Creator v1.0",
+      "file": "skills/zai-skill-creator/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-002",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "002",
+      "title": "Стандарт: Форматирование Markdown v2.4 (EN)",
+      "file": "skills/zai-skill-creator/references/DOC-002-markdown-standard.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-003",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "003",
+      "title": "Стандарт: Политика No-Unicode v2.3",
+      "file": "skills/zai-skill-creator/references/DOC-003-unicode-policy.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-ARCH-004",
+      "prefix": "ZAI",
+      "domain": "ARCH",
+      "number": "004",
+      "title": "Skill: Zai UI Composer v1.1.2",
+      "file": "skills/zai-ui-composer/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "ZAI-META-005",
+      "prefix": "ZAI",
+      "domain": "META",
+      "number": "005",
+      "title": "Skill: Zai Workflow Discipline v2.0",
+      "file": "skills/zai-workflow-discipline/SKILL.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "RULE-ENV-008",
+      "prefix": "RULE",
+      "domain": "ENV",
+      "number": "008",
+      "title": "verify-id-graph.js — Chapter 2: Algorithm & Check Catalog",
+      "file": "standards/docs/chapters/02-algorithm-checks.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "TOOL-VERIFY-004",
+      "prefix": "TOOL",
+      "domain": "VERIFY",
+      "number": "004",
+      "title": "verify-id-graph.js — Specification v1.0",
+      "file": "standards/docs/verify-id-graph-spec-v1.0.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-005",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "005",
+      "title": "Standard: Code Examples Guide v1.2 (EN)",
+      "file": "standards/guides/CODE_EXAMPLES_GUIDE.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-AGENT-001",
+      "prefix": "STD",
+      "domain": "AGENT",
+      "number": "001",
+      "title": "Standard: Subagent Standard v1.1 (EN)",
+      "file": "standards/standards/AGENT-001-subagent.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-AGENT-002",
+      "prefix": "STD",
+      "domain": "AGENT",
+      "number": "002",
+      "title": "Standard: Orchestration Standard v1.1 (EN)",
+      "file": "standards/standards/AGENT-002-orchestration.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-ARCH-001",
+      "prefix": "STD",
+      "domain": "ARCH",
+      "number": "001",
+      "title": "Standard: Architecture & Repo Layout v1.1.2 (EN)",
+      "file": "standards/standards/ARCH-001-architecture-and-repo-layout.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-ARCH-002",
+      "prefix": "STD",
+      "domain": "ARCH",
+      "number": "002",
+      "title": "Standard: Implementation Order v2.6",
+      "file": "standards/standards/ARCH-002-implementation-order.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DESIGN-001",
+      "prefix": "STD",
+      "domain": "DESIGN",
+      "number": "001",
+      "title": "Design System Standard",
+      "file": "standards/standards/DESIGN-001-design-system.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-002",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "002",
+      "title": "Standard: Markdown Formatting v2.4.4 (EN)",
+      "file": "standards/standards/DOC-002-markdown-standard.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-003",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "003",
+      "title": "Standard: Unicode Policy v2.3",
+      "file": "standards/standards/DOC-003-unicode-policy.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-ENV-001",
+      "prefix": "STD",
+      "domain": "ENV",
+      "number": "001",
+      "title": "Standard: Reproducibility v2.1",
+      "file": "standards/standards/ENV-001-reproducibility.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-ENV-002",
+      "prefix": "STD",
+      "domain": "ENV",
+      "number": "002",
+      "title": "Standard: Z.ai Integration v1.3 (EN)",
+      "file": "standards/standards/ENV-002-zai-integration.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-ERR-001",
+      "prefix": "STD",
+      "domain": "ERR",
+      "number": "001",
+      "title": "Standard: Error Handling Core v2.1 (EN)",
+      "file": "standards/standards/ERR-001-error-handling.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-FE-001",
+      "prefix": "STD",
+      "domain": "FE",
+      "number": "001",
+      "title": "Standard: Frontend Development v2.4 (EN)",
+      "file": "standards/standards/FE-001-frontend.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-GIT-001",
+      "prefix": "STD",
+      "domain": "GIT",
+      "number": "001",
+      "title": "Standard: GitHub Core v2.1 (EN)",
+      "file": "standards/standards/GIT-001-github.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-GIT-002",
+      "prefix": "STD",
+      "domain": "GIT",
+      "number": "002",
+      "title": "Standard: GitHub Sandbox Safety v1.1 (EN)",
+      "file": "standards/standards/GIT-002-github-sandbox.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-META-001",
+      "prefix": "STD",
+      "domain": "META",
+      "number": "001",
+      "title": "Standard: Standard ID System v2.0 (EN)",
+      "file": "standards/standards/META-001-standard-id-system.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-META-002",
+      "prefix": "STD",
+      "domain": "META",
+      "number": "002",
+      "title": "Standard: Language Policy v1.0 (EN)",
+      "file": "standards/standards/META-002-language-policy.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-SEC-001",
+      "prefix": "STD",
+      "domain": "SEC",
+      "number": "001",
+      "title": "Standard: Security Core v2.1 (EN)",
+      "file": "standards/standards/SEC-001-security-core.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-SEC-002",
+      "prefix": "STD",
+      "domain": "SEC",
+      "number": "002",
+      "title": "Standard: Security Extended v1.1 (EN)",
+      "file": "standards/standards/SEC-002-security-extended.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-SKILL-001",
+      "prefix": "STD",
+      "domain": "SKILL",
+      "number": "001",
+      "title": "Standard: Skill Format & Identification v1.1 (EN)",
+      "file": "standards/standards/SKILL-001-skill-format.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-007",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "007",
+      "title": "AGENT_RULES.md Template v1.0",
+      "file": "standards/templates/AGENT_RULES_TEMPLATE.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-006",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "006",
+      "title": "Changelog Template v1.0",
+      "file": "standards/templates/CHANGELOG_TEMPLATE.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-004",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "004",
+      "title": "Standard: README Template v3.0",
+      "file": "standards/templates/README_TEMPLATE.md",
+      "repo": "Z-ai-platform"
+    },
+    {
+      "id": "STD-DOC-005",
+      "prefix": "STD",
+      "domain": "DOC",
+      "number": "005",
+      "title": "Worklog Template v1.0",
+      "file": "standards/templates/WORKLOG_TEMPLATE.md",
+      "repo": "Z-ai-platform"
+    }
+  ],
+  "related_edges": [],
+  "aligned_with_edges": [],
+  "exported_at": "2026-07-30T13:55:41.022Z"
+}
