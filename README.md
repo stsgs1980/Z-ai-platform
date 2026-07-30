@@ -79,8 +79,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/stsgs1980/Z-ai-platform/main
 # Governance is now active (skills, rules, AGENT_RULES.md)
 # Clone your project anywhere:
 cd /home/z/my-project
-git clone https://github.com/youruser/your-project.git
-cd your-project
+git clone https://github.com/stsgs1980/StsDev-Portfolio.git
+cd StsDev-Portfolio
 # Start coding — governance skills are available
 ```
 
@@ -111,8 +111,8 @@ Now you can clone your project for coding:
 ```bash
 # Clone your project
 cd /home/z/my-project
-git clone https://github.com/youruser/your-project.git
-cd your-project
+git clone https://github.com/stsgs1980/StsDev-Portfolio.git
+cd StsDev-Portfolio
 
 # Governance skills are available (e.g., tdd-workflow, code-quality-checker)
 # Use them to work on your project
