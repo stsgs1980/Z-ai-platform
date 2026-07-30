@@ -23,3 +23,6 @@ docs/_graph/
 worklog.md
 scripts/skills-registry.json
 tests/governance-escalation-report.md
+
+# Python linter cache
+.ruff_cache/
