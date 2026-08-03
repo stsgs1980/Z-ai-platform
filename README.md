@@ -111,8 +111,8 @@ Now you can clone your project for coding:
 ```bash
 # Clone your project
 cd /home/z/my-project
-git clone https://github.com/stsgs1980/StsDev-Portfolio.git
-cd StsDev-Portfolio
+git clone https://github.com/stsgs1980/my-project
+cd my-project
 
 # Governance skills are available (e.g., tdd-workflow, code-quality-checker)
 # Use them to work on your project
